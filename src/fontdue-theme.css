@@ -1,0 +1,211 @@
+/* ─── Fontdue Theme ─────────────────────────────────────────────────────────
+   Overrides fontdue-js/fontdue.css to match the POI design system.
+   Import this AFTER fontdue.css in App.jsx.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Color tokens ──────────────────────────────────────────────────────────── */
+:root {
+  --primary_background_color:   #ffffff;
+  --primary_text_color:         #1c1c1c;
+  --secondary_background_color: #f0f0f0;
+  --secondary_text_color:       #888888;
+  --horizontal_rule_color:      #e5e5e5;
+  --border-color:               #1c1c1c;
+  --error_color:                #cc0000;
+  --success_color:              #2563eb;
+  --cart_indicator_color:       #d5ff2f;
+
+  /* Generic buttons → black pill, neon-yellow hover */
+  --button_background_color:         #1c1c1c;
+  --button_border_color:             #1c1c1c;
+  --button_text_color:               #ffffff;
+  --button_hover_background_color:   #d5ff2f;
+  --button_hover_border_color:       #d5ff2f;
+  --button_hover_text_color:         #1c1c1c;
+  --button_selected_background_color: #1c1c1c;
+  --button_selected_border_color:    #1c1c1c;
+  --button_selected_text_color:      #ffffff;
+
+  /* Add-to-cart (BuyButton) */
+  --add_to_cart_button_background_color:       #1c1c1c;
+  --add_to_cart_button_border_color:           #1c1c1c;
+  --add_to_cart_button_text_color:             #ffffff;
+  --add_to_cart_button_hover_background_color: #d5ff2f;
+  --add_to_cart_button_hover_border_color:     #d5ff2f;
+  --add_to_cart_button_hover_text_color:       #1c1c1c;
+
+  /* Checkout / download buttons — same scheme */
+  --checkout_button_background_color:       #1c1c1c;
+  --checkout_button_border_color:           #1c1c1c;
+  --checkout_button_text_color:             #ffffff;
+  --checkout_button_hover_background_color: #d5ff2f;
+  --checkout_button_hover_border_color:     #d5ff2f;
+  --checkout_button_hover_text_color:       #1c1c1c;
+
+  --download_button_background_color:       #1c1c1c;
+  --download_button_border_color:           #1c1c1c;
+  --download_button_text_color:             #ffffff;
+  --download_button_hover_background_color: #d5ff2f;
+  --download_button_hover_border_color:     #d5ff2f;
+  --download_button_hover_text_color:       #1c1c1c;
+
+  /* Checkbox — sized to match our UI scale */
+  --checkbox-size:   24px;
+  --checkbox-margin: 12px;
+  --checkbox-color:  #cccccc;
+}
+
+/* ── Typography ────────────────────────────────────────────────────────────── */
+/* Fontdue components inherit from the page, but belt-and-suspenders: */
+.type-tester,
+.character-viewer,
+.newsletter-signup,
+.test-fonts,
+.buy-button,
+.submit-button,
+.select-button,
+.cart-button {
+  font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Pill border-radius on all action buttons ───────────────────────────────── */
+.buy-button,
+.submit-button {
+  border-radius: 100px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Select (style picker inside type tester) — keep flat, it's inline */
+.select-button {
+  font-weight: 600;
+}
+
+/* ── Type tester toolbar ───────────────────────────────────────────────────── */
+.type-tester__toolbar {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-top: 1px solid var(--horizontal_rule_color);
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.type-tester + .type-tester {
+  border-top: 1px solid var(--horizontal_rule_color);
+}
+
+/* Slider handle — keep the existing circle, match our text color */
+.type-tester__slider__handle {
+  border-color: currentcolor;
+}
+
+.type-tester__slider__handle:hover {
+  background-color: currentcolor;
+}
+
+/* OT features toggle button pill */
+.type-tester__features-button__button {
+  border: 1px solid var(--horizontal_rule_color);
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background 150ms, border-color 150ms;
+}
+
+.type-tester__features-button__button:hover {
+  border-color: currentcolor;
+}
+
+/* OT feature list items */
+.type-tester__features__button {
+  font-size: 13px;
+  font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Checkbox → circular dot style ────────────────────────────────────────── */
+
+/* 1. Make the native input a perfect circle */
+.checkbox input {
+  border-radius: 50%;
+  border-color: var(--checkbox-color, #ccc);
+  background: transparent;
+  transition: border-color 150ms, background 150ms;
+}
+
+/* 2. Hover (unchecked) — darker ring */
+.checkbox:hover input:not(:checked) {
+  border-color: #888;
+}
+
+/* 3. Checked — filled blue circle */
+.checkbox input:checked {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+/* 4. Replace icon (checkmark/X) with a centered dot via ::after */
+.checkbox__icon {
+  font-size: 0;        /* hide the SVG/text glyph */
+  color: transparent;
+  visibility: hidden;
+}
+
+.checkbox__icon::after {
+  content: '';
+  display: block;
+  width: 38%;
+  height: 38%;
+  border-radius: 50%;
+  background: currentcolor;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+}
+
+/* 5. Show gray dot on hover */
+.checkbox:hover .checkbox__icon {
+  visibility: visible;
+  color: #888;
+}
+
+/* 6. Show white dot when checked (higher specificity via order — comes after hover rule) */
+input:checked + .checkbox__icon {
+  visibility: visible;
+  color: #ffffff;
+}
+
+/* ── Text inputs (newsletter / trials forms) ──────────────────────────────── */
+.text-field__input {
+  background: var(--secondary_background_color);
+  border-radius: 0;
+  font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+}
+
+.text-field__input:focus {
+  box-shadow: 0 0 0 1px var(--primary_text_color);
+}
+
+/* ── Character viewer ──────────────────────────────────────────────────────── */
+.character-viewer__block__name {
+  font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--secondary_text_color);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--horizontal_rule_color);
+  margin-bottom: 0;
+}
+
+.character-viewer__block__characters > div {
+  border: 1px solid var(--horizontal_rule_color);
+}
+
+.character-viewer__block__characters > div[data-selected='true'] {
+  background: var(--primary_text_color);
+  color: var(--primary_background_color);
+  border-color: var(--primary_text_color);
+}
