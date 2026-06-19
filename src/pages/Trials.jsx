@@ -53,9 +53,9 @@ export default function Trials() {
 
   return (
     <div className="page">
-      <div className="page-2col">
-        <div className="page-img" />
-        <div className="page-body">
+      <div className="page-grid">
+        <div className="page-grid-img" />
+        <div className="page-grid-body">
           {submitted ? (
             <p className="page-text">
               Your download should start automatically.{' '}
@@ -95,7 +95,7 @@ export default function Trials() {
 
               <label className="form-toggle" onClick={() => setNewsletterOptIn(v => !v)}>
                 <span className={`form-toggle-dot${newsletterOptIn ? ' checked' : ''}`} />
-                I would like to receive news
+                Subscribe to the newsletter
               </label>
 
               {error && <p className="page-text" style={{ color: 'red' }}>{error}</p>}
@@ -124,4 +124,5 @@ export default function Trials() {
       </div>
     </div>
   )
+
 }

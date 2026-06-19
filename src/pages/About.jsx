@@ -1,35 +1,38 @@
 export default function About() {
   return (
     <div className="page">
-      <div className="page-2col">
-        <div className="page-img" />
-        <div className="page-body">
+      <div className="page-grid">
+        <div className="page-grid-img" />
+        <div className="page-grid-body">
           <div className="page-section-label">About</div>
           <p className="page-text">
             Place of Interest is an independent type foundry based in Brooklyn, NY.
             It was founded in 2024 by Felix Summ after years of drawing self-initiated
             typefaces. Get in touch for custom inquiries or to submit a font to the catalog.
           </p>
-          <a
-            className="btn btn-dark"
-            href="mailto:hello@poi.tf"
-          >
+          <a className="btn btn-dark" href="mailto:hello@poi.tf">
             hello@poi.tf
           </a>
         </div>
       </div>
 
       <div className="about-secondary">
-        <div>
+        <div className="about-secondary-img" />
+        <div className="about-secondary-body">
+          <div className="about-secondary-label">⌘?</div>
           <p className="about-secondary-text">
-            The name Place of Interest comes from the designated Unicode name for ⌘.
             The oldest recorded ⌘ is 1,600 years old and was discovered in Sweden.
           </p>
-          <p className="about-caption" style={{ marginTop: 48 }}>
-            ⌘ in use on the design of the Finnish penni
+          <p className="about-secondary-text">
+            In the 1950s, Nordic countries in Europe adopted ⌘ as a wayfinding marker
+            for cultural and historical places of interest.
           </p>
+          <p className="about-secondary-text">
+            To be a place of interest—in art, culture, and design—is the guiding
+            principle of the foundry.
+          </p>
+          <p className="about-caption">⌘ in use on the design of the Finnish penni</p>
         </div>
-        <div className="about-secondary-img" />
       </div>
     </div>
   )

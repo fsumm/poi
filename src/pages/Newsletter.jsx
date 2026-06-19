@@ -41,7 +41,7 @@ export default function Newsletter() {
       } else {
         setSubmitted(true)
       }
-    } catch (err) {
+    } catch {
       setError('Something went wrong. Please try again.')
     } finally {
       setSubmitting(false)
@@ -50,9 +50,9 @@ export default function Newsletter() {
 
   return (
     <div className="page">
-      <div className="page-2col">
-        <div className="page-img" />
-        <div className="page-body">
+      <div className="page-grid">
+        <div className="page-grid-img" />
+        <div className="page-grid-body">
           {submitted ? (
             <p className="page-text">You're subscribed. Thanks!</p>
           ) : (
@@ -81,7 +81,7 @@ export default function Newsletter() {
 
               <label className="form-toggle" onClick={() => setOptIn(v => !v)}>
                 <span className={`form-toggle-dot${optIn ? ' checked' : ''}`} />
-                I would like to receive news
+                Subscribe
               </label>
 
               {error && <p className="page-text" style={{ color: 'red' }}>{error}</p>}
@@ -92,7 +92,7 @@ export default function Newsletter() {
                   className={`btn ${disabled ? 'btn-dim' : 'btn-dark'}`}
                   disabled={disabled || submitting}
                 >
-                  {submitting ? 'Subscribing…' : 'Subscribe'}
+                  {submitting ? 'Submitting…' : 'Submit'}
                 </button>
               </div>
             </form>
