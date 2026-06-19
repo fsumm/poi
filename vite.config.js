@@ -8,7 +8,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   resolve: {
-    dedupe: ['react', 'react-dom', 'react-relay', 'relay-runtime'],
+    dedupe: ['react', 'react-dom', 'react-relay', 'relay-runtime', 'react-redux', 'redux'],
   },
   optimizeDeps: {
     include: [

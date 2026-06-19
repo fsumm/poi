@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import FontdueProvider from 'fontdue-js/FontdueProvider'
+import StoreModal from 'fontdue-js/StoreModal'
 import 'fontdue-js/fontdue.css'
 import './fontdue-theme.css'
 import Nav from './components/Nav.jsx'
@@ -16,6 +17,7 @@ const STORE_URL = 'https://store.poi.tf'
 export default function App() {
   return (
     <FontdueProvider url={STORE_URL}>
+      <StoreModal />
       <div className="app">
         <Nav />
         <main className="main">

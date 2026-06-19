@@ -1,6 +1,5 @@
 import { NavLink } from 'react-router-dom'
-
-const STORE_URL = 'https://store.poi.tf'
+import { openCart } from '../fontdueCart.js'
 
 export default function Nav() {
   return (
@@ -14,9 +13,9 @@ export default function Nav() {
         <li><NavLink to="/about" className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>About</NavLink></li>
         <li><NavLink to="/trials" className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>Trials</NavLink></li>
       </ul>
-      <a href={`${STORE_URL}/cart`} className="nav-cart" target="_blank" rel="noopener noreferrer">
-        Cart
-      </a>
+      <div className="nav-cart">
+        <button className="nav-cart-btn" onClick={openCart}>Cart</button>
+      </div>
     </nav>
   )
 }

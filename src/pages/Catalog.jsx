@@ -13,20 +13,20 @@ export default function Catalog() {
           <div className="catalog-card-name">{aeronaut.displayName}</div>
         </Link>
 
-        {/* Carbonic — 3 cols wide, portrait, row 1, cols 7–9 */}
-        <Link to="/catalog/carbonic" className="catalog-card" style={{ gridColumn: '7 / 10', gridRow: 1 }}>
+        {/* Carbonic — 2 cols wide, portrait, row 1, cols 7–8 */}
+        <Link to="/catalog/carbonic" className="catalog-card" style={{ gridColumn: '7 / 9', gridRow: 1 }}>
           <div className="catalog-card-img portrait" />
           <div className="catalog-card-name">{carbonic.displayName}</div>
         </Link>
 
-        {/* Orbiter — 3 cols wide, portrait, row 2, cols 5–7 */}
-        <Link to="/catalog/orbiter" className="catalog-card" style={{ gridColumn: '5 / 8', gridRow: 2 }}>
+        {/* Orbiter — 2 cols wide, portrait, row 2, cols 5–6 */}
+        <Link to="/catalog/orbiter" className="catalog-card" style={{ gridColumn: '5 / 7', gridRow: 2 }}>
           <div className="catalog-card-img portrait" />
           <div className="catalog-card-name">{orbiter.displayName}</div>
         </Link>
 
-        {/* Diode — 3 cols wide, portrait, row 2, cols 9–11 */}
-        <Link to="/catalog/diode" className="catalog-card" style={{ gridColumn: '9 / 12', gridRow: 2 }}>
+        {/* Diode — 2 cols wide, portrait, row 2, cols 9–10 */}
+        <Link to="/catalog/diode" className="catalog-card" style={{ gridColumn: '9 / 11', gridRow: 2 }}>
           <div className="catalog-card-img portrait" />
           <div className="catalog-card-name">{diode.displayName}</div>
         </Link>
