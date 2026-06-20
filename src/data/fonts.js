@@ -79,7 +79,7 @@ export const fonts = [
     displayName: '⌘ Diode',
     styles: 9,
     variable: true,
-    description: 'A monospaced display typeface with a technical edge. 9 styles and a variable font across the weight axis.',
+    description: 'Comprised of two separate pixel designs working in lockstep, this expressive typeface mirrors the look of low-res LED displays, typically found on public transportation. Built with two legibility extremes, each piece can be customized to suit your needs. Experimental at its core, POI Diode excels in expressive applications.',
     weights: [
       { label: 'POI Diode Thin', name: 'Thin', weight: 100, style: 'normal' },
       { label: 'POI Diode ExtraLight', name: 'ExtraLight', weight: 200, style: 'normal' },
@@ -95,6 +95,7 @@ export const fonts = [
     defaultText: 'Diode',
     catalogAspect: '3/4',
     fontdueSlug: 'poi-diode',
+    fontdueCollectionId: 'Rm9udENvbGxlY3Rpb246MjIyMjk0NjQ2MDYyMTQwMDk3NQ==',
   },
 ]
 

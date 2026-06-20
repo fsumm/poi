@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const STORE_URL = 'https://store.poi.tf'
 
@@ -75,11 +75,12 @@ function featureSettings(characterSets) {
   return features.length ? features.map(f => `"${f}" 1`).join(', ') : 'normal'
 }
 
-export default function GlyphOverview({ collectionSlug, collectionId }) {
+export default function GlyphOverview({ collectionSlug, collectionId, fallbackWeights }) {
   const [collection, setCollection] = useState(null)
   const [hovered, setHovered] = useState(null)
   const [selected, setSelected] = useState(null)
   const [selectedStyleIdx, setSelectedStyleIdx] = useState(0)
+  const defaultStyleSet = useRef(false)
 
   useEffect(() => {
     const [query, variables] = collectionId
@@ -98,8 +99,21 @@ export default function GlyphOverview({ collectionSlug, collectionId }) {
           ? (json.data?.node ?? null)
           : (json.data?.viewer?.slug?.fontCollection ?? null)
         setCollection(col)
+        defaultStyleSet.current = false
       })
   }, [collectionSlug, collectionId])
+
+  useEffect(() => {
+    if (!collection || defaultStyleSet.current) return
+    defaultStyleSet.current = true
+    const apiInst = collection.featureStyle?.variableInstances ?? []
+    const fs = collection.fontStyles ?? []
+    const pills = apiInst.length ? apiInst : (!apiInst.length && !fs.length && fallbackWeights?.length)
+      ? fallbackWeights.map(w => ({ name: w.name }))
+      : fs.length > 1 ? fs : []
+    const lightIdx = pills.findIndex(p => p.name === 'Light')
+    if (lightIdx > 0) setSelectedStyleIdx(lightIdx)
+  }, [collection, fallbackWeights])
 
   if (!collection) return <div className="glyph-overview-loading" />
 
@@ -107,8 +121,12 @@ export default function GlyphOverview({ collectionSlug, collectionId }) {
   const glyphGroups = allGroups.filter(g => g.name !== 'Access All Alternates')
   const glyphNames = featureStyle.glyphNames ?? []
 
-  // Variable font instances take priority over static fontStyles
-  const instances = featureStyle.variableInstances ?? []
+  // Variable font instances take priority over static fontStyles, then fallback weights
+  const apiInstances = featureStyle.variableInstances ?? []
+  const syntheticInstances = (!apiInstances.length && !fontStyles.length && fallbackWeights?.length)
+    ? fallbackWeights.map(w => ({ name: w.name, coordinates: [{ axis: 'wght', value: w.weight }] }))
+    : []
+  const instances = apiInstances.length ? apiInstances : syntheticInstances
   const hasInstances = instances.length > 0
   const hasMultiStyle = fontStyles.length > 1
 

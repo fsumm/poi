@@ -65,10 +65,9 @@ export default function FontDetail() {
           >
             Aa
           </div>
-
-          <p className="font-detail-description">{font.description}</p>
-
         </div>
+
+        <p className="font-detail-description">{font.description}</p>
       </div>
 
       {/* ── Type tester ──────────────────────────────────────────── */}
@@ -80,7 +79,7 @@ export default function FontDetail() {
       </div>
 
       {/* ── Glyph overview (custom) ──────────────────────────────── */}
-      <GlyphOverview collectionSlug={font.fontdueSlug} collectionId={font.fontdueCollectionId} />
+      <GlyphOverview collectionSlug={font.fontdueSlug} collectionId={font.fontdueCollectionId} fallbackWeights={font.weights} />
     </div>
   )
 }

@@ -235,11 +235,11 @@ button { cursor: pointer; }
   grid-template-columns: repeat(12, 1fr);
   gap: var(--gap);
   align-items: center;
-  padding: 64px 0 var(--pad);
+  padding: 64px var(--pad) var(--pad);
 }
 
 .footer-brand {
-  grid-column: 1;
+  grid-column: 1 / 3;
   font-weight: 600;
 }
 
@@ -302,9 +302,12 @@ button { cursor: pointer; }
 /* ─── Font detail ────────────────────────────────────────────────────────── */
 
 .font-detail-actions-sticky {
-  position: fixed;
+  grid-column: 9 / 13;
+  grid-row: 1;
+  position: sticky;
   top: calc(var(--nav-h) + 12px);
-  right: calc(max(0px, (100vw - var(--max-w)) / 2) + var(--pad));
+  align-self: start;
+  justify-self: end;
   display: flex;
   gap: 8px;
   z-index: 50;
@@ -345,13 +348,13 @@ button { cursor: pointer; }
 }
 
 .font-detail-img {
-  grid-column: 1 / 3;
+  grid-column: 1 / 5;
   background: var(--color-placeholder);
   height: 360px;
 }
 
 .font-detail-meta {
-  grid-column: 3 / -1;
+  grid-column: 5 / 9;
   padding: 0 4px;
   display: flex;
   flex-direction: column;
@@ -368,12 +371,12 @@ button { cursor: pointer; }
   letter-spacing: -0.02em;
   flex: 1;
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
 }
 
 .font-detail-description {
+  grid-column: 5 / 9;
   font-weight: 600;
-  max-width: 280px;
   margin-bottom: 20px;
   margin-top: 16px;
 }

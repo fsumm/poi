@@ -271,8 +271,11 @@ function FeaturesPanel({ features, enabled, onToggle, open }) {
   )
 }
 
-// Default variable axis to 0 if 0 is within range, otherwise min
 function axisDefault(axis) {
+  if (axis.axis === 'wght') {
+    const v = 300
+    return v >= axis.minValue && v <= axis.maxValue ? v : axis.minValue
+  }
   return axis.minValue <= 0 && 0 <= axis.maxValue ? 0 : axis.minValue
 }
 
