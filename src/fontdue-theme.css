@@ -106,7 +106,7 @@
 .type-tester .type-tester__name {
   background: var(--gray-1);
   border-radius: 100px;
-  padding: 6px 14px;
+  padding: 8px 16px;
   font-size: 12px;
 }
 
@@ -135,7 +135,7 @@
   background: var(--gray-1);
   border: none;
   border-radius: 100px;
-  padding: 6px 14px;
+  padding: 8px 16px;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -345,7 +345,7 @@ input:checked + .checkbox__icon {
   background: var(--gray-1);
   border: none;
   border-radius: 100px;
-  padding: 6px 14px;
+  padding: 8px 16px;
   font-size: 12px;
   font-weight: 600;
   color: var(--ink-black);
@@ -359,9 +359,36 @@ input:checked + .checkbox__icon {
 /* Override wide-screen expansion back to our narrow cap */
 @media (min-width: 900px) {
   [data-route=cart] .store-modal__container__container,
-  [data-route=checkout] .store-modal__container__container {
+  [data-route=checkout] .store-modal__container__container,
+  [data-route=cart]:has(.empty-cart__container) .store-modal__container__container {
     max-width: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
   }
+}
+
+/* Empty cart page */
+.store-modal__container__container .empty-cart__container {
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+.store-modal__container__container .empty-cart__message {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+.store-modal__container__container .empty-cart__container .button {
+  background: var(--ink-black);
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-family: 'POI Orbiter', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+.store-modal__container__container .empty-cart__container .button:hover {
+  background: var(--yellow);
+  color: var(--ink-black);
 }
 
 /* Collapse the side-by-side cart layout */
@@ -1077,16 +1104,16 @@ input:checked + .checkbox__icon {
 }
 
 
+
 .store-modal__container__container .store-modal__container__cart-button .icon {
   display: none;
 }
-
 .store-modal__container__container .store-modal__container__cart-button {
   background: var(--ink-black);
   color: #fff;
   border: none;
   border-radius: 100px;
-  padding: 6px 14px;
+  padding: 8px 16px;
   cursor: pointer;
   transition: background 120ms;
 }
