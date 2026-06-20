@@ -71,6 +71,7 @@ export const fonts = [
     defaultText: 'Orbiter',
     catalogAspect: '3/4',
     fontdueSlug: 'poi-orbiter',
+    fontdueCollectionId: 'Rm9udENvbGxlY3Rpb246MjAxMjY3MzU4NjI0Njc3MzAxNA==',
   },
   {
     id: 'diode',

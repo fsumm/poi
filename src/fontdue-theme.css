@@ -5,6 +5,16 @@
 
 /* ── Color tokens ──────────────────────────────────────────────────────────── */
 :root {
+  /* POI palette */
+  --gray-1: #ededeb;
+  --gray-2: #d8d8d6;
+  --gray-3: #babab9;
+  --gray-4: #a6a6a4;
+  --gray-5: #686866;
+  --ink-black: #171716;
+  --poi-blue: #2e5bff;
+  --yellow: #e9ff15;
+
   --primary_background_color:   #ffffff;
   --primary_text_color:         #1c1c1c;
   --secondary_background_color: #f0f0f0;
@@ -12,15 +22,15 @@
   --horizontal_rule_color:      #e5e5e5;
   --border-color:               #1c1c1c;
   --error_color:                #cc0000;
-  --success_color:              #2563eb;
-  --cart_indicator_color:       #d5ff2f;
+  --success_color:              var(--poi-blue);
+  --cart_indicator_color:       var(--yellow);
 
   /* Generic buttons → black pill, neon-yellow hover */
   --button_background_color:         #1c1c1c;
   --button_border_color:             #1c1c1c;
   --button_text_color:               #ffffff;
-  --button_hover_background_color:   #d5ff2f;
-  --button_hover_border_color:       #d5ff2f;
+  --button_hover_background_color:   var(--yellow);
+  --button_hover_border_color:       var(--yellow);
   --button_hover_text_color:         #1c1c1c;
   --button_selected_background_color: #1c1c1c;
   --button_selected_border_color:    #1c1c1c;
@@ -30,23 +40,23 @@
   --add_to_cart_button_background_color:       #1c1c1c;
   --add_to_cart_button_border_color:           #1c1c1c;
   --add_to_cart_button_text_color:             #ffffff;
-  --add_to_cart_button_hover_background_color: #d5ff2f;
-  --add_to_cart_button_hover_border_color:     #d5ff2f;
+  --add_to_cart_button_hover_background_color: var(--yellow);
+  --add_to_cart_button_hover_border_color:     var(--yellow);
   --add_to_cart_button_hover_text_color:       #1c1c1c;
 
   /* Checkout / download buttons — same scheme */
   --checkout_button_background_color:       #1c1c1c;
   --checkout_button_border_color:           #1c1c1c;
   --checkout_button_text_color:             #ffffff;
-  --checkout_button_hover_background_color: #d5ff2f;
-  --checkout_button_hover_border_color:     #d5ff2f;
+  --checkout_button_hover_background_color: var(--yellow);
+  --checkout_button_hover_border_color:     var(--yellow);
   --checkout_button_hover_text_color:       #1c1c1c;
 
   --download_button_background_color:       #1c1c1c;
   --download_button_border_color:           #1c1c1c;
   --download_button_text_color:             #ffffff;
-  --download_button_hover_background_color: #d5ff2f;
-  --download_button_hover_border_color:     #d5ff2f;
+  --download_button_hover_background_color: var(--yellow);
+  --download_button_hover_border_color:     var(--yellow);
   --download_button_hover_text_color:       #1c1c1c;
 
   /* Checkbox — sized to match our UI scale */
@@ -64,9 +74,6 @@
 .buy-button,
 .submit-button,
 .select-button,
-.cart-button {
-  font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
-}
 
 /* ── Pill border-radius on all action buttons ───────────────────────────────── */
 .buy-button,
@@ -88,40 +95,117 @@
   border-top: 1px solid var(--horizontal_rule_color);
   margin-top: 0;
   margin-bottom: 0;
+  gap: 8px;
 }
 
 .type-tester + .type-tester {
   border-top: 1px solid var(--horizontal_rule_color);
 }
 
-/* Slider handle — keep the existing circle, match our text color */
+/* Font name pill — MENU SELECTOR style */
+.type-tester .type-tester__name {
+  background: var(--gray-1);
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+/* Slider track — thin gray line */
+.type-tester__slider__track {
+  background: var(--gray-2);
+  height: 1.5px;
+}
+
+/* Slider handle — circle */
 .type-tester__slider__handle {
-  border-color: currentcolor;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 1.5px solid var(--gray-4);
+  border-radius: 50%;
+  transition: background 120ms, border-color 120ms;
 }
 
 .type-tester__slider__handle:hover {
-  background-color: currentcolor;
+  background: var(--gray-4);
 }
 
-/* OT features toggle button pill */
-.type-tester__features-button__button {
-  border: 1px solid var(--horizontal_rule_color);
+/* OT features toggle button — MENU SELECTOR style */
+.type-tester .type-tester__features-button__button {
+  background: var(--gray-1);
+  border: none;
   border-radius: 100px;
   padding: 6px 14px;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  transition: background 150ms, border-color 150ms;
+  transition: background 150ms;
 }
 
-.type-tester__features-button__button:hover {
-  border-color: currentcolor;
+/* Hide the chevron arrow icon */
+.type-tester__features-button__button .icon {
+  display: none;
+}
+
+.type-tester .type-tester__features-button__button:hover {
+  background: var(--gray-2);
 }
 
 /* OT feature list items */
 .type-tester__features__button {
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
   font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+  padding: 4px 0;
+}
+
+/* OT feature bullet — radio circle matching UI Elements reference */
+.type-tester__bullet {
+  font-size: 0;
+  color: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-2);
+  background: #ffffff;
+  transition: border-color 150ms, background 150ms;
+}
+
+/* Checked: POI Blue */
+.type-tester__bullet[data-checked="true"] {
+  background: var(--poi-blue);
+  border-color: var(--poi-blue);
+}
+
+/* White center dot when checked */
+.type-tester__bullet[data-checked="true"]::after {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+/* Hover: darker border + gray dot when unchecked */
+.type-tester__features__button:hover .type-tester__bullet[data-checked="false"] {
+  border-color: var(--gray-4);
+}
+
+.type-tester__features__button:hover .type-tester__bullet[data-checked="false"]::after {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gray-4);
 }
 
 /* ── Checkbox → circular dot style ────────────────────────────────────────── */
@@ -141,8 +225,8 @@
 
 /* 3. Checked — filled blue circle */
 .checkbox input:checked {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: var(--poi-blue);
+  border-color: var(--poi-blue);
 }
 
 /* 4. Replace icon (checkmark/X) with a centered dot via ::after */
@@ -208,4 +292,822 @@ input:checked + .checkbox__icon {
   background: var(--primary_text_color);
   color: var(--primary_background_color);
   border-color: var(--primary_text_color);
+}
+
+/* ── Store modal: right-side drawer ─────────────────────────────────────────── */
+
+/* Invisible backdrop — crosshair cursor signals click-to-close */
+.store-modal__container__background {
+  background: transparent;
+  cursor: crosshair;
+}
+
+/* Slide-out close animation */
+@keyframes poi-slide-out {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+.store-modal__container__container[data-closing] {
+  animation: poi-slide-out 280ms ease-in forwards;
+}
+
+/* Panel: 4 columns + 1 gutter, pinned to content right edge */
+
+.store-modal__container__container {
+  max-width: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
+  right: max(0px, (100vw - var(--max-w)) / 2);
+  font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  overscroll-behavior: none;
+  /* Override --font-family so merchant-injected rules resolve to the variable font */
+  --font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+  --font-family__bold: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+}
+
+/* Override merchant-injected font-weight: 400 on specific elements */
+.store-modal__container__container .store-modal__family__title,
+.store-modal__container__container .store-modal__license-selection__title,
+.store-modal__container__container .store-modal__order-variable-selection__title,
+.store-modal__container__container .store-modal__licensee-is-billing-identity__title,
+.store-modal__container__container .store-modal__cart__checkout-section-title,
+.store-modal__container__container .store-modal__container__title {
+  display: none;
+}
+
+/* Back button — gray pill, hide arrow */
+.store-modal__container__container .store-modal__container__back-button .icon {
+  display: none;
+}
+.store-modal__container__container .store-modal__container__back-button {
+  background: var(--gray-1);
+  border: none;
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-black);
+  cursor: pointer;
+  transition: background 120ms;
+}
+.store-modal__container__container .store-modal__container__back-button:hover {
+  background: var(--gray-2);
+}
+
+/* Override wide-screen expansion back to our narrow cap */
+@media (min-width: 900px) {
+  [data-route=cart] .store-modal__container__container,
+  [data-route=checkout] .store-modal__container__container {
+    max-width: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
+  }
+}
+
+/* Collapse the side-by-side cart layout */
+@media (min-width: 900px) {
+  .store-modal__cart__container { display: block; }
+  .store-modal__cart__review { display: block; position: static; padding-right: 0; }
+  .store-modal__cart__checkout { padding-left: 0; border-left: none; margin-top: 40px; }
+  .store-modal__cart__totals { grid-column: 1 / span 2; }
+  .store-modal__cart__items { display: block; }
+}
+
+/* Force cart items to simple 1fr auto grid at all widths — prevents subgrid at 1200px+ */
+@media (min-width: 1200px) {
+  .store-modal__container__container .cart-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 20px;
+    row-gap: 20px;
+    align-items: baseline;
+  }
+  .store-modal__container__container .cart-item > div:has(> .cart-item__licenses) {
+    grid-column: 1 / -1;
+  }
+  .store-modal__container__container .cart-item__price {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+  }
+  .store-modal__container__container .cart-item__product {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+
+/* Cart item license delete button — radio circle style, red */
+.store-modal__container__container .cart-item__license__delete-button .icon {
+  display: none;
+}
+.store-modal__container__container .cart-item__license {
+  gap: 10px;
+}
+.store-modal__container__container .cart-item__license__delete-button {
+  background: none;
+  border: none;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.store-modal__container__container .cart-item__license__delete-button::before {
+  content: '';
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 6px solid #FF2A46;
+  background: #fff;
+  box-sizing: border-box;
+  transition: background 150ms;
+}
+.store-modal__container__container .cart-item__license__delete-button:hover::before {
+  background: var(--ink-black);
+}
+
+/* Close button — same radio circle style as license delete */
+.store-modal__container__container .store-modal__container__close-button .icon {
+  display: none;
+}
+.store-modal__container__container .store-modal__container__close-button {
+  background: none;
+  border: none;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.store-modal__container__container .store-modal__container__close-button::before {
+  content: '';
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 6px solid #0ADD70;
+  background: #fff;
+  box-sizing: border-box;
+  transition: background 150ms;
+}
+.store-modal__container__container .store-modal__container__close-button:hover::before {
+  background: var(--ink-black);
+}
+
+/* Nav bar matching site nav */
+.store-modal__container__nav {
+  min-height: var(--nav-h);
+  padding: 0 var(--pad);
+  margin-bottom: 20px;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  z-index: 10;
+}
+@media (min-width: 900px) {
+  .store-modal__container__nav { padding: 0 var(--pad); grid-gap: var(--gap); }
+}
+/* Pin buttons to the last column so they stay right-aligned when title is hidden */
+.store-modal__container__nav[data-has-back-text=true] .store-modal__container__buttons {
+  grid-column: 3;
+}
+/* On page 1 (no back button), span buttons across full grid to reach the right edge */
+.store-modal__container__nav[data-has-back-text=false] .store-modal__container__buttons {
+  grid-column: 1 / -1;
+}
+
+/* Body padding */
+.store-modal__container__body {
+  padding: 0 var(--pad) var(--pad);
+}
+.store-modal__container__body:has(.store-modal__page__sticky-footer) {
+  padding-bottom: 0;
+}
+
+/* Footer */
+.store-modal__container__container .store-modal__container__footer {
+  padding: var(--pad);
+  border-top: 1px solid var(--gray-2);
+}
+
+/* Page body spacing */
+.store-modal__container__container .store-modal__page__body {
+  padding: 0;
+}
+.store-modal__container__container .store-modal__page__body > * + * {
+  margin-top: 24px;
+}
+
+/* Section label caps */
+.store-modal__container__container .store-modal__licensee-is-billing-identity__title p,
+.store-modal__container__container .store-modal__order-variable-selection__title p,
+.store-modal__container__container .store-modal__license-selection__title p {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-black);
+  margin-bottom: 10px;
+}
+
+/* ── "License these fonts for" checkbox-style toggles (Yourself / Your client) ── */
+
+.store-modal__container__container .store-modal__licensee-is-billing-identity__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.store-modal__container__container .store-modal__licensee-is-billing-identity__option
+  .store-modal__order-variable-selection__button {
+  background: none;
+  color: var(--ink-black);
+  border: none;
+  border-radius: 0;
+  padding: 4px 0;
+  font-size: 12px;
+  font-weight: 600;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  transition: none;
+}
+/* Circle bullet via ::before on the icon-pair */
+.store-modal__container__container .store-modal__licensee-is-billing-identity__option
+  .store-modal__order-variable-selection__button
+  .store-modal__order-variable-selection__icon-pair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.store-modal__container__container .store-modal__licensee-is-billing-identity__option
+  .store-modal__order-variable-selection__button
+  .store-modal__order-variable-selection__icon-pair::before {
+  content: '';
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 6px solid var(--gray-2);
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 150ms, background 150ms;
+}
+.store-modal__container__container .store-modal__licensee-is-billing-identity__option
+  .store-modal__order-variable-selection__button:hover
+  .store-modal__order-variable-selection__icon-pair::before {
+  background: var(--gray-5);
+}
+.store-modal__container__container .store-modal__licensee-is-billing-identity__option
+  .store-modal__order-variable-selection__button[data-selected=true]
+  .store-modal__order-variable-selection__icon-pair::before {
+  border-color: var(--poi-blue);
+  background: #fff;
+}
+
+/* ── "Configure your order" rows ─────────────────────────────────────────────── */
+
+/* Select-type rows (Company size): strip tile off button, move styling to dropdown */
+.store-modal__container__container [data-variable-type=select] {
+  margin-bottom: 6px;
+}
+.store-modal__container__container [data-variable-type=select]
+  .store-modal__order-variable-selection__button {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
+  color: var(--ink-black);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: none;
+}
+.store-modal__container__container [data-variable-type=select]
+  .store-modal__order-variable-selection__button:hover {
+  background: none;
+  color: var(--ink-black);
+}
+.store-modal__container__container [data-variable-type=select]
+  .store-modal__order-variable-selection__select-label {
+  width: 100%;
+  background: var(--gray-1);
+  border-radius: 20px;
+  padding: 10px 14px;
+  color: var(--ink-black);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 120ms;
+  cursor: pointer;
+}
+.store-modal__container__container [data-variable-type=select]
+  .store-modal__order-variable-selection__select-label:hover {
+  background: var(--gray-2);
+}
+.store-modal__container__container [data-variable-type=select]
+  .store-modal__order-variable-selection__select-label .icon {
+  display: none;
+}
+
+/* Checkbox-type rows (non-profit): no tile styling */
+.store-modal__container__container [data-variable-type=boolean]
+  .store-modal__order-variable-selection__button {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 4px 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  transition: none;
+}
+.store-modal__container__container [data-variable-type=boolean]
+  .store-modal__order-variable-selection__button:hover {
+  background: none;
+}
+.store-modal__container__container [data-variable-type=boolean]
+  .store-modal__order-variable-selection__button[data-selected=true]:not(:disabled) {
+  background: none;
+  color: var(--ink-black);
+}
+
+/* Hide the square SVG checkbox icons */
+.store-modal__container__container .store-modal__order-variable-selection__icon-pair .icon {
+  display: none;
+}
+
+/* Radio circle on boolean configure-your-order rows only (not select/dropdown rows) */
+[data-variable-type=boolean] .store-modal__order-variable-selection__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+[data-variable-type=boolean] .store-modal__order-variable-selection__label::before {
+  content: '';
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 6px solid var(--gray-2);
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 150ms, background 150ms;
+}
+[data-variable-type=boolean] .store-modal__order-variable-selection__button:hover:not([data-selected=true])
+  .store-modal__order-variable-selection__label::before {
+  background: var(--gray-5);
+}
+[data-variable-type=boolean] .store-modal__order-variable-selection__button[data-selected=true]
+  .store-modal__order-variable-selection__label::before {
+  border-color: var(--poi-blue);
+  background: #fff;
+}
+
+
+/* ── License selection (Commercial / Personal etc.) ──────────────────────────── */
+
+.store-modal__container__container .store-modal__license-selection__licenses {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.store-modal__container__container .store-modal__license-selection__license-button {
+  background: none;
+  color: var(--ink-black);
+  border: none;
+  border-radius: 0;
+  padding: 4px 0;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  transition: none;
+}
+.store-modal__container__container .store-modal__license-selection__license-button:hover:not(:disabled) {
+  background: none;
+  color: var(--ink-black);
+  border-color: transparent;
+}
+.store-modal__container__container .store-modal__license-selection__license-button[data-selected=true]:not(:disabled) {
+  background: none;
+  color: var(--ink-black);
+  border-color: transparent;
+}
+.store-modal__container__container .store-modal__license-selection__icon-pair .icon {
+  display: none;
+}
+
+/* Radio circle on license selection buttons */
+.store-modal__container__container .store-modal__license-selection__license-button-label {
+  gap: 10px;
+}
+.store-modal__container__container .store-modal__license-selection__icon-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  flex-shrink: 0;
+}
+.store-modal__container__container .store-modal__license-selection__icon-pair::before {
+  content: '';
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 6px solid var(--gray-2);
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 150ms, background 150ms;
+}
+.store-modal__container__container .store-modal__license-selection__license-button:hover:not([data-selected=true])
+  .store-modal__license-selection__icon-pair::before {
+  background: var(--gray-5);
+}
+.store-modal__container__container .store-modal__license-selection__license-button[data-selected=true]
+  .store-modal__license-selection__icon-pair::before {
+  border-color: var(--poi-blue);
+  background: #fff;
+}
+
+/* ── Font selector tiles (style/family/bundle buttons) ───────────────────────── */
+
+.store-modal__container__container .store-modal__family__group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.store-modal__container__container .store-modal__family__group .store-modal__family__style-button:only-child {
+  grid-column: 1 / -1;
+}
+.store-modal__container__container .store-modal__family__bundle-button,
+.store-modal__container__container .store-modal__family__family-button[data-clickable=false] {
+  grid-column: 1 / -1;
+}
+
+.store-modal__container__container .store-modal__family__style-button {
+  background: var(--gray-1);
+  color: var(--ink-black);
+  border: none;
+  border-radius: 20px;
+  box-shadow: none;
+  margin: 0;
+  padding: 14px 16px;
+}
+.store-modal__container__container .store-modal__family__style-button,
+.store-modal__container__container .store-modal__family__family-button[data-clickable=true],
+.store-modal__container__container .store-modal__family__bundle-button {
+  background: var(--gray-1);
+  color: var(--ink-black);
+  border: none;
+  border-radius: 20px;
+  box-shadow: none;
+  margin: 0;
+  padding: 14px 16px;
+}
+.store-modal__container__container .store-modal__family__family-button[data-clickable=false] {
+  background: none;
+  color: var(--ink-black);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 4px 0;
+}
+.store-modal__container__container .store-modal__family__style-button[data-selected=false][data-clickable=true]:hover:not(:disabled),
+.store-modal__container__container .store-modal__family__family-button[data-selected=false][data-clickable=true]:hover:not(:disabled),
+.store-modal__container__container .store-modal__family__bundle-button[data-selected=false][data-clickable=true]:hover:not(:disabled) {
+  background: var(--gray-2);
+  color: var(--ink-black);
+}
+.store-modal__container__container .store-modal__family__style-button[data-selected=true]:not(:disabled),
+.store-modal__container__container .store-modal__family__family-button[data-selected=true]:not(:disabled),
+.store-modal__container__container .store-modal__family__bundle-button[data-selected=true]:not(:disabled) {
+  background: var(--ink-black);
+  color: #ffffff;
+}
+.store-modal__container__container .store-modal__family__family-button[data-clickable=false] .store-modal__family-button__name,
+.store-modal__container__container .store-modal__family__bundle-button .store-modal__family-button__name {
+  font-size: 12px;
+}
+.store-modal__container__container .store-modal__family__family-button[data-clickable=false] .store-modal__family-button__label,
+.store-modal__container__container .store-modal__family__bundle-button .store-modal__family-button__label {
+  display: none;
+}
+
+/* "Aa" specimen size in tiles */
+.store-modal__container__container .store-modal__family-button__name {
+  font-size: 24px;
+}
+
+/* Section spacing */
+.store-modal__container__container .store-modal__family__container:not(:last-child) {
+  margin-bottom: 24px;
+}
+.store-modal__container__container .store-modal__family__container {
+  gap: 6px;
+}
+.store-modal__container__container .store-modal__family__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-black);
+  margin-bottom: 10px;
+}
+
+/* ── Checkout / add-to-cart action button ────────────────────────────────────── */
+.store-modal__container__container .store-modal__cart__buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+.store-modal__container__container .store-modal__cart__button {
+  border-radius: 100px;
+  font-weight: 600;
+  background: var(--poi-blue);
+  color: #ffffff;
+  border-color: var(--poi-blue);
+  padding: 8px 20px;
+  font-size: 18px;
+  width: auto;
+}
+.store-modal__container__container .store-modal__cart__button:hover:not(:disabled) {
+  background: var(--yellow);
+  color: var(--ink-black);
+  border-color: var(--yellow);
+}
+
+.store-modal__container__container .store-modal__cart__share {
+  margin-top: 10px;
+}
+
+/* Coupon code and share cart toggle buttons */
+.store-modal__container__container .cart-additions__expand-button,
+.store-modal__container__container .cart__share__share-button {
+  background: var(--gray-1);
+  color: var(--ink-black);
+  border: none;
+  border-radius: 20px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  width: 100%;
+  transition: background 120ms;
+}
+.store-modal__container__container .cart-additions__expand-button:hover,
+.store-modal__container__container .cart__share__share-button:hover {
+  background: var(--gray-2);
+}
+
+/* Coupon input + Apply button */
+.store-modal__container__container .cart-additions__form {
+  gap: 6px;
+}
+.store-modal__container__container .cart-additions__field {
+  background: var(--gray-1);
+  color: var(--ink-black);
+  border: none;
+  border-radius: 20px;
+  padding: 10px 14px;
+  font-family: 'POI Orbiter', system-ui, sans-serif;
+  font-size: 12px;
+  flex: 1;
+}
+.store-modal__container__container .cart-additions__field:focus {
+  outline: none;
+}
+.store-modal__container__container .cart-additions__button {
+  background: var(--gray-1);
+  color: var(--ink-black);
+  border: none;
+  border-radius: 20px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 120ms;
+}
+.store-modal__container__container .cart-additions__button:hover {
+  background: var(--gray-2);
+}
+
+/* Share URL input + Copy + PDF buttons */
+.store-modal__container__container .cart__share-url-input {
+  background: var(--gray-1);
+  color: var(--ink-black);
+  border: none;
+  border-radius: 20px;
+  padding: 10px 14px;
+  font-family: 'POI Orbiter', system-ui, sans-serif;
+  font-size: 12px;
+  flex: 1;
+}
+.store-modal__container__container .cart__share-url-input:focus {
+  outline: none;
+}
+.store-modal__container__container .cart__share__copy-button,
+.store-modal__container__container .cart__share__pdf-button {
+  background: var(--gray-1);
+  color: var(--ink-black);
+  border: none;
+  border-radius: 20px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 120ms;
+  white-space: nowrap;
+}
+.store-modal__container__container .cart__share__copy-button:hover,
+.store-modal__container__container .cart__share__pdf-button:hover {
+  background: var(--gray-2);
+}
+
+/* Contact info text inputs (Name, Email) */
+.store-modal__container__container .text-field__label-wrapper {
+  display: none;
+}
+.store-modal__container__container .checkout-modal__section {
+  margin-bottom: 10px;
+}
+.store-modal__container__container .text-field__input {
+  background: var(--gray-1);
+  border: none;
+  border-radius: 20px;
+  padding: 10px 14px;
+  font-family: 'POI Orbiter', system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--ink-black);
+  width: 100%;
+}
+.store-modal__container__container .text-field__input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ── Select dropdown ─────────────────────────────────────────────────────────── */
+.store-modal__container__container .select__select {
+  border-radius: 100px;
+  font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Collection index items (All collections view) ───────────────────────────── */
+.store-modal__container__container .store-modal__index-item__button {
+  border: none;
+  padding: 0;
+}
+
+.store-modal__container__container .store-modal__index-item__buy {
+  background: var(--poi-blue);
+  color: #ffffff;
+  border-radius: 100px;
+  padding: 8px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 120ms, color 120ms;
+}
+.store-modal__container__container .store-modal__index-item__buy:hover {
+  background: var(--yellow);
+  color: var(--ink-black);
+}
+
+/* Sticky footer */
+.store-modal__container__container .store-modal__page__sticky-footer {
+  border-top: none;
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+  margin-left: calc(-1 * var(--pad));
+  margin-right: calc(-1 * var(--pad));
+}
+
+/* Sticky checkout button on cart page */
+.store-modal__container__container .store-modal__cart__buttons {
+  position: sticky;
+  bottom: 0;
+  padding: 30px var(--pad);
+  margin-left: calc(-1 * var(--pad));
+  margin-right: calc(-1 * var(--pad));
+}
+.store-modal__container__body:has(.store-modal__cart__buttons) {
+  padding-bottom: 0;
+}
+
+/* Remove padding from order variable label */
+.store-modal__container__container .store-modal__order-variable-selection__label {
+  padding: 0;
+  border-right: none;
+}
+
+.store-modal__container__container .store-modal__license-selection__license-button-label {
+  padding: 0;
+  border-right: none;
+}
+
+/* "I would like to receive news" checkbox — match radio circle style */
+.store-modal__container__container .checkbox {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+.store-modal__container__container .checkbox input {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 6px solid var(--gray-2);
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 150ms, background 150ms;
+  flex-shrink: 0;
+}
+.store-modal__container__container .checkbox input:checked {
+  border-color: var(--poi-blue);
+}
+/* Override merchant-injected hover — apply correct circle hover on full row */
+.store-modal__container__container .checkout-modal__checkbox-field:hover .checkbox input:not(:checked) {
+  border-color: var(--gray-2);
+  background: var(--gray-5);
+}
+.store-modal__container__container .checkbox__icon,
+.store-modal__container__container .checkbox:hover .checkbox__icon {
+  display: none;
+  visibility: hidden;
+}
+
+
+.store-modal__container__container .store-modal__container__cart-button .icon {
+  display: none;
+}
+
+.store-modal__container__container .store-modal__container__cart-button {
+  background: var(--ink-black);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 120ms;
+}
+.store-modal__container__container .store-modal__container__cart-button:hover {
+  background: var(--yellow);
+  color: var(--ink-black);
+}
+.store-modal__container__container .store-modal__container__cart-button:hover::before {
+  color: var(--ink-black);
+}
+.store-modal__container__container .store-modal__container__cart-button::before {
+  content: 'Items in cart';
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Allow page to scroll while cart modal is open */
+body[data-fontdue-store-modal=open] {
+  overflow: auto;
+  overscroll-behavior: none;
+}
+
+/* Add-to-cart button — matches index buy button style */
+.store-modal__container__container .store-modal__product-summary__add-to-cart-button {
+  background: var(--poi-blue);
+  color: #ffffff;
+  border-radius: 100px;
+  padding: 8px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  width: auto;
+  transition: background 120ms, color 120ms;
+}
+.store-modal__container__container .store-modal__product-summary__add-to-cart-button:hover:not(:disabled) {
+  background: var(--yellow);
+  color: var(--ink-black);
+  border: none;
+}
+.store-modal__container__container .store-modal__product-summary__add-to-cart-button:disabled {
+  background: var(--gray-2);
+  color: var(--gray-5);
+  opacity: 1;
+  cursor: default;
+}
+
+.store-modal__container__container .store-modal__product-summary__nothing-selected {
+  opacity: 0;
+}
+
+.store-modal__container__container .store-modal__style-button__checked {
+  display: none;
 }

@@ -1,8 +1,8 @@
 import { useParams, Navigate } from 'react-router-dom'
 import { Suspense, Component } from 'react'
-import TypeTesters from 'fontdue-js/TypeTesters'
 import BuyButton from 'fontdue-js/BuyButton'
 import GlyphOverview from '../components/GlyphOverview.jsx'
+import TypeTester from '../components/TypeTester.jsx'
 import { getFontById } from '../data/fonts.js'
 
 class SectionErrorBoundary extends Component {
@@ -71,21 +71,16 @@ export default function FontDetail() {
         </div>
       </div>
 
-      {/* ── Type tester (Fontdue) ────────────────────────────────── */}
+      {/* ── Type tester ──────────────────────────────────────────── */}
       <div className="fontdue-section">
-        <SectionErrorBoundary>
-          <Suspense fallback={<div className="fontdue-loading" />}>
-            <TypeTesters
-              collectionSlug={font.fontdueSlug}
-              autofit
-              features="*"
-            />
-          </Suspense>
-        </SectionErrorBoundary>
+        <TypeTester
+          collectionSlug={font.fontdueSlug}
+          collectionId={font.fontdueCollectionId}
+        />
       </div>
 
       {/* ── Glyph overview (custom) ──────────────────────────────── */}
-      <GlyphOverview collectionSlug={font.fontdueSlug} />
+      <GlyphOverview collectionSlug={font.fontdueSlug} collectionId={font.fontdueCollectionId} />
     </div>
   )
 }

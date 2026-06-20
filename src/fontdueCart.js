@@ -17,6 +17,62 @@ function findStore() {
   return null
 }
 
+function animateClose(overlay, scrollTop) {
+  const container = overlay.querySelector('.store-modal__container__container')
+  if (!container) return
+  container.dataset.closing = 'true'
+  overlay.style.pointerEvents = 'none'
+  // Re-append to body so the animation plays after React's removal
+  document.body.appendChild(overlay)
+  // Restore scroll position captured before React's re-render reset it
+  container.scrollTop = scrollTop
+  setTimeout(() => { if (document.body.contains(overlay)) overlay.remove() }, 280)
+}
+
+function watchForClose() {
+  // Poll until the overlay appears in the DOM, then watch for its removal
+  let attempts = 0
+  const poll = setInterval(() => {
+    const overlay = document.querySelector('.store-modal__container__overlay')
+    if (!overlay || ++attempts > 40) { clearInterval(poll); return }
+    clearInterval(poll)
+
+    const container = overlay.querySelector('.store-modal__container__container')
+
+    // Close when clicking the transparent background (outside the panel)
+    const bg = overlay.querySelector('.store-modal__container__background')
+    if (bg) bg.addEventListener('click', () => _store?.dispatch({ type: 'CLOSE_CART' }), { once: true })
+
+    // Capture scrollTop BEFORE React re-renders on CLOSE_CART (re-render resets it to 0)
+    let capturedScrollTop = 0
+    const originalDispatch = _store.dispatch.bind(_store)
+    _store.dispatch = function(action) {
+      if (action.type === 'CLOSE_CART') {
+        capturedScrollTop = container?.scrollTop ?? 0
+      }
+      return originalDispatch(action)
+    }
+
+    let handled = false
+    const parent = overlay.parentNode
+    const mo = new MutationObserver(mutations => {
+      _store.dispatch = originalDispatch
+      if (handled) return
+      for (const m of mutations) {
+        for (const node of m.removedNodes) {
+          if (node === overlay) {
+            handled = true
+            mo.disconnect()
+            animateClose(overlay, capturedScrollTop)
+            return
+          }
+        }
+      }
+    })
+    mo.observe(parent, { childList: true })
+  }, 50)
+}
+
 export function openCart() {
   if (!_store) _store = findStore()
   if (!_store) return
@@ -31,4 +87,6 @@ export function openCart() {
     }, 150)
     setTimeout(() => clearInterval(interval), 3000)
   }
+
+  watchForClose()
 }
