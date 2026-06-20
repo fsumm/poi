@@ -332,7 +332,6 @@ input:checked + .checkbox__icon {
 .store-modal__container__container .store-modal__family__title,
 .store-modal__container__container .store-modal__license-selection__title,
 .store-modal__container__container .store-modal__order-variable-selection__title,
-.store-modal__container__container .store-modal__licensee-is-billing-identity__title,
 .store-modal__container__container .store-modal__cart__checkout-section-title,
 .store-modal__container__container .store-modal__container__title {
   display: none;
@@ -380,8 +379,15 @@ input:checked + .checkbox__icon {
     display: grid;
     grid-template-columns: 1fr auto;
     column-gap: 20px;
-    row-gap: 20px;
+    row-gap: 10px;
     align-items: baseline;
+    padding-bottom: 0;
+  }
+  .store-modal__container__container .cart-item + .cart-item {
+    border-top: 1.5px solid var(--gray-2);
+  }
+  .store-modal__container__container .cart-item__name {
+    margin-top: 20px;
   }
   .store-modal__container__container .cart-item > div:has(> .cart-item__licenses) {
     grid-column: 1 / -1;
@@ -851,6 +857,19 @@ input:checked + .checkbox__icon {
   border-color: var(--yellow);
 }
 
+/* Align Pay button right on checkout page */
+.store-modal__container__container .store-modal__cart__checkout-section .store-modal__cart__button {
+  display: block;
+  margin-left: auto;
+}
+.store-modal__container__container .store-modal__cart__checkout-section .store-modal__cart__button:disabled {
+  background: var(--gray-2);
+  color: var(--gray-5);
+  border-color: var(--gray-2);
+  cursor: default;
+  opacity: 1;
+}
+
 .store-modal__container__container .store-modal__cart__share {
   margin-top: 10px;
 }
@@ -936,8 +955,12 @@ input:checked + .checkbox__icon {
 }
 
 /* Contact info text inputs (Name, Email) */
-.store-modal__container__container .text-field__label-wrapper {
-  display: none;
+.store-modal__container__container .text-field__label-wrapper,
+.store-modal__container__container .text-field__label {
+  color: var(--ink-black);
+}
+.store-modal__container__container .text-field__input-wrapper {
+  margin-top: 6px;
 }
 .store-modal__container__container .checkout-modal__section {
   margin-bottom: 10px;
@@ -991,18 +1014,15 @@ input:checked + .checkbox__icon {
   padding-right: var(--pad);
   margin-left: calc(-1 * var(--pad));
   margin-right: calc(-1 * var(--pad));
+  background: transparent;
 }
 
-/* Sticky checkout button on cart page */
-.store-modal__container__container .store-modal__cart__buttons {
-  position: sticky;
-  bottom: 0;
-  padding: 30px var(--pad);
-  margin-left: calc(-1 * var(--pad));
-  margin-right: calc(-1 * var(--pad));
+/* Remove sticky/fixed from both cart modal footers — let them flow naturally */
+.store-modal__container__container .store-modal__page__sticky-footer {
+  position: static;
 }
-.store-modal__container__body:has(.store-modal__cart__buttons) {
-  padding-bottom: 0;
+.store-modal__container__container .store-modal__cart__buttons {
+  position: static;
 }
 
 /* Remove padding from order variable label */
@@ -1014,6 +1034,16 @@ input:checked + .checkbox__icon {
 .store-modal__container__container .store-modal__license-selection__license-button-label {
   padding: 0;
   border-right: none;
+}
+
+.store-modal__container__container .store-modal__order-variable-selection__container {
+  margin-bottom: 20px;
+}
+
+/* EULA agreement label — make full row clickable */
+.store-modal__container__container .store-modal__cart__agreement label {
+  cursor: pointer;
+  flex: 1;
 }
 
 /* "I would like to receive news" checkbox — match radio circle style */
@@ -1106,6 +1136,13 @@ body[data-fontdue-store-modal=open] {
 
 .store-modal__container__container .store-modal__product-summary__nothing-selected {
   opacity: 0;
+}
+
+.store-modal__container__container .store-modal__product-summary__selection-text {
+  background: white;
+  border-radius: 999px;
+  padding: 8px 14px;
+  line-height: 1;
 }
 
 .store-modal__container__container .store-modal__style-button__checked {
