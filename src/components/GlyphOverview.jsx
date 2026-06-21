@@ -165,8 +165,8 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
                     style={{
                       fontFamily: entry.fontFamily,
                       fontVariationSettings: entry.fontVariationSettings,
-                      opacity: Math.max(0, 1 - age * 0.1),
-                      filter: age > 0 ? `blur(${age * 2}px)` : undefined,
+                      opacity: Math.max(0, 1 - age * 0.04),
+                      filter: `blur(${age + 1}px)`,
                     }}
                   >
                     {entry.char}

@@ -9,27 +9,32 @@ function domSettle(el) {
   return new Promise(resolve => {
     let timer = null
 
-    const settle = () => {
+    const resetTimer = () => {
       clearTimeout(timer)
-      timer = setTimeout(() => {
-        observer.disconnect()
-        resolve()
-      }, SETTLE_IDLE)
+      timer = setTimeout(() => { observer.disconnect(); resolve() }, SETTLE_IDLE)
     }
 
-    const observer = new MutationObserver(settle)
+    const observer = new MutationObserver(resetTimer)
     observer.observe(el, { subtree: true, childList: true, characterData: true, attributes: true })
-    settle()
+    resetTimer()
 
     setTimeout(() => { observer.disconnect(); resolve() }, SETTLE_MAX)
   })
 }
 
-// Resolves when CSS fonts are loaded and the page DOM has been quiet for
-// SETTLE_IDLE ms — meaning async components (TypeTester, etc.) have fully rendered.
+const raf2 = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+
+// Wait for CSS fonts, then DOM to settle (catches GraphQL + TypeTester loading state).
+// If TypeTester added fonts to document.fonts during the settle window, they may still
+// be loading — wait for them, then give React two frames to flush the re-renders that
+// follow (setLoaded → autofit → fontSize set → text visible).
 async function waitUntilReady(el) {
   await document.fonts.ready
   await domSettle(el)
+  if (document.fonts.status === 'loading') {
+    await document.fonts.ready
+    await raf2()
+  }
 }
 
 export default function AnimatedRoutes({ children }) {
