@@ -108,7 +108,9 @@ function useFontFace(cssFamily, webfontSources, cssWeight, cssStyle) {
         style: cssStyle ?? 'normal',
       })
     )
-    Promise.all(faces.map(f => f.load().then(f => { document.fonts.add(f); return f })))
+    // Add before loading so document.fonts tracks the load in its status/ready promise
+    faces.forEach(f => document.fonts.add(f))
+    Promise.all(faces.map(f => f.load()))
       .then(() => { if (!cancelled) setLoaded(true) })
       .catch(console.error)
     return () => { cancelled = true }
@@ -271,9 +273,9 @@ function FeaturesPanel({ features, enabled, onToggle, open }) {
   )
 }
 
-function axisDefault(axis) {
+function axisDefault(axis, defaultWeight) {
   if (axis.axis === 'wght') {
-    const v = 300
+    const v = defaultWeight ?? 300
     return v >= axis.minValue && v <= axis.maxValue ? v : axis.minValue
   }
   return axis.minValue <= 0 && 0 <= axis.maxValue ? 0 : axis.minValue
@@ -281,7 +283,7 @@ function axisDefault(axis) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function TypeTester({ collectionSlug, collectionId }) {
+export default function TypeTester({ collectionSlug, collectionId, defaultStyleName, defaultWeight }) {
   const styles = useFontData(collectionSlug, collectionId)
 
   const [selectedId, setSelectedId] = useState(null)
@@ -302,12 +304,15 @@ export default function TypeTester({ collectionSlug, collectionId }) {
 
   useEffect(() => {
     if (styles?.length && !selectedId) {
-      setSelectedId(styles[0].id)
-      const initial = styles[0].defaultContent ?? ''
+      const preferred = defaultStyleName
+        ? (styles.find(s => s.name === defaultStyleName) ?? styles[0])
+        : styles[0]
+      setSelectedId(preferred.id)
+      const initial = preferred.defaultContent ?? ''
       setText(initial)
       if (textAreaRef.current) textAreaRef.current.textContent = initial
       const defaults = {}
-      styles[0].variableAxes?.forEach(a => { defaults[a.axis] = axisDefault(a) })
+      preferred.variableAxes?.forEach(a => { defaults[a.axis] = axisDefault(a, defaultWeight) })
       setAxisValues(defaults)
     }
   }, [styles])
@@ -319,13 +324,21 @@ export default function TypeTester({ collectionSlug, collectionId }) {
     setText(initial)
     if (textAreaRef.current) textAreaRef.current.textContent = initial
     const defaults = {}
-    style.variableAxes?.forEach(a => { defaults[a.axis] = axisDefault(a) })
+    style.variableAxes?.forEach(a => { defaults[a.axis] = axisDefault(a, defaultWeight) })
     setAxisValues(defaults)
     setEnabledFeatures(new Set())
   }, [style?.id])
 
   const fontLoaded = useFontFace(style?.cssFamily, style?.webfontSources, style?.cssWeight, style?.cssStyle)
   const [fontSize, setFontSize] = useAutofit(containerRef, text ?? '', style?.cssFamily, fontLoaded)
+
+  // The contenteditable ref is only available after fontLoaded triggers the full UI render.
+  // Re-populate it here since the earlier effects ran while it was still null.
+  useEffect(() => {
+    if (fontLoaded && textAreaRef.current) {
+      textAreaRef.current.textContent = text
+    }
+  }, [fontLoaded])
 
   // Build feature list with human names from API
   const features = style ? (style.fontFeatures?.supportedFeatures ?? []).map(tag => {
@@ -362,7 +375,7 @@ export default function TypeTester({ collectionSlug, collectionId }) {
     })
   }
 
-  if (!styles) return <div className="tt-loading" />
+  if (!styles || !fontLoaded) return <div className="tt-loading" />
 
   const hasAxes = (style?.variableAxes?.length ?? 0) > 0
   const hasFeatures = features.length > 0

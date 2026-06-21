@@ -36,7 +36,7 @@ export const fonts = [
     displayName: '⌘ Carbonic',
     styles: 16,
     variable: true,
-    description: 'A versatile workhorse with 16 styles and a variable font, Carbonic adapts to any environment — from editorial to screen.',
+    description: 'A contemporary sans serif that walks the line between genres, melding the unconventional with the futuristic. Its design takes influence from tack welding, a process where two pieces are temporarily joined before being permanently fused. Industrial and tech-forward, POI Carbonic is perfect for bold messages that share its non-conformist character.',
     weights: [
       { label: 'POI Carbonic Thin', name: 'Thin', weight: 100, style: 'normal' },
       { label: 'POI Carbonic ExtraLight', name: 'ExtraLight', weight: 200, style: 'normal' },
@@ -50,7 +50,10 @@ export const fonts = [
     features: [],
     defaultText: 'Carbonic',
     catalogAspect: '3/4',
+    defaultWeight: 100,
     fontdueSlug: 'poi-carbonic',
+    fontdueCollectionId: 'Rm9udENvbGxlY3Rpb246MjAwMDYzNDY2ODA5MzU5Nzg1OQ==',
+    defaultStyleName: 'Thin',
   },
   {
     id: 'orbiter',

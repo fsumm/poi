@@ -1,8 +1,11 @@
+import about001 from '../../img/about001.jpg'
+import about002 from '../../img/about002.jpg'
+
 export default function About() {
   return (
     <div className="page">
       <div className="page-grid">
-        <div className="page-grid-img" />
+        <div className="page-grid-img" style={{ backgroundImage: `url(${about001})` }} />
         <div className="page-grid-body">
           <div className="page-section-label">About</div>
           <p className="page-text">
@@ -17,7 +20,7 @@ export default function About() {
       </div>
 
       <div className="about-secondary">
-        <div className="about-secondary-img" />
+        <div className="about-secondary-img" style={{ backgroundImage: `url(${about002})` }} />
         <div className="about-secondary-body">
           <div className="about-secondary-label">⌘?</div>
           <p className="about-secondary-text">

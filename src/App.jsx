@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Route, Navigate } from 'react-router-dom'
+import AnimatedRoutes from './components/AnimatedRoutes.jsx'
 import FontdueProvider from 'fontdue-js/FontdueProvider'
 import StoreModal from 'fontdue-js/StoreModal'
 import 'fontdue-js/fontdue.css'
@@ -55,7 +56,7 @@ export default function App() {
       <div className="app">
         <Nav />
         <main className="main">
-          <Routes>
+          <AnimatedRoutes>
             <Route path="/" element={<Navigate to="/catalog" replace />} />
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/catalog/:fontId" element={<FontDetail />} />
@@ -63,7 +64,7 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/newsletter" element={<Newsletter />} />
             <Route path="/trials" element={<Trials />} />
-          </Routes>
+          </AnimatedRoutes>
         </main>
         <Footer />
       </div>

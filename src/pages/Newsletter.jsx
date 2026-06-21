@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import newsletter001 from '../../img/newsletter001.jpg'
 
 const STORE_URL = 'https://store.poi.tf'
 
@@ -51,7 +52,7 @@ export default function Newsletter() {
   return (
     <div className="page">
       <div className="page-grid">
-        <div className="page-grid-img" />
+        <div className="page-grid-img" style={{ backgroundImage: `url(${newsletter001})` }} />
         <div className="page-grid-body">
           {submitted ? (
             <p className="page-text">You're subscribed. Thanks!</p>

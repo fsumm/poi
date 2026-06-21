@@ -78,7 +78,7 @@ function featureSettings(characterSets) {
 export default function GlyphOverview({ collectionSlug, collectionId, fallbackWeights }) {
   const [collection, setCollection] = useState(null)
   const [hovered, setHovered] = useState(null)
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState([])
   const [selectedStyleIdx, setSelectedStyleIdx] = useState(0)
   const defaultStyleSet = useRef(false)
 
@@ -114,6 +114,7 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
     const lightIdx = pills.findIndex(p => p.name === 'Light')
     if (lightIdx > 0) setSelectedStyleIdx(lightIdx)
   }, [collection, fallbackWeights])
+
 
   if (!collection) return <div className="glyph-overview-loading" />
 
@@ -155,7 +156,26 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
           <div className="page-section-label">Glyph Overview</div>
           <div className="glyph-overview__preview-sticky">
             <div className="glyph-overview__preview" style={previewStyle}>
-              <span className="glyph-overview__preview-char">{hovered ?? selected ?? firstChar}</span>
+              {selected.map((entry, i) => {
+                const age = selected.length - 1 - i
+                return (
+                  <span
+                    key={`selected-bg-${i}`}
+                    className="glyph-overview__preview-char glyph-selected-bg"
+                    style={{
+                      fontFamily: entry.fontFamily,
+                      fontVariationSettings: entry.fontVariationSettings,
+                      opacity: Math.max(0, 1 - age * 0.1),
+                      filter: age > 0 ? `blur(${age * 2}px)` : undefined,
+                    }}
+                  >
+                    {entry.char}
+                  </span>
+                )
+              })}
+              <span className="glyph-overview__preview-char">
+                {hovered ?? selected[selected.length - 1]?.char ?? firstChar}
+              </span>
             </div>
             {pills.length > 1 && (
               <div className="glyph-overview__style-pills">
@@ -176,18 +196,9 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
 
         {/* ── Right: all categories stacked ───────────────────── */}
         <div className="glyph-overview__groups">
-          {glyphGroups.map((group, idx) => {
+          {glyphGroups.map((group) => {
             const chars = expandCharacters(group.characterSets, glyphNames)
             const fontFeatureSettings = featureSettings(group.characterSets)
-
-            // Pair groups (left=even, right=odd); pad both to the taller pair's row count
-            const pairIdx = idx % 2 === 0 ? idx + 1 : idx - 1
-            const pairGroup = glyphGroups[pairIdx]
-            const pairChars = pairGroup ? expandCharacters(pairGroup.characterSets, glyphNames) : []
-            const myRows = Math.ceil(chars.length / 6)
-            const pairRows = Math.ceil(pairChars.length / 6)
-            const maxRows = Math.max(myRows, pairRows)
-            const fillerCount = maxRows * 6 - chars.length
 
             return (
               <div key={group.name} className="glyph-overview__group">
@@ -196,16 +207,13 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
                   {chars.map((char, i) => (
                     <div
                       key={i}
-                      className={`glyph-overview__cell${selected === char ? ' selected' : ''}`}
+                      className={`glyph-overview__cell${selected[selected.length - 1]?.char === char ? ' selected' : ''}`}
                       onMouseEnter={() => setHovered(char)}
                       onMouseLeave={() => setHovered(null)}
-                      onClick={() => setSelected(prev => prev === char ? null : char)}
+                      onClick={() => setSelected(prev => [...prev, { char, fontFamily, fontVariationSettings }])}
                     >
-                      {char}
+                      <span>{char}</span>
                     </div>
-                  ))}
-                  {Array.from({ length: fillerCount }).map((_, i) => (
-                    <div key={`filler-${i}`} className="glyph-overview__cell-filler" />
                   ))}
                 </div>
               </div>
