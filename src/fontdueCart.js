@@ -20,6 +20,12 @@ function findStore() {
 function animateClose(overlay, scrollTop) {
   const container = overlay.querySelector('.store-modal__container__container')
   if (!container) return
+  // If fonts were still loading when the user closed, snap content visible so
+  // the slide-out animation doesn't play with an empty-looking panel.
+  if (overlay.classList.contains('cart-anim--loading')) {
+    overlay.classList.remove('cart-anim--loading')
+    overlay.classList.add('cart-anim--entering')
+  }
   container.dataset.closing = 'true'
   overlay.style.pointerEvents = 'none'
   // Re-append to body so the animation plays after React's removal
@@ -34,7 +40,9 @@ function watchForClose() {
   let attempts = 0
   const poll = setInterval(() => {
     const overlay = document.querySelector('.store-modal__container__overlay')
-    if (!overlay || ++attempts > 40) { clearInterval(poll); return }
+    // Overlay not mounted yet (StoreModal lazy-loads on a fresh session) — keep
+    // polling until it appears; only give up after the attempt budget runs out.
+    if (!overlay) { if (++attempts > 40) clearInterval(poll); return }
     clearInterval(poll)
 
     const container = overlay.querySelector('.store-modal__container__container')
@@ -54,22 +62,14 @@ function watchForClose() {
     }
 
     let handled = false
-    const parent = overlay.parentNode
-    const mo = new MutationObserver(mutations => {
+    const mo = new MutationObserver(() => {
+      if (handled || document.body.contains(overlay)) return
+      handled = true
       _store.dispatch = originalDispatch
-      if (handled) return
-      for (const m of mutations) {
-        for (const node of m.removedNodes) {
-          if (node === overlay) {
-            handled = true
-            mo.disconnect()
-            animateClose(overlay, capturedScrollTop)
-            return
-          }
-        }
-      }
+      mo.disconnect()
+      animateClose(overlay, capturedScrollTop)
     })
-    mo.observe(parent, { childList: true })
+    mo.observe(document.body, { childList: true, subtree: true })
   }, 50)
 }
 
