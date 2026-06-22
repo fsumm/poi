@@ -1419,10 +1419,11 @@ button { cursor: pointer; }
   .nav--open .nav-links {
     max-height: 320px; /* snug above the four links so the slide fills its duration */
     padding-bottom: 16px;
-    /* Longer, slower intro than the close (base transition above) */
+    /* Longer, slower intro than the close (base transition above), with a
+       gentler easing curve than the dramatic ease-out it used before */
     transition:
-      max-height 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-      padding 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height 0.7s cubic-bezier(0.33, 1, 0.68, 1),
+      padding 0.7s cubic-bezier(0.33, 1, 0.68, 1);
   }
   .nav-links li { padding: 10px 0; }
 
@@ -1437,10 +1438,10 @@ button { cursor: pointer; }
     transform: translateY(0);
     transition: opacity 0.55s linear, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .nav--open .nav-links li:nth-child(1) { transition-delay: 0.12s; }
-  .nav--open .nav-links li:nth-child(2) { transition-delay: 0.24s; }
-  .nav--open .nav-links li:nth-child(3) { transition-delay: 0.36s; }
-  .nav--open .nav-links li:nth-child(4) { transition-delay: 0.48s; }
+  .nav--open .nav-links li:nth-child(1) { transition-delay: 0.06s; }
+  .nav--open .nav-links li:nth-child(2) { transition-delay: 0.12s; }
+  .nav--open .nav-links li:nth-child(3) { transition-delay: 0.18s; }
+  .nav--open .nav-links li:nth-child(4) { transition-delay: 0.24s; }
 
   /* ── Footer → stack ── */
   .footer {
@@ -1480,10 +1481,16 @@ button { cursor: pointer; }
     grid-row: auto;
     align-self: end;
     justify-self: stretch;
-    justify-content: center;
+    align-items: center;
+    justify-content: flex-end;
     gap: 12px;
+    height: var(--nav-h);
     margin-top: 24px;
-    padding: 12px var(--pad);
+    /* Full-bleed: cancel the page's side padding so the frosted bar reaches
+       both screen edges instead of clipping at the content width */
+    margin-left: calc(-1 * var(--pad));
+    margin-right: calc(-1 * var(--pad));
+    padding: 0 var(--pad);
     background: rgba(255, 255, 255, 0.7);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     backdrop-filter: blur(16px) saturate(180%);
