@@ -1175,3 +1175,29 @@ body[data-fontdue-store-modal=open] {
 .store-modal__container__container .store-modal__style-button__checked {
   display: none;
 }
+
+/* ── Responsive cart drawer: stays 4 grid-columns wide at every breakpoint ──
+   12-col (desktop): 4 cols = right third (handled above).
+   8-col (≤1140px):  4 cols = half the grid.
+   4-col (≤580px):   4 cols = full width.
+   Route-specific selectors mirror the (min-width: 900px) override above so
+   they win at 900–1140px by source order. */
+@media (max-width: 1140px) {
+  .store-modal__container__container,
+  [data-route=cart] .store-modal__container__container,
+  [data-route=checkout] .store-modal__container__container,
+  [data-route=cart]:has(.empty-cart__container) .store-modal__container__container {
+    max-width: calc((100vw - 2 * var(--pad) - 7 * var(--gap)) / 2 + 3 * var(--gap) + var(--pad) + var(--gap));
+    right: 0;
+  }
+}
+
+@media (max-width: 580px) {
+  .store-modal__container__container,
+  [data-route=cart] .store-modal__container__container,
+  [data-route=checkout] .store-modal__container__container,
+  [data-route=cart]:has(.empty-cart__container) .store-modal__container__container {
+    max-width: 100vw;
+    right: 0;
+  }
+}
