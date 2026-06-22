@@ -11,6 +11,14 @@ export default function Nav() {
       <NavLink to="/" className="nav-logo" aria-label="Place of Interest" onClick={close}>
         ⌘
       </NavLink>
+      <button
+        className="nav-toggle"
+        aria-label="Menu"
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen(v => !v)}
+      >
+        Menu
+      </button>
       <ul className="nav-links">
         <li><NavLink to="/catalog" onClick={close} className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>Catalog</NavLink></li>
         <li><NavLink to="/contact" onClick={close} className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>Contact</NavLink></li>
@@ -20,15 +28,6 @@ export default function Nav() {
       <div className="nav-cart">
         <button className="nav-cart-btn" onClick={openCart}>Cart</button>
       </div>
-      <button
-        className="nav-toggle"
-        aria-label="Menu"
-        aria-expanded={menuOpen}
-        onClick={() => setMenuOpen(v => !v)}
-      >
-        <span />
-        <span />
-      </button>
     </nav>
   )
 }

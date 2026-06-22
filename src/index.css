@@ -272,7 +272,7 @@ button { cursor: pointer; }
 .footer-link:hover { opacity: 0.6; }
 
 .footer-copy {
-  grid-column: 12;
+  grid-column: 11 / 13;
   justify-self: end;
   font-weight: 600;
 }
@@ -1323,30 +1323,16 @@ button { cursor: pointer; }
    because the 12-col tracks don't survive a column reduction.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Hamburger toggle — hidden until the mobile breakpoint */
+/* Menu toggle — a text button, hidden until the mobile breakpoint */
 .nav-toggle {
   display: none;
-  grid-column: 12;
-  justify-self: end;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  width: 28px;
-  height: 28px;
   padding: 0;
+  font-weight: 600;
+  color: inherit;
+  transition: opacity 0.12s;
 }
 
-.nav-toggle span {
-  display: block;
-  height: 2px;
-  width: 100%;
-  background: var(--color-text);
-  border-radius: 2px;
-  transition: transform 0.2s, opacity 0.2s;
-}
-
-.nav--open .nav-toggle span:nth-child(1) { transform: translateY(3.5px) rotate(45deg); }
-.nav--open .nav-toggle span:nth-child(2) { transform: translateY(-3.5px) rotate(-45deg); }
+.nav-toggle:hover { opacity: 0.6; }
 
 /* ─────────────────────────────────────────────────────────────────────────
    BREAKPOINT 1 — ≤1140px : 8-column grid
@@ -1363,9 +1349,9 @@ button { cursor: pointer; }
     grid-template-columns: repeat(8, 1fr);
   }
 
-  /* Nav / footer — push the right-edge items to the new last column */
+  /* Nav / footer — push the right-edge items to the new last columns */
   .nav-cart   { grid-column: 8; }
-  .footer-copy { grid-column: 8; }
+  .footer-copy { grid-column: 7 / 9; }
 
   /* Catalog — landscape full-third on row 1, portraits reflow */
   .catalog-grid > *:nth-child(1) { grid-column: 1 / 5; grid-row: 1; } /* Aeronaut */
@@ -1416,27 +1402,59 @@ button { cursor: pointer; }
     grid-template-columns: repeat(4, 1fr);
   }
 
-  /* ── Nav → hamburger. Flex so logo sits left, cart + toggle group right ── */
+  /* ── Nav → "Menu" toggle sits right of the logo; Cart pinned far right ── */
   .nav { display: flex; align-items: center; }
-  .nav-toggle { display: flex; margin-left: 16px; }
+  .nav-toggle { display: inline-block; margin-left: 24px; }
   .nav-cart { margin-left: auto; }
 
+  /* Dropdown panel: same frosted background as the nav bar, slides down
+     on open and collapses on close. */
   .nav-links {
     position: absolute;
     top: var(--nav-h);
     left: 0;
     right: 0;
-    display: none;
+    display: grid;
     grid-template-columns: 1fr;
     gap: 0;
-    padding: 8px var(--pad) 20px;
-    background: rgba(255, 255, 255, 0.95);
+    padding: 0 var(--pad);
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: rgba(255, 255, 255, 0.85);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     backdrop-filter: blur(16px) saturate(180%);
+    transition:
+      max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      padding 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.3s linear;
+  }
+  .nav--open .nav-links {
+    max-height: 70vh;
+    opacity: 1;
+    pointer-events: auto;
+    padding-top: 8px;
+    padding-bottom: 20px;
     border-bottom: 1px solid #e8e8e8;
   }
-  .nav--open .nav-links { display: grid; }
   .nav-links li { padding: 10px 0; }
+
+  /* Menu items fade + drift in, staggered like the site's page transitions */
+  .nav-links li {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.3s linear, transform 0.3s linear;
+  }
+  .nav--open .nav-links li {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s linear, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .nav--open .nav-links li:nth-child(1) { transition-delay: 0.08s; }
+  .nav--open .nav-links li:nth-child(2) { transition-delay: 0.16s; }
+  .nav--open .nav-links li:nth-child(3) { transition-delay: 0.24s; }
+  .nav--open .nav-links li:nth-child(4) { transition-delay: 0.32s; }
 
   /* ── Footer → stack ── */
   .footer {
@@ -1454,11 +1472,10 @@ button { cursor: pointer; }
     gap: 8px;
   }
 
-  /* ── Catalog → stacked, portraits two-up ── */
-  .catalog-grid > *:nth-child(1) { grid-column: 1 / -1; grid-row: auto; } /* Aeronaut */
-  .catalog-grid > *:nth-child(2) { grid-column: 1 / 3;  grid-row: auto; } /* Carbonic */
-  .catalog-grid > *:nth-child(3) { grid-column: 3 / 5;  grid-row: auto; } /* Orbiter  */
-  .catalog-grid > *:nth-child(4) { grid-column: 1 / 3;  grid-row: auto; } /* Diode    */
+  /* ── Catalog → every card full width, stacked ──
+     nth-child(n) matches all cards and ties the ≤1140 placement specificity,
+     so this wins on source order. */
+  .catalog-grid > *:nth-child(n) { grid-column: 1 / -1; grid-row: auto; }
 
   /* ── Font detail → stacked header ── */
   .font-detail-header { grid-template-columns: 1fr; }
@@ -1468,12 +1485,12 @@ button { cursor: pointer; }
 
   /* Buy actions stay a fixed bottom bar (inherited from the ≤1140 rule) */
 
-  /* ── Page (about/contact/newsletter/trials) → editorial: small image, full-width text ── */
-  .page-grid-img  { grid-column: 1 / 3; }
+  /* ── Page (about/contact/newsletter/trials) → full-width image + text ── */
+  .page-grid-img  { grid-column: 1 / -1; }
   .page-grid-body { grid-column: 1 / -1; }
 
-  /* ── About secondary → stacked left ── */
-  .about-secondary-img  { grid-column: 1 / 3; }
+  /* ── About secondary → stacked, full-width image ── */
+  .about-secondary-img  { grid-column: 1 / -1; }
   .about-secondary-body { grid-column: 1 / -1; }
 
   /* ── Glyph overview → single column, preview un-sticks ── */
