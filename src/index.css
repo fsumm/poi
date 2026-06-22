@@ -1407,36 +1407,35 @@ button { cursor: pointer; }
   .nav-toggle { display: inline-block; margin-left: 24px; }
   .nav-cart { margin-left: auto; }
 
-  /* Dropdown panel: same frosted background as the nav bar, slides down
-     on open and collapses on close. */
+  /* The dropdown panel IS the nav's frosted background: it starts at the
+     very top, blurs the whole nav-bar strip (its padding-top) plus the
+     revealed links below, so the bar and the dropdown share one continuous
+     blur. The bar's own ::before blur is therefore disabled here to avoid a
+     second overlapping layer (the seam the split came from). */
+  .nav::before { display: none; }
+
   .nav-links {
     position: absolute;
-    top: var(--nav-h);
+    top: 0;
     left: 0;
     right: 0;
+    z-index: -1; /* behind the bar content (logo/Menu/Cart), above the page */
     display: grid;
     grid-template-columns: 1fr;
     gap: 0;
-    padding: 0 var(--pad);
-    max-height: 0;
-    opacity: 0;
+    padding: var(--nav-h) var(--pad) 0;
+    max-height: var(--nav-h); /* closed: only the bar strip shows */
     overflow: hidden;
-    pointer-events: none;
     background: rgba(255, 255, 255, 0.85);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     backdrop-filter: blur(16px) saturate(180%);
     transition:
       max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-      padding 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-      opacity 0.3s linear;
+      padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .nav--open .nav-links {
-    max-height: 70vh;
-    opacity: 1;
-    pointer-events: auto;
-    padding-top: 8px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #e8e8e8;
+    max-height: 320px; /* snug above the four links so the slide fills its duration */
+    padding-bottom: 16px;
   }
   .nav-links li { padding: 10px 0; }
 
