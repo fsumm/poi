@@ -40,24 +40,6 @@ export default function FontDetail() {
 
   return (
     <div className="font-detail">
-      {/* ── Sticky buy actions ───────────────────────────────────────── */}
-      <div className="font-detail-actions-sticky">
-        <a
-          className="btn btn-dark"
-          href={`https://store.poi.tf/products/${font.fontdueSlug}?trial=true`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Download Trial
-        </a>
-        <Suspense fallback={<span className="btn btn-blue">Buy</span>}>
-          <BuyButton
-            collectionSlug={font.fontdueSlug}
-            collectionName={font.name}
-            label="Buy"
-          />
-        </Suspense>
-      </div>
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="font-detail-header">
         <div className="font-detail-img" style={{ backgroundImage: fontImages[fontId] ? `url(${fontImages[fontId]})` : undefined }} />
@@ -88,6 +70,27 @@ export default function FontDetail() {
 
       {/* ── Glyph overview (custom) ──────────────────────────────── */}
       <GlyphOverview collectionSlug={font.fontdueSlug} collectionId={font.fontdueCollectionId} fallbackWeights={font.weights} />
+
+      {/* ── Buy actions ──────────────────────────────────────────────
+          Last in the DOM so the mobile sticky bar's natural flow position
+          is the bottom of the content; desktop/tablet pin it via grid-row:1. */}
+      <div className="font-detail-actions-sticky">
+        <a
+          className="btn btn-dark"
+          href={`https://store.poi.tf/products/${font.fontdueSlug}?trial=true`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Download Trial
+        </a>
+        <Suspense fallback={<span className="btn btn-blue">Buy</span>}>
+          <BuyButton
+            collectionSlug={font.fontdueSlug}
+            collectionName={font.name}
+            label="Buy"
+          />
+        </Suspense>
+      </div>
     </div>
   )
 }
