@@ -1,5 +1,5 @@
 import { useParams, Navigate } from 'react-router-dom'
-import { Suspense, Component } from 'react'
+import { Suspense, Component, useMemo } from 'react'
 import aeronaut001 from '../../img/aeronaut001.jpg'
 import carbonic001 from '../../img/carbonic001.jpg'
 import orbiter001 from '../../img/orbiter001.jpg'
@@ -10,6 +10,7 @@ import BuyButton from 'fontdue-js/BuyButton'
 import GlyphOverview from '../components/GlyphOverview.jsx'
 import TypeTester from '../components/TypeTester.jsx'
 import { getFontById } from '../data/fonts.js'
+import { makeOverlay } from '../overlayText.js'
 
 class SectionErrorBoundary extends Component {
   state = { error: null }
@@ -34,6 +35,9 @@ export default function FontDetail() {
   const { fontId } = useParams()
   const font = getFontById(fontId)
 
+  // Hook must run unconditionally (before the early return below)
+  const overlay = useMemo(() => (font ? makeOverlay(font) : null), [fontId])
+
   if (!font) return <Navigate to="/catalog" replace />
 
   const ff = fontFamily(fontId)
@@ -42,7 +46,9 @@ export default function FontDetail() {
     <div className="font-detail">
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="font-detail-header">
-        <div className="font-detail-img" style={{ backgroundImage: fontImages[fontId] ? `url(${fontImages[fontId]})` : undefined }} />
+        <div className="font-detail-img" style={{ backgroundImage: fontImages[fontId] ? `url(${fontImages[fontId]})` : undefined }}>
+          <span className="catalog-card-text" style={overlay.style}>{overlay.text}</span>
+        </div>
 
         <div className="font-detail-meta">
           <div className="font-detail-breadcrumb">{font.displayName}</div>
