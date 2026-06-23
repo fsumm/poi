@@ -122,15 +122,17 @@
   --gap: 20px;
   --nav-h: 84px;
   --font-ui: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+  --font-size-sm: 12px;
+  --font-size-lg: 18px;
+  --padding-sm: 6px 14px;
 }
 
 html, body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-ui);
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
-  line-height: 20px;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -153,6 +155,10 @@ button { cursor: pointer; }
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  /* Contain horizontal spill from the type tester (oversized/tracked text)
+     at the viewport edge without a page scrollbar. `clip` (not `hidden`)
+     keeps position: sticky working for the nav and buy bar. */
+  overflow-x: clip;
 }
 
 .main { flex: 1; margin-top: 12px;}
@@ -285,11 +291,27 @@ button { cursor: pointer; }
   padding: 0;
 }
 
+.catalog-hero {
+  /* Full content width; the headline is sized/offset to fit by JS */
+  margin-bottom: 12px;
+  overflow: hidden; /* clip the trailing advance/side-bearing whitespace */
+}
+
+.catalog-hero-text {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-variation-settings: 'wght' 400;
+  letter-spacing: -0.0615em;
+  line-height: 0.9;
+  white-space: nowrap;
+}
+
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   column-gap: var(--gap);
-  row-gap: 40px;
+  row-gap: 30px;
 }
 
 .catalog-card {
@@ -469,10 +491,10 @@ button { cursor: pointer; }
 .tester-style-btn {
   display: inline-flex;
   align-items: center;
-  padding: 6px 14px;
+  padding: var(--padding-sm);
   border-radius: var(--radius-pill);
   background: var(--color-dim);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -495,7 +517,7 @@ button { cursor: pointer; }
 }
 
 .tester-tracking-label {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -507,7 +529,7 @@ button { cursor: pointer; }
 
 .tester-axes-label,
 .tester-features-label {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -519,7 +541,7 @@ button { cursor: pointer; }
 }
 
 .tester-features-heading {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   margin-bottom: 10px;
   color: var(--color-muted);
@@ -646,7 +668,7 @@ button { cursor: pointer; }
 }
 
 .legal-heading {
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   line-height: 22px;
   color: #171716;
@@ -659,7 +681,7 @@ button { cursor: pointer; }
 }
 
 .legal-text {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   line-height: 16px;
   color: #171716;
@@ -713,14 +735,17 @@ button { cursor: pointer; }
 
 /* ─── Forms ──────────────────────────────────────────────────────────────── */
 
+/* Inputs span 3 grid columns while the text above stays at the body's 2.
+   The body is 2 cols (2u + gap); 3 cols is (3u + 2·gap), which relative to
+   the body width works out to 1.5·body + 0.5·gap — exact at any viewport. */
 .form-field {
   display: block;
-  width: 220px;
+  width: calc(150% + var(--gap) / 2);
   padding: 10px 14px;
   border-radius: var(--radius-pill);
   background: var(--color-input);
   border: none;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
   outline: none;
@@ -736,45 +761,29 @@ button { cursor: pointer; }
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   user-select: none;
   margin-bottom: 8px;
 }
 
 .form-toggle-dot {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: #e0e0e0;
+  border: 6px solid var(--gray-2);
+  background: #fff;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.12s;
+  box-sizing: border-box;
+  transition: border-color 150ms, background 150ms;
 }
 
 .form-toggle:hover .form-toggle-dot:not(.checked) {
-  background: #b8b8b8;
-}
-
-.form-toggle:hover .form-toggle-dot:not(.checked)::after {
-  content: '';
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #6b6b6b;
+  background: var(--gray-5);
 }
 
 .form-toggle-dot.checked {
-  background: var(--color-check);
-}
-
-.form-toggle-dot.checked::after {
-  content: '';
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  border-color: var(--poi-blue);
   background: #fff;
 }
 
@@ -878,6 +887,7 @@ button { cursor: pointer; }
 
 .glyph-overview__group-name {
   font-weight: 600;
+  line-height: 20px;
   margin-bottom: 12px;
 }
 
@@ -994,7 +1004,10 @@ button { cursor: pointer; }
 
 /* Text area */
 .tt-text-wrap {
-  overflow: hidden;
+  /* No clipping: large autofit sizes and heavy tracking can push glyphs past
+     the box in both axes — let them show. Horizontal spill is contained at the
+     viewport via .app (overflow-x: clip) so the page never gains a scrollbar. */
+  overflow: visible;
   padding: 24px 0;
   min-height: 120px;
   cursor: text;
@@ -1029,8 +1042,8 @@ button { cursor: pointer; }
 .tt-name {
   background: var(--gray-1);
   border-radius: 100px;
-  padding: 6px 14px;
-  font-size: 12px;
+  padding: var(--padding-sm);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -1046,8 +1059,8 @@ button { cursor: pointer; }
   background: var(--gray-1);
   border: none;
   border-radius: 100px;
-  padding: 6px 14px;
-  font-size: 12px;
+  padding: var(--padding-sm);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: background 150ms;
@@ -1062,7 +1075,7 @@ button { cursor: pointer; }
 .tt-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
@@ -1074,20 +1087,20 @@ button { cursor: pointer; }
 }
 
 .tt-slider-label {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
   color: var(--color-muted);
 }
 
 .tt-slider-value {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-muted);
   background: var(--gray-1);
   border: none;
   border-radius: 100px;
-  padding: 3px 10px;
+  padding: var(--padding-sm);
   width: 52px;
   text-align: center;
   outline: none;
@@ -1149,7 +1162,7 @@ button { cursor: pointer; }
 }
 
 .tt-features-heading {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
   color: var(--color-muted);
@@ -1171,7 +1184,7 @@ button { cursor: pointer; }
   cursor: pointer;
   padding: 4px 0;
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 }
 
@@ -1537,6 +1550,8 @@ button { cursor: pointer; }
   /* ── Page (about/contact/newsletter/trials) → full-width image + text ── */
   .page-grid-img  { grid-column: 1 / -1; }
   .page-grid-body { grid-column: 1 / -1; }
+  /* Body is full-width here, so inputs fill it rather than overflowing 150% */
+  .form-field { width: 100%; }
 
   /* ── About secondary → stacked, full-width image ── */
   .about-secondary-img  { grid-column: 1 / -1; }

@@ -107,7 +107,7 @@
   background: var(--gray-1);
   border-radius: 100px;
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 /* Slider track — thin gray line */
@@ -136,7 +136,7 @@
   border: none;
   border-radius: 100px;
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   letter-spacing: 0.02em;
   transition: background 150ms;
@@ -156,7 +156,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
   padding: 4px 0;
@@ -317,7 +317,7 @@ input:checked + .checkbox__icon {
   max-width: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
   right: max(0px, (100vw - var(--max-w)) / 2);
   font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   background-color: rgba(255, 255, 255, 0.85);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -346,7 +346,7 @@ input:checked + .checkbox__icon {
   border: none;
   border-radius: 100px;
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--ink-black);
   cursor: pointer;
@@ -371,7 +371,7 @@ input:checked + .checkbox__icon {
   padding-right: var(--pad);
 }
 .store-modal__container__container .empty-cart__message {
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   margin-bottom: 20px;
 }
 .store-modal__container__container .empty-cart__container .button {
@@ -381,7 +381,7 @@ input:checked + .checkbox__icon {
   border-radius: 999px;
   padding: 8px 16px;
   font-family: 'POI Orbiter', system-ui, sans-serif;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: background 120ms, color 120ms;
@@ -430,6 +430,12 @@ input:checked + .checkbox__icon {
   }
 }
 
+@media (max-width: 1199px) {
+  .store-modal__container__container .cart-item {
+    row-gap: 10px;
+  }
+}
+
 /* Cart item license delete button — radio circle style, red */
 .store-modal__container__container .cart-item__license__delete-button .icon {
   display: none;
@@ -473,7 +479,7 @@ input:checked + .checkbox__icon {
   cursor: pointer;
   color: var(--color-text);
   font-family: var(--font-ui);
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   /* Use the font's natural line box (not a tight 20px) so the generated
      ::before text gets the same inline box as the real-text nav links,
@@ -539,7 +545,7 @@ input:checked + .checkbox__icon {
 .store-modal__container__container .store-modal__licensee-is-billing-identity__title p,
 .store-modal__container__container .store-modal__order-variable-selection__title p,
 .store-modal__container__container .store-modal__license-selection__title p {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--ink-black);
   margin-bottom: 10px;
@@ -561,7 +567,7 @@ input:checked + .checkbox__icon {
   border: none;
   border-radius: 0;
   padding: 4px 0;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   width: auto;
   display: inline-flex;
@@ -620,7 +626,7 @@ input:checked + .checkbox__icon {
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   transition: none;
 }
@@ -662,7 +668,7 @@ input:checked + .checkbox__icon {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   transition: none;
 }
@@ -723,7 +729,7 @@ input:checked + .checkbox__icon {
   border: none;
   border-radius: 0;
   padding: 4px 0;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -836,7 +842,7 @@ input:checked + .checkbox__icon {
 }
 .store-modal__container__container .store-modal__family__family-button[data-clickable=false] .store-modal__family-button__name,
 .store-modal__container__container .store-modal__family__bundle-button .store-modal__family-button__name {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 .store-modal__container__container .store-modal__family__family-button[data-clickable=false] .store-modal__family-button__label,
 .store-modal__container__container .store-modal__family__bundle-button .store-modal__family-button__label {
@@ -856,7 +862,7 @@ input:checked + .checkbox__icon {
   gap: 6px;
 }
 .store-modal__container__container .store-modal__family__title {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--ink-black);
   margin-bottom: 10px;
@@ -874,7 +880,7 @@ input:checked + .checkbox__icon {
   color: #ffffff;
   border-color: var(--poi-blue);
   padding: 8px 20px;
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   width: auto;
 }
 .store-modal__container__container .store-modal__cart__button:hover:not(:disabled) {
@@ -900,6 +906,26 @@ input:checked + .checkbox__icon {
   margin-top: 10px;
 }
 
+/* Cart edit button — pill */
+.store-modal__container__container .store-modal__cart__edit-button {
+  background: var(--gray-1);
+  color: var(--ink-black);
+  border: none;
+  border-radius: 20px;
+  padding: 10px 14px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition: background 120ms;
+}
+.store-modal__container__container .store-modal__cart__edit-button:hover {
+  background: var(--gray-2);
+}
+
+/* Hide the family button checked indicator */
+.store-modal__container__container .store-modal__family-button__checked {
+  visibility: hidden;
+}
+
 /* Coupon code and share cart toggle buttons */
 .store-modal__container__container .cart-additions__expand-button,
 .store-modal__container__container .cart__share__share-button {
@@ -908,9 +934,9 @@ input:checked + .checkbox__icon {
   border: none;
   border-radius: 20px;
   padding: 10px 14px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
-  width: 100%;
+  width: inherit;
   transition: background 120ms;
 }
 .store-modal__container__container .cart-additions__expand-button:hover,
@@ -929,7 +955,7 @@ input:checked + .checkbox__icon {
   border-radius: 20px;
   padding: 10px 14px;
   font-family: 'POI Orbiter', system-ui, sans-serif;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   flex: 1;
 }
 .store-modal__container__container .cart-additions__field:focus {
@@ -941,7 +967,7 @@ input:checked + .checkbox__icon {
   border: none;
   border-radius: 20px;
   padding: 10px 14px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   transition: background 120ms;
 }
@@ -950,6 +976,12 @@ input:checked + .checkbox__icon {
 }
 
 /* Share URL input + Copy + PDF buttons */
+.store-modal__container__container .cart__share-url-input-container {
+  gap: 6px;
+}
+.store-modal__container__container .cart__share__button.cart__share__pdf-button {
+  width: fit-content;
+}
 .store-modal__container__container .cart__share-url-input {
   background: var(--gray-1);
   color: var(--ink-black);
@@ -957,7 +989,7 @@ input:checked + .checkbox__icon {
   border-radius: 20px;
   padding: 10px 14px;
   font-family: 'POI Orbiter', system-ui, sans-serif;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   flex: 1;
 }
 .store-modal__container__container .cart__share-url-input:focus {
@@ -970,7 +1002,7 @@ input:checked + .checkbox__icon {
   border: none;
   border-radius: 20px;
   padding: 10px 14px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   transition: background 120ms;
   white-space: nowrap;
@@ -997,7 +1029,7 @@ input:checked + .checkbox__icon {
   border-radius: 20px;
   padding: 10px 14px;
   font-family: 'POI Orbiter', system-ui, sans-serif;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--ink-black);
   width: 100%;
 }
@@ -1023,7 +1055,7 @@ input:checked + .checkbox__icon {
   color: #ffffff;
   border-radius: 100px;
   padding: 8px 20px;
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   white-space: nowrap;
   transition: background 120ms, color 120ms;
@@ -1125,7 +1157,7 @@ input:checked + .checkbox__icon {
 }
 .store-modal__container__container .store-modal__container__cart-button::before {
   content: 'Items in cart';
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: #fff;
 }
@@ -1142,7 +1174,7 @@ body[data-fontdue-store-modal=open] {
   color: #ffffff;
   border-radius: 100px;
   padding: 8px 20px;
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   border: none;
   width: auto;

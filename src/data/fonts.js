@@ -61,7 +61,7 @@ export const fonts = [
     displayName: '⌘ Orbiter',
     styles: 12,
     variable: true,
-    description: 'An orbital display face with 12 styles and a variable font spanning weight and slant axes.',
+    description: 'POI Orbiter draws inspiration from early space exploration and the industrial design language that defined it. Its sturdy construction and ample x-height make it useful across a broad range of editorial and UI applications.',
     weights: [
       { label: 'POI Orbiter Regular', name: 'Regular', weight: 400, style: 'normal' },
       { label: 'POI Orbiter Medium', name: 'Medium', weight: 500, style: 'normal' },

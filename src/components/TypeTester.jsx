@@ -325,7 +325,9 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
     fontFeatureSettings,
     fontVariationSettings,
     lineHeight: 1.1,
-    transition: 'letter-spacing 0.1s',
+    // No letter-spacing transition: while dragging the tracking slider it would
+    // animate (reflowing every frame), and with the now-visible overflowing text
+    // each reflow is costly. Applying tracking instantly matches the Size slider.
   } : {}
 
   function toggleFeature(tag) {
