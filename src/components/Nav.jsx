@@ -7,6 +7,7 @@ export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [catalogOpen, setCatalogOpen] = useState(false)
   const navRef = useRef(null)
+  const submenuRef = useRef(null)
   const close = () => {
     setMenuOpen(false)
     setCatalogOpen(false)
@@ -19,11 +20,23 @@ export default function Nav() {
     setCatalogOpen(v => !v)
   }
 
-  // Flag the open submenu on <body> so its height (--submenu-h) is readable by
-  // both the nav's frosted backdrop and the sticky items in the page below it.
+  // Publish the open submenu's *actual* height as --submenu-h on <body> so the
+  // nav's frosted backdrop and the sticky items below it can offset by exactly
+  // the amount the bar grows. Measured (not a fixed guess) so the offset matches
+  // the real content height rather than the max-height cap. 0 when closed.
   useEffect(() => {
-    document.body.classList.toggle('catalog-submenu-open', catalogOpen)
-    return () => document.body.classList.remove('catalog-submenu-open')
+    if (!catalogOpen || !submenuRef.current) {
+      document.body.style.removeProperty('--submenu-h')
+      return
+    }
+    // Publish the submenu's real height, but commit the start value (0) with a
+    // forced reflow first so the dependent `top`/`height` transitions have a
+    // distinct start state to animate from — otherwise they snap to the end.
+    const h = submenuRef.current.scrollHeight
+    document.body.style.setProperty('--submenu-h', '0px')
+    void document.body.offsetWidth // flush the 0 state
+    document.body.style.setProperty('--submenu-h', `${h}px`)
+    return () => document.body.style.removeProperty('--submenu-h')
   }, [catalogOpen])
 
   useEffect(() => {
@@ -56,7 +69,7 @@ export default function Nav() {
       <ul className="nav-links">
         <li className={`nav-item nav-item--has-submenu${catalogOpen ? ' nav-item--submenu-open' : ''}`}>
           <NavLink to="/catalog" onClick={onCatalogClick} aria-haspopup="true" aria-expanded={catalogOpen} className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>Catalog</NavLink>
-          <ul className="nav-submenu">
+          <ul className="nav-submenu" ref={submenuRef}>
             {fonts.map(font => (
               <li key={font.id}>
                 <NavLink to={`/catalog/${font.id}`} onClick={close} className={({ isActive }) => 'nav-link nav-sublink' + (isActive ? ' active' : '')}>

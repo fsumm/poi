@@ -145,6 +145,10 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
   const previewStyle = { fontFamily, fontVariationSettings }
   const gridStyle = (fontFeatureSettings) => ({ fontFamily, fontVariationSettings, fontFeatureSettings })
 
+  const activeEntry = hovered ?? selected[selected.length - 1] ?? null
+  const activeChar = activeEntry?.char ?? firstChar
+  const activeFeatures = activeEntry?.fontFeatureSettings ?? 'normal'
+
   const pills = hasInstances ? instances : hasMultiStyle ? fontStyles : []
 
   return (
@@ -165,6 +169,7 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
                     style={{
                       fontFamily: entry.fontFamily,
                       fontVariationSettings: entry.fontVariationSettings,
+                      fontFeatureSettings: entry.fontFeatureSettings,
                       opacity: Math.max(0, 1 - age * 0.04),
                       filter: `blur(${age + 1}px)`,
                     }}
@@ -173,8 +178,11 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
                   </span>
                 )
               })}
-              <span className="glyph-overview__preview-char">
-                {hovered ?? selected[selected.length - 1]?.char ?? firstChar}
+              <span
+                className="glyph-overview__preview-char"
+                style={{ fontFeatureSettings: activeFeatures }}
+              >
+                {activeChar}
               </span>
             </div>
             {pills.length > 1 && (
@@ -208,9 +216,9 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
                     <div
                       key={i}
                       className={`glyph-overview__cell${selected[selected.length - 1]?.char === char ? ' selected' : ''}`}
-                      onMouseEnter={() => setHovered(char)}
+                      onMouseEnter={() => setHovered({ char, fontFeatureSettings })}
                       onMouseLeave={() => setHovered(null)}
-                      onClick={() => setSelected(prev => [...prev, { char, fontFamily, fontVariationSettings }])}
+                      onClick={() => setSelected(prev => [...prev, { char, fontFamily, fontVariationSettings, fontFeatureSettings }])}
                     >
                       <span>{char}</span>
                     </div>

@@ -254,9 +254,8 @@ button { cursor: pointer; }
 
 .nav-link.active { }
 
-/* Open submenu publishes its height so the backdrop and sticky page items below
-   can account for it. Matches the .nav-submenu max-height target. */
-body.catalog-submenu-open { --submenu-h: 140px; }
+/* --submenu-h (the open submenu's real rendered height) is published on <body>
+   from JS when the menu opens; the backdrop and sticky page items offset by it. */
 
 /* ── Catalog submenu (desktop/tablet, click-toggled) ────────────────────────
    In-flow under the Catalog label, stacked within its column (col 3). Opening
@@ -1481,6 +1480,16 @@ body.catalog-submenu-open { --submenu-h: 140px; }
 .page-anim--entering > *:not(.catalog-page) > *:nth-child(4)  { transition-delay: 450ms; }
 .page-anim--entering > *:not(.catalog-page) > *:nth-child(5)  { transition-delay: 600ms; }
 .page-anim--entering > *:not(.catalog-page) > *:nth-child(6)  { transition-delay: 750ms; }
+
+/* The enter rule above sets `transition: opacity` on every direct child of the
+   page root, which clobbers the buy bar's `top` transition (it's a direct child;
+   the glyph preview is nested deeper, so it's unaffected). Restore both here —
+   higher specificity, and after the nth-child delays so the offset animates with
+   no stagger delay — so the buy bar still slides clear of the open submenu. */
+.page-anim--entering > *:not(.catalog-page) > .font-detail-actions-sticky {
+  transition: top 0.4s cubic-bezier(.5, 0, .5, 1), opacity 0.4s linear;
+  transition-delay: 0s;
+}
 
 .page-anim--entering .catalog-hero,
 .page-anim--entering .catalog-grid > * {
