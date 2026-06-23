@@ -214,48 +214,10 @@ function SliderControl({ label, min, max, step = 1, value, onChange }) {
 
 // ── OT Features panel ─────────────────────────────────────────────────────────
 
-// Uses direct DOM style manipulation instead of React state to avoid React 18
-// automatic batching, which would merge the two height assignments needed to
-// trigger a CSS height transition.
-function FeaturesPanel({ features, enabled, onToggle, open }) {
-  const ref = useRef(null)
-  const isFirstRender = useRef(true)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      el.style.height = open ? 'auto' : '0px'
-      el.style.overflow = open ? 'visible' : 'hidden'
-      return
-    }
-
-    if (open) {
-      el.style.overflow = 'hidden'
-      el.style.transition = 'none'
-      el.style.height = '0px'
-      el.getBoundingClientRect() // force reflow so browser sees the 0px start
-      el.style.transition = 'height 0.3s ease-out'
-      el.style.height = el.scrollHeight + 'px'
-      const t = setTimeout(() => {
-        el.style.height = 'auto'
-        el.style.overflow = 'visible'
-      }, 320)
-      return () => clearTimeout(t)
-    } else {
-      el.style.overflow = 'hidden'
-      el.style.transition = 'none'
-      el.style.height = el.scrollHeight + 'px'
-      el.getBoundingClientRect() // force reflow so browser sees the current height
-      el.style.transition = 'height 0.3s ease-out'
-      el.style.height = '0px'
-    }
-  }, [open])
-
+function FeaturesPanel({ features, enabled, onToggle }) {
   return (
-    <div ref={ref} style={{ height: 0, overflow: 'hidden' }}>
+    <div className="tt-features">
+      <div className="tt-features-heading">OpenType Features</div>
       <div className="tt-features-grid">
         {features.map(feat => (
           <button
@@ -292,7 +254,6 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
   const [tracking, setTracking] = useState(0)
   const [enabledFeatures, setEnabledFeatures] = useState(new Set())
   const [axisValues, setAxisValues] = useState({})
-  const [featuresOpen, setFeaturesOpen] = useState(false)
 
   const containerRef = useRef(null)
   // Uncontrolled ref for the contenteditable — React never sets its children,
@@ -375,7 +336,7 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
     })
   }
 
-  if (!styles || !fontLoaded) return <div className="tt-loading" />
+  if (!styles || !fontLoaded) return <div className="tt-loading" data-anim-pending />
 
   const hasAxes = (style?.variableAxes?.length ?? 0) > 0
   const hasFeatures = features.length > 0
@@ -398,7 +359,10 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
   }
 
   return (
-    <div className="tt">
+    // Keep gating the page-enter animation until autofit has measured the text
+    // (fontSize is null until then, when the text renders at 0px). This carries
+    // the [data-anim-pending] gate seamlessly on from the loading placeholder.
+    <div className="tt" data-anim-pending={fontSize == null ? '' : undefined}>
       {/* ── Text area ───────────────────────────────────────── */}
       <div className="tt-text-wrap" ref={containerRef}>
         <div
@@ -476,17 +440,6 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
           ))}
         </div>
       </div>
-
-        {/* OpenType Features toggle — own row below sliders */}
-        {hasFeatures && (
-          <button
-            className={`tt-features-btn${featuresOpen ? ' active' : ''}`}
-            type="button"
-            onClick={() => setFeaturesOpen(o => !o)}
-          >
-            OpenType Features
-          </button>
-        )}
       </div>
 
       {/* ── OT Features panel ────────────────────────────────── */}
@@ -495,7 +448,6 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
           features={features}
           enabled={enabledFeatures}
           onToggle={toggleFeature}
-          open={featuresOpen}
         />
       )}
     </div>

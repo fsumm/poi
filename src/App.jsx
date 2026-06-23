@@ -13,6 +13,8 @@ import About from './pages/About.jsx'
 import Contact from './pages/Contact.jsx'
 import Newsletter from './pages/Newsletter.jsx'
 import Trials from './pages/Trials.jsx'
+import License from './pages/License.jsx'
+import Privacy from './pages/Privacy.jsx'
 
 const STORE_URL = 'https://store.poi.tf'
 
@@ -66,6 +68,8 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/newsletter" element={<Newsletter />} />
             <Route path="/trials" element={<Trials />} />
+            <Route path="/license" element={<License />} />
+            <Route path="/privacy" element={<Privacy />} />
           </AnimatedRoutes>
         </main>
         <Footer />

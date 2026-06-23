@@ -1,0 +1,22 @@
+{
+  "name": "Place of Interest",
+  "short_name": "POI",
+  "icons": [
+    {
+      "src": "/poi/favicons/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/poi/favicons/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "theme_color": "#ededeb",
+  "background_color": "#ededeb",
+  "display": "standalone",
+  "start_url": "/poi/"
+}

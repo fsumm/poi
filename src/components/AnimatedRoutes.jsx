@@ -11,18 +11,19 @@ export default function AnimatedRoutes({ children }) {
   const wrapperRef = useRef(null)
   const timerRef = useRef(null)
 
-  const startEnter = () => {
+  // Run the enter sequence once the displayed page's DOM has committed. Keying
+  // on displayLocation (not calling startEnter inline) guarantees the new
+  // page — and any [data-anim-pending] gate it renders, e.g. the type tester
+  // loading placeholder — is in the DOM before waitUntilReady inspects it.
+  // Otherwise the readiness check races the React commit and resolves early,
+  // letting the page fade in before async content has rendered.
+  useEffect(() => {
     waitUntilReady(wrapperRef.current).then(() => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => setPhase('entering'))
       })
     })
-  }
-
-  // Initial page load
-  useEffect(() => {
-    startEnter()
-  }, [])
+  }, [displayLocation])
 
   useEffect(() => {
     if (location.key === displayLocation.key) return
@@ -33,7 +34,6 @@ export default function AnimatedRoutes({ children }) {
     timerRef.current = setTimeout(() => {
       setDisplayLocation(location)
       setPhase('idle')
-      startEnter()
     }, EXIT_DURATION)
 
     return () => clearTimeout(timerRef.current)

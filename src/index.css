@@ -92,7 +92,7 @@
   font-family: 'POI Orbiter';
   src: url('../fonts/poi-orbiter/POIOrbiter[slnt,wght].woff2') format('woff2-variations');
   font-weight: 400 900;
-  font-style: normal oblique -15deg 0deg;
+  font-style: normal oblique -12deg 0deg;
   font-display: swap;
 }
 
@@ -155,7 +155,7 @@ button { cursor: pointer; }
   min-height: 100dvh;
 }
 
-.main { flex: 1; }
+.main { flex: 1; margin-top: 12px;}
 
 .nav,
 .main,
@@ -270,6 +270,8 @@ button { cursor: pointer; }
 }
 
 .footer-link:hover { opacity: 0.6; }
+
+.footer-link--instagram:hover { cursor: alias; }
 
 .footer-copy {
   grid-column: 11 / 13;
@@ -629,6 +631,50 @@ button { cursor: pointer; }
   aspect-ratio: 3 / 4;
 }
 
+/* ─── Legal docs (License, Privacy) ──────────────────────────────────────── */
+
+.legal-page {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--gap);
+  margin-bottom: 64px;
+}
+
+/* Text occupies 6 of the 12 desktop columns (and 6 of 8 on tablet). */
+.legal-body {
+  grid-column: 1 / 7;
+}
+
+.legal-heading {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #171716;
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+
+.legal-heading:first-child {
+  margin-top: 0;
+}
+
+.legal-text {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: #171716;
+  margin-bottom: 12px;
+}
+
+.legal-list {
+  margin-bottom: 12px;
+  padding-left: 18px;
+}
+
+.legal-list .legal-text {
+  margin-bottom: 6px;
+}
+
 /* ─── Buttons ────────────────────────────────────────────────────────────── */
 
 .btn {
@@ -670,11 +716,11 @@ button { cursor: pointer; }
 .form-field {
   display: block;
   width: 220px;
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-radius: var(--radius-pill);
   background: var(--color-input);
   border: none;
-  font-size: inherit;
+  font-size: 12px;
   font-weight: 600;
   color: var(--color-text);
   outline: none;
@@ -690,7 +736,7 @@ button { cursor: pointer; }
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   user-select: none;
   margin-bottom: 8px;
@@ -949,7 +995,7 @@ button { cursor: pointer; }
 /* Text area */
 .tt-text-wrap {
   overflow: hidden;
-  padding: 24px var(--page-margin);
+  padding: 24px 0;
   min-height: 120px;
   cursor: text;
 }
@@ -967,7 +1013,7 @@ button { cursor: pointer; }
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px var(--page-margin);
+  padding: 12px 0;
   border-top: 1px solid var(--color-border);
 }
 
@@ -1097,37 +1143,23 @@ button { cursor: pointer; }
 }
 
 
-.tt-features-btn {
-  align-self: flex-start;
-  margin-bottom: 6px;
-  background: var(--gray-1);
-  border: none;
-  border-radius: 100px;
-  padding: 6px 14px;
+/* Features panel */
+.tt-features {
+  padding-bottom: 12px;
+}
+
+.tt-features-heading {
   font-size: 12px;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 150ms, color 150ms;
   white-space: nowrap;
-  font-family: inherit;
-  color: inherit;
+  color: var(--color-muted);
 }
 
-.tt-features-btn:hover {
-  background: var(--gray-2);
-}
-
-.tt-features-btn.active {
-  background: var(--ink-black);
-  color: #fff;
-}
-
-/* Features panel */
 .tt-features-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 24px;
-  padding: 10px var(--page-margin) 20px;
+  padding: 6px 0 0;
 }
 
 .tt-feature-item {
@@ -1139,7 +1171,7 @@ button { cursor: pointer; }
   cursor: pointer;
   padding: 4px 0;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1344,6 +1376,7 @@ button { cursor: pointer; }
   .catalog-grid,
   .font-detail,
   .page-grid,
+  .legal-page,
   .glyph-overview__body,
   .about-secondary {
     grid-template-columns: repeat(8, 1fr);
@@ -1380,10 +1413,14 @@ button { cursor: pointer; }
   .catalog-grid,
   .font-detail,
   .page-grid,
+  .legal-page,
   .glyph-overview__body,
   .about-secondary {
     grid-template-columns: repeat(4, 1fr);
   }
+
+  /* Legal docs — text fills all 4 mobile columns */
+  .legal-body { grid-column: 1 / 5; }
 
   /* ── Nav → "Menu" toggle sits right of the logo; Cart pinned far right ── */
   .nav { display: flex; align-items: center; }

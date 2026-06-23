@@ -461,7 +461,7 @@ input:checked + .checkbox__icon {
   background: var(--ink-black);
 }
 
-/* Close button — same radio circle style as license delete */
+/* Close button — "Close" text styled like the main nav links */
 .store-modal__container__container .store-modal__container__close-button .icon {
   display: none;
 }
@@ -469,24 +469,23 @@ input:checked + .checkbox__icon {
   background: none;
   border: none;
   padding: 0;
-  width: 20px;
-  height: 20px;
   flex-shrink: 0;
   cursor: pointer;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 600;
+  /* Use the font's natural line box (not a tight 20px) so the generated
+     ::before text gets the same inline box as the real-text nav links,
+     keeping the baseline on the same sub-pixel row across Chrome/Safari. */
+  line-height: normal;
+  transition: opacity 0.12s;
 }
 .store-modal__container__container .store-modal__container__close-button::before {
-  content: '';
-  display: inline-flex;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 6px solid #0ADD70;
-  background: #fff;
-  box-sizing: border-box;
-  transition: background 150ms;
+  content: 'Close';
 }
-.store-modal__container__container .store-modal__container__close-button:hover::before {
-  background: var(--ink-black);
+.store-modal__container__container .store-modal__container__close-button:hover {
+  opacity: 0.6;
 }
 
 /* Nav bar matching site nav */
