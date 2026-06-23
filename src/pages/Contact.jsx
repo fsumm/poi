@@ -1,4 +1,5 @@
 import contact001 from '../../img/contact001.jpg'
+import CopyEmailButton from '../components/CopyEmailButton'
 
 export default function Contact() {
   return (
@@ -11,9 +12,7 @@ export default function Contact() {
             We're open for custom projects, collaborations, and modifications to
             the catalog. Have a font ready for retail release? We'd love to see that too.
           </p>
-          <a className="btn btn-dark" href="mailto:hello@poi.tf">
-            hello@poi.tf
-          </a>
+          <CopyEmailButton email="hello@poi.tf" />
         </div>
       </div>
     </div>

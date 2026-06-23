@@ -11,6 +11,9 @@ import GlyphOverview from '../components/GlyphOverview.jsx'
 import TypeTester from '../components/TypeTester.jsx'
 import { getFontById } from '../data/fonts.js'
 import { makeOverlay } from '../overlayText.js'
+import { useFitText } from '../useFitText.js'
+
+const SPECIMEN_TRACKING = -0.04 // -4% letter-spacing, expressed in em
 
 class SectionErrorBoundary extends Component {
   state = { error: null }
@@ -35,12 +38,17 @@ export default function FontDetail() {
   const { fontId } = useParams()
   const font = getFontById(fontId)
 
-  // Hook must run unconditionally (before the early return below)
+  const ff = fontFamily(fontId)
+
+  // Hooks must run unconditionally (before the early return below)
   const overlay = useMemo(() => (font ? makeOverlay(font) : null), [fontId])
+  const [specimenRef, specimenTextRef, specimenReady] = useFitText({
+    text: font?.displayName ?? '',
+    family: ff,
+    tracking: SPECIMEN_TRACKING,
+  })
 
   if (!font) return <Navigate to="/catalog" replace />
-
-  const ff = fontFamily(fontId)
 
   return (
     <div className="font-detail">
@@ -50,15 +58,20 @@ export default function FontDetail() {
           <span className="catalog-card-text" style={overlay.style}>{overlay.text}</span>
         </div>
 
-        <div className="font-detail-meta">
-          <div className="font-detail-breadcrumb">{font.displayName}</div>
-
-          <div
-            className="font-detail-specimen"
-            style={{ fontFamily: ff, fontWeight: 400 }}
+        <div
+          className="font-detail-specimen"
+          ref={specimenRef}
+          data-anim-pending={specimenReady ? undefined : ''}
+        >
+          {/* fontSize / marginLeft / --baseline-shift are written imperatively
+              by useFitText so the fit tracks resizes without a render delay. */}
+          <span
+            className="font-detail-specimen-text"
+            ref={specimenTextRef}
+            style={{ fontFamily: ff, fontWeight: 400, visibility: specimenReady ? undefined : 'hidden' }}
           >
-            Aa
-          </div>
+            {font.displayName}
+          </span>
         </div>
 
         <p className="font-detail-description">{font.description}</p>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { fonts } from '../data/fonts.js'
 import { openCart } from '../fontdueCart.js'
@@ -6,25 +6,42 @@ import { openCart } from '../fontdueCart.js'
 export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [catalogOpen, setCatalogOpen] = useState(false)
+  const navRef = useRef(null)
   const close = () => {
     setMenuOpen(false)
     setCatalogOpen(false)
   }
 
-  // On the mobile dropdown (≤580px) tapping "Catalog" reveals the submenu
-  // instead of navigating. On desktop/tablet the submenu is hover-driven, so
-  // the link behaves normally.
+  // The Catalog submenu is click-toggled on every viewport (clicking the label
+  // opens/closes it rather than navigating). Closes on outside click or Escape.
   const onCatalogClick = (e) => {
-    if (window.matchMedia('(max-width: 580px)').matches) {
-      e.preventDefault()
-      setCatalogOpen(v => !v)
-    } else {
-      close()
-    }
+    e.preventDefault()
+    setCatalogOpen(v => !v)
   }
 
+  // Flag the open submenu on <body> so its height (--submenu-h) is readable by
+  // both the nav's frosted backdrop and the sticky items in the page below it.
+  useEffect(() => {
+    document.body.classList.toggle('catalog-submenu-open', catalogOpen)
+    return () => document.body.classList.remove('catalog-submenu-open')
+  }, [catalogOpen])
+
+  useEffect(() => {
+    if (!catalogOpen) return
+    const onDocPointer = (e) => {
+      if (navRef.current && !navRef.current.contains(e.target)) setCatalogOpen(false)
+    }
+    const onKey = (e) => { if (e.key === 'Escape') setCatalogOpen(false) }
+    document.addEventListener('mousedown', onDocPointer)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDocPointer)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [catalogOpen])
+
   return (
-    <nav className={`nav${menuOpen ? ' nav--open' : ''}`}>
+    <nav ref={navRef} className={`nav${menuOpen ? ' nav--open' : ''}`}>
       <NavLink to="/" className="nav-logo" aria-label="Place of Interest" onClick={close}>
         ⌘
       </NavLink>
@@ -38,7 +55,7 @@ export default function Nav() {
       </button>
       <ul className="nav-links">
         <li className={`nav-item nav-item--has-submenu${catalogOpen ? ' nav-item--submenu-open' : ''}`}>
-          <NavLink to="/catalog" onClick={onCatalogClick} className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>Catalog</NavLink>
+          <NavLink to="/catalog" onClick={onCatalogClick} aria-haspopup="true" aria-expanded={catalogOpen} className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>Catalog</NavLink>
           <ul className="nav-submenu">
             {fonts.map(font => (
               <li key={font.id}>

@@ -1,5 +1,6 @@
 import about001 from '../../img/about001.jpg'
 import about002 from '../../img/about002.jpg'
+import CopyEmailButton from '../components/CopyEmailButton'
 
 export default function About() {
   return (
@@ -13,9 +14,7 @@ export default function About() {
             It was founded in 2024 by Felix Summ after years of drawing self-initiated
             typefaces. Get in touch for custom inquiries or to submit a font to the catalog.
           </p>
-          <a className="btn btn-dark" href="mailto:hello@poi.tf">
-            hello@poi.tf
-          </a>
+          <CopyEmailButton email="hello@poi.tf" />
         </div>
       </div>
 

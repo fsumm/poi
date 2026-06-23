@@ -91,7 +91,7 @@ export default function Trials() {
 
               <label className="form-toggle" onClick={() => setEulaAgreed(v => !v)}>
                 <span className={`form-toggle-dot${eulaAgreed ? ' checked' : ''}`} />
-                I agree to the trial license terms
+                I agree to the EULA
               </label>
 
               <label className="form-toggle" onClick={() => setNewsletterOptIn(v => !v)}>
