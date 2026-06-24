@@ -52,7 +52,7 @@ export const fonts = [
     catalogAspect: '3/4',
     defaultWeight: 100,
     fontdueSlug: 'poi-carbonic',
-    fontdueCollectionId: 'Rm9udENvbGxlY3Rpb246MjAwMDYzNDM2ODM2ODYzMzk4Mw==',
+    fontdueCollectionId: 'Rm9udENvbGxlY3Rpb246MjAwMDYzNDY2ODA5MzU5Nzg1OQ==',
     defaultStyleName: 'Thin',
   },
   {
@@ -74,7 +74,7 @@ export const fonts = [
     defaultText: 'Orbiter',
     catalogAspect: '3/4',
     fontdueSlug: 'poi-orbiter',
-    fontdueCollectionId: 'Rm9udENvbGxlY3Rpb246MjAxMjY3MzIyODE5NTgxNzcyMg==',
+    fontdueCollectionId: 'Rm9udENvbGxlY3Rpb246MjAxMjY3MzU4NjI0Njc3MzAxNA==',
   },
   {
     id: 'diode',
