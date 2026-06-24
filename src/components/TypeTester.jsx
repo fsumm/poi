@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react'
 
 const STORE_URL = 'https://store.poi.tf/graphql'
 
@@ -122,17 +122,85 @@ function useFontFace(cssFamily, webfontSources, cssWeight, cssStyle) {
   return loaded
 }
 
-// Default font size (px) for the tester text; adjusted via the Size slider.
+// Fallback font size (px) shown only before the first autofit measurement.
 const DEFAULT_FONT_SIZE = 120
+
+// ── Autofit ───────────────────────────────────────────────────────────────────
+// While `enabled`, scales the font size so the text fills the container width,
+// re-measuring as the text / features / axes / tracking / viewport change. The
+// measurement uses a hidden span at a fixed 100px reference (independent of the
+// resulting fontSize) so there's no feedback loop. Disabled the moment the user
+// sets the size manually; re-enabled only on a fresh mount (navigation/refresh).
+function useAutofit(containerRef, setFontSize, opts) {
+  const { enabled, fontLoaded, fontFamily, fontWeight, fontStyle,
+          featureSettings, variationSettings, tracking, text } = opts
+  const measureRef = useRef(null)
+
+  useEffect(() => {
+    const span = document.createElement('span')
+    span.style.cssText = 'position:fixed;top:-9999px;left:-9999px;white-space:nowrap;visibility:hidden;font-size:100px'
+    document.body.appendChild(span)
+    measureRef.current = span
+    return () => span.remove()
+  }, [])
+
+  const fit = useCallback(() => {
+    const container = containerRef.current
+    const span = measureRef.current
+    if (!enabled || !container || !span || !fontLoaded || !fontFamily) return
+    span.style.fontFamily = `"${fontFamily}", sans-serif`
+    span.style.fontWeight = fontWeight ?? 400
+    span.style.fontStyle = fontStyle ?? 'normal'
+    span.style.fontFeatureSettings = featureSettings || 'normal'
+    span.style.fontVariationSettings = variationSettings || 'normal'
+    span.style.letterSpacing = `${tracking ?? 0}em`
+    // Multi-line text (the user pressed Enter) must fill the width based on its
+    // WIDEST line, not the lines concatenated — otherwise the size shrinks far
+    // too small. innerText carries the line breaks as "\n".
+    const lines = String(text || ' ').split('\n')
+    let textW = 0
+    for (const line of lines) {
+      span.textContent = line.length ? line : ' '
+      if (span.offsetWidth > textW) textW = span.offsetWidth
+    }
+    const containerW = container.clientWidth
+    if (!textW || !containerW) return
+    setFontSize(Math.min(900, Math.max(12, Math.floor((containerW / textW) * 100))))
+  }, [enabled, fontLoaded, fontFamily, fontWeight, fontStyle, featureSettings, variationSettings, tracking, text])
+
+  // useLayoutEffect runs before paint, so load / style change / typing never
+  // flash a stale size.
+  useLayoutEffect(() => { fit() }, [fit])
+
+  // Re-fit on viewport / container width changes — debounced so a window drag
+  // doesn't re-measure and reflow the (large, overflowing) text every frame,
+  // which was causing noticeable resize lag. Fits once the resize settles.
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container || !enabled) return
+    let t
+    const ro = new ResizeObserver(() => {
+      clearTimeout(t)
+      t = setTimeout(fit, 150)
+    })
+    ro.observe(container)
+    return () => { ro.disconnect(); clearTimeout(t) }
+  }, [fit, enabled])
+}
 
 // ── Slider with value pill ────────────────────────────────────────────────────
 
 function SliderControl({ label, min, max, step = 1, value, onChange }) {
   const [draft, setDraft] = useState(null) // null = not editing
+  // Decimal places implied by the step (e.g. step 0.1 → 1 decimal) so fractional
+  // controls like Line Height display "1.1" instead of being rounded to "1".
+  const decimals = (String(step).split('.')[1] || '').length
+  const clamp = v => Math.min(max, Math.max(min, v))
+  const fmt = v => Number(v).toFixed(decimals)
 
   function commit(str) {
     const raw = Number(str)
-    if (!isNaN(raw) && str.trim() !== '') onChange(Math.min(max, Math.max(min, raw)))
+    if (!isNaN(raw) && str.trim() !== '') onChange(clamp(raw))
     setDraft(null)
   }
 
@@ -142,31 +210,32 @@ function SliderControl({ label, min, max, step = 1, value, onChange }) {
       <input
         type="number"
         className="tt-slider-value"
-        value={draft ?? Math.round(value)}
+        step={step}
+        value={draft ?? fmt(value)}
         onChange={e => setDraft(e.target.value)}
-        onFocus={e => { setDraft(String(Math.round(value))); e.target.select() }}
+        onFocus={e => { setDraft(fmt(value)); e.target.select() }}
         onBlur={e => commit(e.target.value)}
         onKeyDown={e => {
           if (e.key === 'Enter') { e.target.blur(); return }
           if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-            // Shift + arrow steps by 10 (otherwise the native input steps by 1)
+            // Shift + arrow steps by 10× the step (otherwise it steps by one step)
             if (e.shiftKey) {
               e.preventDefault()
               const base = Number(e.target.value)
               if (!isNaN(base)) {
-                const delta = e.key === 'ArrowUp' ? 10 : -10
-                const clamped = Math.min(max, Math.max(min, base + delta))
-                setDraft(String(clamped))
-                onChange(clamped)
+                const delta = (e.key === 'ArrowUp' ? 1 : -1) * step * 10
+                const next = clamp(Number((base + delta).toFixed(decimals)))
+                setDraft(fmt(next))
+                onChange(next)
               }
               return
             }
             setTimeout(() => {
               const raw = Number(e.target.value)
               if (!isNaN(raw)) {
-                const clamped = Math.min(max, Math.max(min, raw))
-                setDraft(String(clamped))
-                onChange(clamped)
+                const next = clamp(Number(raw.toFixed(decimals)))
+                setDraft(fmt(next))
+                onChange(next)
               }
             }, 0)
           }
@@ -225,9 +294,13 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
   // Tracks the tester content so it can be restored when the style changes
   const [text, setText] = useState('')
   const [tracking, setTracking] = useState(0)
+  const [lineHeight, setLineHeight] = useState(1.1)
   const [enabledFeatures, setEnabledFeatures] = useState(new Set())
   const [axisValues, setAxisValues] = useState({})
-  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE)
+  const [fontSize, setFontSize] = useState(null)
+  // Text fills the container by default; turns off once the user sets a size,
+  // and is only restored on a fresh mount (navigation / refresh).
+  const [autofit, setAutofit] = useState(true)
 
   const containerRef = useRef(null)
   // Uncontrolled ref for the contenteditable — React never sets its children,
@@ -275,33 +348,6 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
     }
   }, [fontLoaded])
 
-  // Once per load (and on style/font change) size the text to fill the container
-  // width. Measured with the style's default content, default-on features, and
-  // default axes at a 100px reference so the result matches the glyphs shown.
-  // useLayoutEffect runs before paint, so there's no flash of the default size.
-  useLayoutEffect(() => {
-    const container = containerRef.current
-    if (!fontLoaded || !style?.cssFamily || !container) return
-    const containerW = container.clientWidth
-    if (!containerW) return
-
-    const span = document.createElement('span')
-    span.style.cssText = 'position:fixed;top:-9999px;left:-9999px;white-space:nowrap;visibility:hidden;font-size:100px'
-    span.style.fontFamily = `"${style.cssFamily}", sans-serif`
-    span.style.fontWeight = style.cssWeight ?? 400
-    span.style.fontStyle = style.cssStyle ?? 'normal'
-    const feats = style.defaultFeatures ?? []
-    span.style.fontFeatureSettings = feats.length ? feats.map(t => `"${t}" 1`).join(', ') : 'normal'
-    const axes = (style.variableAxes ?? []).map(a => `"${a.axis}" ${axisDefault(a, defaultWeight)}`)
-    span.style.fontVariationSettings = axes.length ? axes.join(', ') : 'normal'
-    span.textContent = style.defaultContent || ' '
-    document.body.appendChild(span)
-    const textW = span.offsetWidth
-    span.remove()
-
-    if (textW) setFontSize(Math.min(900, Math.max(12, Math.floor((containerW / textW) * 100))))
-  }, [fontLoaded, style?.id])
-
   // Build feature list with human names from API
   const features = style ? (style.fontFeatures?.supportedFeatures ?? []).map(tag => {
     const apiName = style.fontFeatures?.stylisticSetNames?.find(s => s.featureName === tag)?.humanName
@@ -317,15 +363,28 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
     ? Object.entries(axisValues).map(([k, v]) => `"${k}" ${v}`).join(', ')
     : 'normal'
 
+  // Keep the text filling the container width until the user sets a size.
+  useAutofit(containerRef, setFontSize, {
+    enabled: autofit,
+    fontLoaded,
+    fontFamily: style?.cssFamily,
+    fontWeight: style?.cssWeight,
+    fontStyle: style?.cssStyle,
+    featureSettings: fontFeatureSettings,
+    variationSettings: fontVariationSettings,
+    tracking,
+    text,
+  })
+
   const textStyle = style ? {
     fontFamily: fontLoaded ? `"${style.cssFamily}", sans-serif` : 'sans-serif',
     fontWeight: style.cssWeight,
     fontStyle: style.cssStyle,
-    fontSize: `${fontSize}px`,
+    fontSize: fontSize ? `${fontSize}px` : '0px',
     letterSpacing: `${tracking}em`,
     fontFeatureSettings,
     fontVariationSettings,
-    lineHeight: 1.1,
+    lineHeight,
     // No letter-spacing transition: while dragging the tracking slider it would
     // animate (reflowing every frame), and with the now-visible overflowing text
     // each reflow is costly. Applying tracking instantly matches the Size slider.
@@ -372,7 +431,7 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
           contentEditable
           suppressContentEditableWarning
           spellCheck={false}
-          onInput={e => setText(e.currentTarget.textContent)}
+          onInput={e => setText(e.currentTarget.innerText)}
         />
       </div>
 
@@ -416,8 +475,8 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
           <SliderControl
             label="Size"
             min={12} max={900}
-            value={fontSize}
-            onChange={setFontSize}
+            value={fontSize ?? DEFAULT_FONT_SIZE}
+            onChange={v => { setAutofit(false); setFontSize(v) }}
           />
 
           {/* Tracking slider */}
@@ -426,6 +485,14 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
             min={-100} max={100} step={1}
             value={Math.round(tracking * 1000)}
             onChange={v => setTracking(v / 1000)}
+          />
+
+          {/* Line height slider */}
+          <SliderControl
+            label="Line Height"
+            min={0.5} max={1.5} step={0.1}
+            value={lineHeight}
+            onChange={setLineHeight}
           />
 
           {/* Variable axes */}
