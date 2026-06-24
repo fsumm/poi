@@ -1280,6 +1280,12 @@ body[data-fontdue-store-modal=open] {
   animation: poi-slide-out 280ms ease-in forwards;
 }
 
+/* Slide out when the user navigates away while the modal is open */
+body[data-page-phase=exiting] .trial-modal__panel {
+  animation: poi-slide-out 280ms ease-in forwards;
+  animation-delay: 200ms;
+}
+
 /* Nav bar matching the cart modal nav: close button pinned to the right */
 .trial-modal__nav {
   display: flex;

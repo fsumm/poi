@@ -21,7 +21,7 @@ export default function About() {
       <div className="about-secondary">
         <div className="about-secondary-img" style={{ backgroundImage: `url(${about002})` }} />
         <div className="about-secondary-body">
-          <div className="about-secondary-label">⌘?</div>
+          <div className="page-section-label">⌘?</div>
           <p className="about-secondary-text">
             The oldest recorded ⌘ is 1,600 years old and was discovered in Sweden.
           </p>
@@ -33,7 +33,6 @@ export default function About() {
             To be a place of interest—in art, culture, and design—is the guiding
             principle of the foundry.
           </p>
-          <p className="about-caption">⌘ in use on the design of the Finnish penni</p>
         </div>
       </div>
     </div>

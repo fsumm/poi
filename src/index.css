@@ -114,9 +114,18 @@ html[data-resizing] *::after {
 }
 
 :root {
+  --gray-1: #ededeb;
+  --gray-2: #d8d8d6;
+  --gray-3: #babab9;
+  --gray-4: #a6a6a4;
+  --gray-5: #686866;
+  --ink-black: #171716;
+  --poi-blue: #2e5bff;
+  --yellow: #e9ff15;
+
   --color-bg: #ffffff;
   --color-text: #171716;
-  --color-muted: #888888;
+  --color-muted: #686868;
   --color-placeholder: #d9d9d9;
   --color-input: #f0f0f0;
   --color-dark: #171716;
@@ -263,16 +272,16 @@ button { cursor: pointer; }
    in normal flow this also pushes the page content down (at the top of scroll).
    Items below that are sticky (pinned under the bar) are offset separately via
    --submenu-h so the open panel never covers them when scrolled. */
+/* Two rows: an 84px bar row holding the Catalog label, then the submenu row.
+   A grid (rather than a tall flex link) keeps the label centered in the bar in
+   both states while leaving the link itself natural height — so its hit area is
+   just the text, matching the other nav items. */
 .nav-links > .nav-item--has-submenu {
-  flex-direction: column;
-  align-items: flex-start;
-  height: auto;
-}
-
-.nav-item--has-submenu > .nav-link {
-  height: var(--nav-h);
-  display: flex;
+  display: grid;
+  grid-template-rows: var(--nav-h) auto;
   align-items: center;
+  justify-items: start;
+  height: auto;
 }
 
 .nav-submenu {
@@ -779,8 +788,9 @@ button { cursor: pointer; }
 }
 
 .page-section-label {
+  font-size: var(--font-size-sm);
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
 }
 
 .page-text {
@@ -846,7 +856,7 @@ button { cursor: pointer; }
   justify-content: center;
   padding: 8px 20px;
   border-radius: var(--radius-pill);
-  font-size: inherit;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   transition: background 0.12s, color 0.12s;
   border: none;
@@ -955,6 +965,36 @@ button { cursor: pointer; }
   font-weight: 600;
   user-select: none;
   margin-bottom: 8px;
+}
+
+/* EULA toggle paired with a "View EULA" pill on the same row */
+.form-eula-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.form-eula-row .form-toggle {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.pill-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--gray-1);
+  color: var(--ink-black);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s;
+}
+.pill-link:hover {
+  background: var(--gray-2);
+  color: var(--ink-black);
 }
 
 .form-toggle-dot {
@@ -1760,10 +1800,9 @@ body[data-page-phase=entering] .footer {
   }
   .nav-sublink { font-size: var(--font-size-lg); }
 
-  /* Catalog row is a normal-height menu item (its link no longer fills the
-     nav-bar height the way the desktop bar item does). */
-  .nav-item--has-submenu > .nav-link {
-    height: auto;
+  /* Undo the desktop two-row grid so the Catalog row is a normal stacked menu
+     item (label, then submenu) at its natural height. */
+  .nav-links > .nav-item--has-submenu {
     display: block;
   }
 

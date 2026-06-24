@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { Link } from 'react-router-dom'
 
 const STORE_URL = 'https://store.poi.tf'
 
@@ -85,10 +86,13 @@ export default function TrialForm() {
             required
           />
 
-          <label className="form-toggle" onClick={() => setEulaAgreed(v => !v)}>
-            <span className={`form-toggle-dot${eulaAgreed ? ' checked' : ''}`} />
-            I agree to the EULA
-          </label>
+          <div className="form-eula-row">
+            <label className="form-toggle" onClick={() => setEulaAgreed(v => !v)}>
+              <span className={`form-toggle-dot${eulaAgreed ? ' checked' : ''}`} />
+              I agree to the EULA
+            </label>
+            <Link to="/license" className="pill-link">View EULA</Link>
+          </div>
 
           <label className="form-toggle" onClick={() => setNewsletterOptIn(v => !v)}>
             <span className={`form-toggle-dot${newsletterOptIn ? ' checked' : ''}`} />
