@@ -115,6 +115,10 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
     if (lightIdx > 0) setSelectedStyleIdx(lightIdx)
   }, [collection, fallbackWeights])
 
+  useEffect(() => {
+    setSelected([])
+  }, [collectionSlug, collectionId])
+
 
   if (!collection) return <div className="glyph-overview-loading" />
 
