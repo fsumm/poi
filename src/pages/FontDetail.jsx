@@ -79,9 +79,13 @@ export default function FontDetail() {
         <p className="font-detail-description">{font.description}</p>
       </div>
 
-      {/* ── Type tester ──────────────────────────────────────────── */}
+      {/* ── Type tester ──────────────────────────────────────────────
+          key={fontId} forces a fresh mount per font so tester state (size,
+          tracking, line height, autofit) resets on navigation rather than
+          persisting from the previously viewed font. */}
       <div className="fontdue-section">
         <TypeTester
+          key={fontId}
           collectionSlug={font.fontdueSlug}
           collectionId={font.fontdueCollectionId}
           defaultStyleName={font.defaultStyleName}

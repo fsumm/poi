@@ -490,7 +490,7 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
           {/* Line height slider */}
           <SliderControl
             label="Line Height"
-            min={0.5} max={1.5} step={0.1}
+            min={0.5} max={1.5} step={0.01}
             value={lineHeight}
             onChange={setLineHeight}
           />
