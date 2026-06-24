@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 
 const STORE_URL = 'https://store.poi.tf/graphql'
 
@@ -41,7 +41,7 @@ const QUERY_BY_SLUG = `query POITypeTesterBySlug($slug: String!) {
     slug(name: $slug) {
       collection: fontCollection {
         typeTesters(first: 999) {
-          edges { node { content fontStyle { ${FONT_STYLE_FIELDS} } } }
+          edges { node { content featureSettings { feature value } fontStyle { ${FONT_STYLE_FIELDS} } } }
         }
       }
     }
@@ -52,7 +52,7 @@ const QUERY_BY_ID = `query POITypeTesterById($id: ID!) {
   node(id: $id) {
     ... on FontCollection {
       typeTesters(first: 999) {
-        edges { node { content fontStyle { ${FONT_STYLE_FIELDS} } } }
+        edges { node { content featureSettings { feature value } fontStyle { ${FONT_STYLE_FIELDS} } } }
       }
     }
   }
@@ -67,7 +67,11 @@ function parseEdges(edges) {
     const fs = node?.fontStyle
     if (!fs || seen.has(fs.id)) continue
     seen.add(fs.id)
-    result.push({ ...fs, defaultContent: node.content ?? 'Type something' })
+    // Features fontdue has turned on by default for this tester (value !== "0")
+    const defaultFeatures = (node.featureSettings ?? [])
+      .filter(s => s.value && s.value !== '0')
+      .map(s => s.feature)
+    result.push({ ...fs, defaultContent: node.content ?? 'Type something', defaultFeatures })
   }
   return result
 }
@@ -118,51 +122,8 @@ function useFontFace(cssFamily, webfontSources, cssWeight, cssStyle) {
   return loaded
 }
 
-// ── Autofit ───────────────────────────────────────────────────────────────────
-
-// Scales font size so text fills the container width.
-// Uses a hidden measurement span at a fixed reference size to avoid feedback loops.
-function useAutofit(containerRef, text, fontFamily, fontLoaded) {
-  const [fontSize, setFontSize] = useState(null)
-  const measureRef = useRef(null)
-
-  // Create / recycle the hidden measurement span
-  useEffect(() => {
-    const span = document.createElement('span')
-    span.style.cssText = [
-      'position:fixed', 'top:-9999px', 'left:-9999px',
-      'white-space:nowrap', 'font-size:100px', 'pointer-events:none', 'visibility:hidden',
-    ].join(';')
-    document.body.appendChild(span)
-    measureRef.current = span
-    return () => span.remove()
-  }, [])
-
-  const fit = useCallback(() => {
-    const container = containerRef.current
-    const span = measureRef.current
-    if (!container || !span || !fontLoaded || !fontFamily) return
-    span.style.fontFamily = `"${fontFamily}", sans-serif`
-    span.textContent = text || ' '
-    const textW = span.offsetWidth
-    const containerW = container.clientWidth
-    if (!textW || !containerW) return
-    const target = Math.floor((containerW / textW) * 100)
-    setFontSize(Math.min(300, Math.max(12, target)))
-  }, [text, fontFamily, fontLoaded])
-
-  useEffect(() => { fit() }, [fit])
-
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-    const ro = new ResizeObserver(fit)
-    ro.observe(container)
-    return () => ro.disconnect()
-  }, [fit])
-
-  return [fontSize, setFontSize]
-}
+// Default font size (px) for the tester text; adjusted via the Size slider.
+const DEFAULT_FONT_SIZE = 120
 
 // ── Slider with value pill ────────────────────────────────────────────────────
 
@@ -188,6 +149,18 @@ function SliderControl({ label, min, max, step = 1, value, onChange }) {
         onKeyDown={e => {
           if (e.key === 'Enter') { e.target.blur(); return }
           if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            // Shift + arrow steps by 10 (otherwise the native input steps by 1)
+            if (e.shiftKey) {
+              e.preventDefault()
+              const base = Number(e.target.value)
+              if (!isNaN(base)) {
+                const delta = e.key === 'ArrowUp' ? 10 : -10
+                const clamped = Math.min(max, Math.max(min, base + delta))
+                setDraft(String(clamped))
+                onChange(clamped)
+              }
+              return
+            }
             setTimeout(() => {
               const raw = Number(e.target.value)
               if (!isNaN(raw)) {
@@ -249,11 +222,12 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
   const styles = useFontData(collectionSlug, collectionId)
 
   const [selectedId, setSelectedId] = useState(null)
-  // text is used only for autofit measurement — never fed back into the DOM
+  // Tracks the tester content so it can be restored when the style changes
   const [text, setText] = useState('')
   const [tracking, setTracking] = useState(0)
   const [enabledFeatures, setEnabledFeatures] = useState(new Set())
   const [axisValues, setAxisValues] = useState({})
+  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE)
 
   const containerRef = useRef(null)
   // Uncontrolled ref for the contenteditable — React never sets its children,
@@ -275,6 +249,7 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
       const defaults = {}
       preferred.variableAxes?.forEach(a => { defaults[a.axis] = axisDefault(a, defaultWeight) })
       setAxisValues(defaults)
+      setEnabledFeatures(new Set(preferred.defaultFeatures ?? []))
     }
   }, [styles])
 
@@ -287,11 +262,10 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
     const defaults = {}
     style.variableAxes?.forEach(a => { defaults[a.axis] = axisDefault(a, defaultWeight) })
     setAxisValues(defaults)
-    setEnabledFeatures(new Set())
+    setEnabledFeatures(new Set(style.defaultFeatures ?? []))
   }, [style?.id])
 
   const fontLoaded = useFontFace(style?.cssFamily, style?.webfontSources, style?.cssWeight, style?.cssStyle)
-  const [fontSize, setFontSize] = useAutofit(containerRef, text ?? '', style?.cssFamily, fontLoaded)
 
   // The contenteditable ref is only available after fontLoaded triggers the full UI render.
   // Re-populate it here since the earlier effects ran while it was still null.
@@ -300,6 +274,33 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
       textAreaRef.current.textContent = text
     }
   }, [fontLoaded])
+
+  // Once per load (and on style/font change) size the text to fill the container
+  // width. Measured with the style's default content, default-on features, and
+  // default axes at a 100px reference so the result matches the glyphs shown.
+  // useLayoutEffect runs before paint, so there's no flash of the default size.
+  useLayoutEffect(() => {
+    const container = containerRef.current
+    if (!fontLoaded || !style?.cssFamily || !container) return
+    const containerW = container.clientWidth
+    if (!containerW) return
+
+    const span = document.createElement('span')
+    span.style.cssText = 'position:fixed;top:-9999px;left:-9999px;white-space:nowrap;visibility:hidden;font-size:100px'
+    span.style.fontFamily = `"${style.cssFamily}", sans-serif`
+    span.style.fontWeight = style.cssWeight ?? 400
+    span.style.fontStyle = style.cssStyle ?? 'normal'
+    const feats = style.defaultFeatures ?? []
+    span.style.fontFeatureSettings = feats.length ? feats.map(t => `"${t}" 1`).join(', ') : 'normal'
+    const axes = (style.variableAxes ?? []).map(a => `"${a.axis}" ${axisDefault(a, defaultWeight)}`)
+    span.style.fontVariationSettings = axes.length ? axes.join(', ') : 'normal'
+    span.textContent = style.defaultContent || ' '
+    document.body.appendChild(span)
+    const textW = span.offsetWidth
+    span.remove()
+
+    if (textW) setFontSize(Math.min(900, Math.max(12, Math.floor((containerW / textW) * 100))))
+  }, [fontLoaded, style?.id])
 
   // Build feature list with human names from API
   const features = style ? (style.fontFeatures?.supportedFeatures ?? []).map(tag => {
@@ -320,7 +321,7 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
     fontFamily: fontLoaded ? `"${style.cssFamily}", sans-serif` : 'sans-serif',
     fontWeight: style.cssWeight,
     fontStyle: style.cssStyle,
-    fontSize: fontSize ? `${fontSize}px` : '0px',
+    fontSize: `${fontSize}px`,
     letterSpacing: `${tracking}em`,
     fontFeatureSettings,
     fontVariationSettings,
@@ -361,10 +362,7 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
   }
 
   return (
-    // Keep gating the page-enter animation until autofit has measured the text
-    // (fontSize is null until then, when the text renders at 0px). This carries
-    // the [data-anim-pending] gate seamlessly on from the loading placeholder.
-    <div className="tt" data-anim-pending={fontSize == null ? '' : undefined}>
+    <div className="tt">
       {/* ── Text area ───────────────────────────────────────── */}
       <div className="tt-text-wrap" ref={containerRef}>
         <div
@@ -417,8 +415,8 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
           {/* Size slider */}
           <SliderControl
             label="Size"
-            min={12} max={300}
-            value={fontSize ?? 120}
+            min={12} max={900}
+            value={fontSize}
             onChange={setFontSize}
           />
 

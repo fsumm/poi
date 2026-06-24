@@ -29,14 +29,26 @@ export default function Nav() {
       document.body.style.removeProperty('--submenu-h')
       return
     }
-    // Publish the submenu's real height, but commit the start value (0) with a
-    // forced reflow first so the dependent `top`/`height` transitions have a
-    // distinct start state to animate from — otherwise they snap to the end.
-    const h = submenuRef.current.scrollHeight
-    document.body.style.setProperty('--submenu-h', '0px')
-    void document.body.offsetWidth // flush the 0 state
-    document.body.style.setProperty('--submenu-h', `${h}px`)
-    return () => document.body.style.removeProperty('--submenu-h')
+    const el = submenuRef.current
+    const publish = (animate) => {
+      if (animate) {
+        // Commit the start value (0) with a forced reflow first so the dependent
+        // `top`/`height` transitions have a distinct state to animate from —
+        // otherwise they snap straight to the end.
+        document.body.style.setProperty('--submenu-h', '0px')
+        void document.body.offsetWidth // flush the 0 state
+      }
+      document.body.style.setProperty('--submenu-h', `${el.scrollHeight}px`)
+    }
+    publish(true)
+    // If a webfont is still loading, the first measure used fallback metrics;
+    // re-measure once fonts settle and ease to the corrected value (no flush).
+    let cancelled = false
+    document.fonts?.ready.then(() => { if (!cancelled) publish(false) })
+    return () => {
+      cancelled = true
+      document.body.style.removeProperty('--submenu-h')
+    }
   }, [catalogOpen])
 
   useEffect(() => {

@@ -11,6 +11,11 @@ export default function AnimatedRoutes({ children }) {
   const wrapperRef = useRef(null)
   const timerRef = useRef(null)
 
+  // Mirror phase onto body so the footer (outside this wrapper) can react to it.
+  useEffect(() => {
+    document.body.dataset.pagePhase = phase
+  }, [phase])
+
   // Run the enter sequence once the displayed page's DOM has committed. Keying
   // on displayLocation (not calling startEnter inline) guarantees the new
   // page — and any [data-anim-pending] gate it renders, e.g. the type tester

@@ -278,7 +278,9 @@ button { cursor: pointer; }
 .nav-submenu {
   list-style: none;
   margin: 0;
-  padding: 0;
+  /* Extra breathing room beneath the list; counted in the measured height
+     (scrollHeight → --submenu-h) so the backdrop and sticky offsets follow. */
+  padding: 0 0 24px;
   width: max-content;
   display: flex;
   flex-direction: column;
@@ -287,9 +289,9 @@ button { cursor: pointer; }
   transition: max-height 0.4s cubic-bezier(.5,0,.5,1);
 }
 
-/* Target kept close to the real content height so the ease-out curve plays out
-   over the full slide rather than finishing early against a tall cap. */
-.nav-item--submenu-open .nav-submenu { max-height: 140px; }
+/* Target kept close to the real content height (items + bottom padding) so the
+   ease-out curve plays out over the full slide rather than finishing early. */
+.nav-item--submenu-open .nav-submenu { max-height: 164px; }
 
 /* Items fade + drift in (and out), staggered — matching the dropdown links */
 .nav-submenu > li {
@@ -1526,6 +1528,28 @@ button { cursor: pointer; }
 .page-anim--exiting .catalog-grid > *:nth-child(3) { transition-delay: 80ms; }
 .page-anim--exiting .catalog-grid > *:nth-child(4) { transition-delay: 120ms; }
 
+/* ─── Footer page transition ──────────────────────────────────────────────── */
+/* Mirrors the page-anim phase via data-page-phase on body (set by
+   AnimatedRoutes). Idle snaps to invisible with no transition so the enter
+   always starts from 0. */
+
+body:not([data-page-phase]) .footer,
+body[data-page-phase=idle] .footer {
+  opacity: 0;
+  transition: none;
+}
+
+body[data-page-phase=exiting] .footer {
+  opacity: 0;
+  transition: opacity 0.15s linear;
+}
+
+body[data-page-phase=entering] .footer {
+  opacity: 1;
+  transition: opacity 0.4s linear;
+  transition-delay: 500ms;
+}
+
 /* ─── Cart modal animations ──────────────────────────────────────────────── */
 
 .cart-anim--loading .store-modal__container__nav,
@@ -1710,6 +1734,8 @@ button { cursor: pointer; }
      the staggered per-item fade carry over from the base submenu rules. */
   .nav-submenu {
     width: auto;
+    /* No extra bottom padding here — that's a desktop-only flourish */
+    padding: 0;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 0 var(--gap);
