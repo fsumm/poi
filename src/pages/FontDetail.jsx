@@ -1,5 +1,5 @@
 import { useParams, Navigate } from 'react-router-dom'
-import { Suspense, Component, useMemo } from 'react'
+import { Suspense, Component, useMemo, useState } from 'react'
 import aeronaut001 from '../../img/aeronaut001.jpg'
 import carbonic001 from '../../img/carbonic001.jpg'
 import orbiter001 from '../../img/orbiter001.jpg'
@@ -9,6 +9,7 @@ const fontImages = { aeronaut: aeronaut001, carbonic: carbonic001, orbiter: orbi
 import BuyButton from 'fontdue-js/BuyButton'
 import GlyphOverview from '../components/GlyphOverview.jsx'
 import TypeTester from '../components/TypeTester.jsx'
+import TrialModal from '../components/TrialModal.jsx'
 import { getFontById } from '../data/fonts.js'
 import { makeOverlay } from '../overlayText.js'
 import { useFitText } from '../useFitText.js'
@@ -37,6 +38,7 @@ function fontFamily(id) {
 export default function FontDetail() {
   const { fontId } = useParams()
   const font = getFontById(fontId)
+  const [trialOpen, setTrialOpen] = useState(false)
 
   const ff = fontFamily(fontId)
 
@@ -94,14 +96,13 @@ export default function FontDetail() {
           Last in the DOM so the mobile sticky bar's natural flow position
           is the bottom of the content; desktop/tablet pin it via grid-row:1. */}
       <div className="font-detail-actions-sticky">
-        <a
+        <button
+          type="button"
           className="btn btn-dark"
-          href={`https://store.poi.tf/products/${font.fontdueSlug}?trial=true`}
-          target="_blank"
-          rel="noopener noreferrer"
+          onClick={() => setTrialOpen(true)}
         >
           Download Trial
-        </a>
+        </button>
         <Suspense fallback={<span className="btn btn-blue">Buy</span>}>
           <BuyButton
             collectionSlug={font.fontdueSlug}
@@ -110,6 +111,8 @@ export default function FontDetail() {
           />
         </Suspense>
       </div>
+
+      <TrialModal open={trialOpen} onClose={() => setTrialOpen(false)} />
     </div>
   )
 }

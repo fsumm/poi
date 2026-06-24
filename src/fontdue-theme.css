@@ -1232,3 +1232,118 @@ body[data-fontdue-store-modal=open] {
     right: 0;
   }
 }
+
+/* ── Trial modal: right-side drawer mirroring the cart modal ─────────────────── */
+
+.trial-modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+/* Invisible backdrop — crosshair cursor signals click-to-close, matching the cart */
+.trial-modal__background {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  cursor: crosshair;
+}
+
+@keyframes poi-slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Panel: same frosted glass + sizing as the cart drawer */
+.trial-modal__panel {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  max-width: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
+  right: max(0px, (100vw - var(--max-w)) / 2);
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+  font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  background-color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  animation: poi-slide-in 300ms forwards;
+}
+.trial-modal__panel[data-closing] {
+  animation: poi-slide-out 280ms ease-in forwards;
+}
+
+/* Nav bar matching the cart modal nav: close button pinned to the right */
+.trial-modal__nav {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: var(--nav-h);
+  padding: 0 var(--pad);
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  z-index: 10;
+}
+
+/* Close button — "Close" text styled like the cart modal close button */
+.trial-modal__close-button {
+  background: none;
+  border: none;
+  padding: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: normal;
+  transition: opacity 0.12s;
+}
+.trial-modal__close-button::before {
+  content: 'Close';
+}
+.trial-modal__close-button:hover {
+  opacity: 0.6;
+}
+
+/* Body padding matching the cart modal */
+.trial-modal__body {
+  padding: 0 var(--pad) var(--pad);
+}
+
+/* Text above the form: wider type, constrained to half the panel width. */
+.trial-modal__body .page-text {
+  max-width: 50%;
+  font-size: var(--font-size-lg);
+}
+
+/* The form fields are sized to 150% for the narrow 2-col Trials page grid;
+   inside the drawer they should be narrower than the panel. */
+.trial-modal__body .form-field {
+  width: 75%;
+}
+
+/* Responsive widths mirror the cart drawer breakpoints exactly */
+@media (max-width: 1140px) {
+  .trial-modal__panel {
+    max-width: calc((100vw - 2 * var(--pad) - 7 * var(--gap)) / 2 + 3 * var(--gap) + var(--pad) + var(--gap));
+    right: 0;
+  }
+}
+@media (max-width: 580px) {
+  .trial-modal__panel {
+    max-width: 100vw;
+    right: 0;
+  }
+}
