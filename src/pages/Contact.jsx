@@ -1,11 +1,12 @@
 import contact001 from '../../img/contact001.jpg'
+import { lqip } from '../data/imagePlaceholders.js'
 import CopyEmailButton from '../components/CopyEmailButton'
 
 export default function Contact() {
   return (
     <div className="page">
       <div className="page-grid">
-        <div className="page-grid-img" style={{ backgroundImage: `url(${contact001})` }} />
+        <div className="page-grid-img" style={{ backgroundImage: lqip(contact001) }} />
         <div className="page-grid-body">
           <div className="page-section-label">Contact</div>
           <p className="page-text">

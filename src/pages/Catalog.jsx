@@ -7,6 +7,7 @@ import aeronaut001 from '../../img/aeronaut001.jpg'
 import carbonic001 from '../../img/carbonic001.jpg'
 import orbiter001 from '../../img/orbiter001.jpg'
 import diode001 from '../../img/diode001.jpg'
+import { lqip } from '../data/imagePlaceholders.js'
 
 const HERO_TEXT = 'Place of Interest'
 const HERO_FAMILY = 'POI Orbiter'
@@ -42,28 +43,28 @@ export default function Catalog() {
         {/* Placement lives in CSS (.catalog-grid > nth-child) so the
             responsive breakpoints can remap each card. */}
         <Link to="/catalog/aeronaut" className="catalog-card">
-          <div className="catalog-card-img landscape" style={{ backgroundImage: `url(${aeronaut001})` }}>
+          <div className="catalog-card-img landscape" style={{ backgroundImage: lqip(aeronaut001) }}>
             <span className="catalog-card-text" style={overlays.aeronaut.style}>{overlays.aeronaut.text}</span>
           </div>
           <div className="catalog-card-name">{aeronaut.displayName}</div>
         </Link>
 
         <Link to="/catalog/carbonic" className="catalog-card">
-          <div className="catalog-card-img portrait" style={{ backgroundImage: `url(${carbonic001})` }}>
+          <div className="catalog-card-img portrait" style={{ backgroundImage: lqip(carbonic001) }}>
             <span className="catalog-card-text" style={overlays.carbonic.style}>{overlays.carbonic.text}</span>
           </div>
           <div className="catalog-card-name">{carbonic.displayName}</div>
         </Link>
 
         <Link to="/catalog/orbiter" className="catalog-card">
-          <div className="catalog-card-img portrait" style={{ backgroundImage: `url(${orbiter001})` }}>
+          <div className="catalog-card-img portrait" style={{ backgroundImage: lqip(orbiter001) }}>
             <span className="catalog-card-text" style={overlays.orbiter.style}>{overlays.orbiter.text}</span>
           </div>
           <div className="catalog-card-name">{orbiter.displayName}</div>
         </Link>
 
         <Link to="/catalog/diode" className="catalog-card">
-          <div className="catalog-card-img portrait" style={{ backgroundImage: `url(${diode001})` }}>
+          <div className="catalog-card-img portrait" style={{ backgroundImage: lqip(diode001) }}>
             <span className="catalog-card-text" style={overlays.diode.style}>{overlays.diode.text}</span>
           </div>
           <div className="catalog-card-name">{diode.displayName}</div>

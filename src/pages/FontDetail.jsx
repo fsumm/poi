@@ -4,6 +4,7 @@ import aeronaut001 from '../../img/aeronaut001.jpg'
 import carbonic001 from '../../img/carbonic001.jpg'
 import orbiter001 from '../../img/orbiter001.jpg'
 import diode001 from '../../img/diode001.jpg'
+import { lqip } from '../data/imagePlaceholders.js'
 
 const fontImages = { aeronaut: aeronaut001, carbonic: carbonic001, orbiter: orbiter001, diode: diode001 }
 import BuyButton from 'fontdue-js/BuyButton'
@@ -56,7 +57,7 @@ export default function FontDetail() {
     <div className="font-detail">
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="font-detail-header">
-        <div className="font-detail-img" style={{ backgroundImage: fontImages[fontId] ? `url(${fontImages[fontId]})` : undefined }}>
+        <div className="font-detail-img" style={{ backgroundImage: fontImages[fontId] ? lqip(fontImages[fontId]) : undefined }}>
           <span className="catalog-card-text" style={overlay.style}>{overlay.text}</span>
         </div>
 
