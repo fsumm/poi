@@ -50,10 +50,8 @@ export const fonts = [
     features: [],
     defaultText: 'Carbonic',
     catalogAspect: '3/4',
-    defaultWeight: 100,
     fontdueSlug: 'poi-carbonic',
     fontdueCollectionId: 'Rm9udENvbGxlY3Rpb246MjAwMDYzNDY2ODA5MzU5Nzg1OQ==',
-    defaultStyleName: 'Thin',
   },
   {
     id: 'orbiter',

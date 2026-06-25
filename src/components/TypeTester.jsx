@@ -41,7 +41,7 @@ const QUERY_BY_SLUG = `query POITypeTesterBySlug($slug: String!) {
     slug(name: $slug) {
       collection: fontCollection {
         typeTesters(first: 999) {
-          edges { node { content featureSettings { feature value } fontStyle { ${FONT_STYLE_FIELDS} } } }
+          edges { node { content featureSettings { feature value } variableSettings { axis value } fontStyle { ${FONT_STYLE_FIELDS} } } }
         }
       }
     }
@@ -52,7 +52,7 @@ const QUERY_BY_ID = `query POITypeTesterById($id: ID!) {
   node(id: $id) {
     ... on FontCollection {
       typeTesters(first: 999) {
-        edges { node { content featureSettings { feature value } fontStyle { ${FONT_STYLE_FIELDS} } } }
+        edges { node { content featureSettings { feature value } variableSettings { axis value } fontStyle { ${FONT_STYLE_FIELDS} } } }
       }
     }
   }
@@ -71,7 +71,10 @@ function parseEdges(edges) {
     const defaultFeatures = (node.featureSettings ?? [])
       .filter(s => s.value && s.value !== '0')
       .map(s => s.feature)
-    result.push({ ...fs, defaultContent: node.content ?? 'Type something', defaultFeatures })
+    // Default variable-axis positions fontdue set for this tester (e.g. wght/slnt)
+    const defaultAxes = {}
+    for (const v of node.variableSettings ?? []) defaultAxes[v.axis] = v.value
+    result.push({ ...fs, defaultContent: node.content ?? 'Type something', defaultFeatures, defaultAxes })
   }
   return result
 }
@@ -277,17 +280,22 @@ function FeaturesPanel({ features, enabled, onToggle }) {
   )
 }
 
-function axisDefault(axis, defaultWeight) {
-  if (axis.axis === 'wght') {
-    const v = defaultWeight ?? 300
-    return v >= axis.minValue && v <= axis.maxValue ? v : axis.minValue
-  }
-  return axis.minValue <= 0 && 0 <= axis.maxValue ? 0 : axis.minValue
+// Initial axis positions for a style: use fontdue's per-tester defaults
+// (defaultAxes) when present, otherwise a neutral fallback per axis.
+function styleAxisDefaults(style) {
+  const defaults = {}
+  style.variableAxes?.forEach(a => {
+    const provided = style.defaultAxes?.[a.axis]
+    defaults[a.axis] = provided != null
+      ? provided
+      : (a.minValue <= 0 && 0 <= a.maxValue ? 0 : a.minValue)
+  })
+  return defaults
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function TypeTester({ collectionSlug, collectionId, defaultStyleName, defaultWeight }) {
+export default function TypeTester({ collectionSlug, collectionId }) {
   const styles = useFontData(collectionSlug, collectionId)
 
   const [selectedId, setSelectedId] = useState(null)
@@ -312,16 +320,13 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
 
   useEffect(() => {
     if (styles?.length && !selectedId) {
-      const preferred = defaultStyleName
-        ? (styles.find(s => s.name === defaultStyleName) ?? styles[0])
-        : styles[0]
+      // Default to the style fontdue provides (its first/default tester).
+      const preferred = styles[0]
       setSelectedId(preferred.id)
       const initial = preferred.defaultContent ?? ''
       setText(initial)
       if (textAreaRef.current) textAreaRef.current.textContent = initial
-      const defaults = {}
-      preferred.variableAxes?.forEach(a => { defaults[a.axis] = axisDefault(a, defaultWeight) })
-      setAxisValues(defaults)
+      setAxisValues(styleAxisDefaults(preferred))
       setEnabledFeatures(new Set(preferred.defaultFeatures ?? []))
     }
   }, [styles])
@@ -332,9 +337,7 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
     const initial = style.defaultContent ?? ''
     setText(initial)
     if (textAreaRef.current) textAreaRef.current.textContent = initial
-    const defaults = {}
-    style.variableAxes?.forEach(a => { defaults[a.axis] = axisDefault(a, defaultWeight) })
-    setAxisValues(defaults)
+    setAxisValues(styleAxisDefaults(style))
     setEnabledFeatures(new Set(style.defaultFeatures ?? []))
   }, [style?.id])
 

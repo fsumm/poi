@@ -92,8 +92,6 @@ export default function FontDetail() {
           key={fontId}
           collectionSlug={font.fontdueSlug}
           collectionId={font.fontdueCollectionId}
-          defaultStyleName={font.defaultStyleName}
-          defaultWeight={font.defaultWeight}
         />
       </div>
 

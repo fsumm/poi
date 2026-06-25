@@ -470,16 +470,10 @@ button:disabled { cursor: default; }
   container-type: inline-size;
 }
 
-/* Subtle cursor-following perspective tilt shared by every framed image. The
-   rotation itself is written as an inline `transform` by the FrameImage pointer
-   handlers (a CSS-var/@property approach can't be used here: `container-type`
-   makes these frames query containers, which reset registered custom props so
-   the transform stays flat). We only own the easing + compositor hints; the
-   resting state is no transform. */
-.frame-tilt {
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
-}
+/* The cursor-following perspective tilt shared by every framed image is driven
+   entirely from JS (see useTilt): a rAF loop eases the inline `transform` and
+   toggles `will-change` only while active. A CSS `transition` is deliberately
+   NOT used — restarting one per mousemove is what makes Safari jitter. */
 
 /* Centered random-glyph overlay; font family/style set inline per card.
    `filter` carries a slight permanent blur which the intro animation
