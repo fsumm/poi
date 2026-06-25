@@ -176,13 +176,13 @@ button:disabled { cursor: default; }
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  /* Contain horizontal spill from the type tester (oversized/tracked text)
-     at the viewport edge without a page scrollbar. `clip` (not `hidden`)
-     keeps position: sticky working for the nav and buy bar. */
-  overflow-x: clip;
+  /* No overflow clipping here: it was containing the type tester's horizontal
+     spill, but as a *sticky ancestor* it makes Safari shimmer the sticky buy bar
+     and glyph preview by ~1px on scroll. The spill is now clipped locally on
+     .tt-text-wrap instead, so this clip is no longer needed. */
 }
 
-.main { flex: 1; margin-top: 12px; overflow-x: clip; }
+.main { flex: 1; margin-top: 12px; }
 
 .nav,
 .main,
@@ -1114,12 +1114,26 @@ button:disabled { cursor: default; }
   gap: 6px;
 }
 
-/* Right: groups — cols 5–12, flowing into two columns */
+/* Right: groups — cols 5–12, split into two columns. We use two explicit flex
+   columns (the groups are pre-split into balanced halves in GlyphOverview.jsx)
+   rather than CSS multicol: WebKit mis-renders multicol here in several ways
+   (over-wide columns when the multicol root is also a container, cells spilling
+   their track, and the second column starting lower than the first). Flex
+   columns start at the top deterministically and render identically on both
+   engines. container-type stays for the groups' 100cqi margins. */
 .glyph-overview__groups {
   grid-column: 5 / 13;
-  column-count: 2;
-  column-gap: var(--gap);
+  display: flex;
+  gap: var(--gap);
   container-type: inline-size;
+  min-width: 0;
+}
+
+.glyph-overview__col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .glyph-overview__group {
@@ -1135,7 +1149,11 @@ button:disabled { cursor: default; }
 
 .glyph-overview__grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  /* minmax(0, 1fr), not 1fr: plain `1fr` is minmax(auto, 1fr), whose `auto`
+     minimum lets each cell grow to its content's min-width. On Safari that wins
+     and the 6 cells overflow the column; flooring the minimum at 0 forces them
+     to the track so they fit (Chrome already resolved this to fit). */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0;
   margin: -3px;
   font-weight: 400;
@@ -1145,9 +1163,20 @@ button:disabled { cursor: default; }
 .glyph-overview__cell {
   aspect-ratio: 1;
   display: flex;
-  align-items: center;
+  /* stretch (not center) so the gray span fills the cell's *content* box via
+     flex stretch rather than `height: 100%` — a percentage height resolves
+     against the border box on Safari and spills past the 3px padding. */
+  align-items: stretch;
   justify-content: center;
   font-size: 9cqi;
+  /* Keep cells square cross-browser: with `line-height: normal` the glyph's
+     line box (font-metric dependent) can exceed the aspect-ratio height, and
+     Safari sizes the auto grid row to that content instead of the aspect height
+     (Chrome lets aspect-ratio win) — making cells slightly taller than wide.
+     line-height: 1 keeps the text shorter than the cell, and min-height: 0 lets
+     the aspect ratio drive the height. The glyph is flex-centred regardless. */
+  line-height: 1;
+  min-height: 0;
   cursor: default;
   user-select: none;
   padding: 3px;
@@ -1158,7 +1187,8 @@ button:disabled { cursor: default; }
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  /* height comes from the cell's `align-items: stretch`, not a percentage —
+     see the cell rule (Safari resolves % height against the border box). */
   background: var(--gray-1);
   border-radius: 10px;
   transform: scale(1);
@@ -1238,10 +1268,21 @@ button:disabled { cursor: default; }
 }
 
 /* Text area */
+/* Full-bleed clip box around the text area: large autofit sizes and heavy
+   tracking push the tester text far past the 1700px content column. Clip it at
+   the *browser window* edge (not the content edge) by stretching this wrapper to
+   the full viewport width while keeping its content inset to the column, so the
+   text can run into the side margins before it clips. overflow-y stays visible
+   for vertical glyph overshoot. The clip lives here — never on .app/.main, a
+   sticky ancestor, which makes Safari shimmer the sticky buy bar / glyph preview.
+   .tt-text-wrap keeps the column width that the tester's autofit measures. */
+.tt-text-clip {
+  margin-inline: calc(50% - 50vw);
+  padding-inline: calc(50vw - 50%);
+  overflow-x: clip;
+}
+
 .tt-text-wrap {
-  /* No clipping: large autofit sizes and heavy tracking can push glyphs past
-     the box in both axes — let them show. Horizontal spill is contained at the
-     viewport via .app (overflow-x: clip) so the page never gains a scrollbar. */
   overflow: visible;
   padding: 24px 0;
   min-height: 120px;
@@ -1885,11 +1926,6 @@ body[data-page-phase=entering] .footer {
     background: rgba(255, 255, 255, 0.7);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     backdrop-filter: blur(16px) saturate(180%);
-    /* Promote to its own compositor layer so WebKit resolves the sticky offset
-       once instead of re-rounding it against the backdrop-filter sample every
-       scroll frame — fixes the ~1px vertical jitter on iOS Safari/Chrome. */
-    transform: translateZ(0);
-    will-change: transform;
     z-index: 50;
   }
 
@@ -1908,7 +1944,8 @@ body[data-page-phase=entering] .footer {
   .glyph-overview__preview-sticky { position: static; }
   .glyph-overview__groups {
     grid-column: 1 / -1;
-    column-count: 1;
+    /* Stack the two flex columns into one so all groups read top-to-bottom */
+    flex-direction: column;
   }
 
   /* ── Type tester controls → stack ── */

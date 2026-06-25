@@ -423,16 +423,20 @@ export default function TypeTester({ collectionSlug, collectionId, defaultStyleN
   return (
     <div className="tt">
       {/* ── Text area ───────────────────────────────────────── */}
-      <div className="tt-text-wrap" ref={containerRef}>
-        <div
-          ref={textAreaRef}
-          className="tt-text"
-          style={textStyle}
-          contentEditable
-          suppressContentEditableWarning
-          spellCheck={false}
-          onInput={e => setText(e.currentTarget.innerText)}
-        />
+      {/* .tt-text-clip full-bleeds to the window and clips the overflowing text
+          there; .tt-text-wrap keeps the content-column width autofit measures. */}
+      <div className="tt-text-clip">
+        <div className="tt-text-wrap" ref={containerRef}>
+          <div
+            ref={textAreaRef}
+            className="tt-text"
+            style={textStyle}
+            contentEditable
+            suppressContentEditableWarning
+            spellCheck={false}
+            onInput={e => setText(e.currentTarget.innerText)}
+          />
+        </div>
       </div>
 
       {/* ── Toolbar ──────────────────────────────────────────── */}

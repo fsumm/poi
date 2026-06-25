@@ -146,6 +146,24 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
   const firstChar = expandCharacters(glyphGroups[0]?.characterSets ?? [], glyphNames)
     .find(c => c.trim() !== '') ?? ''
 
+  // Split the groups into two balanced, contiguous columns (mirroring CSS
+  // multicol's column-major flow, which WebKit renders buggily — see CSS). A
+  // group's column height ≈ (rows + 1) × cellHeight: `rows` grid rows of 6 cells
+  // plus ~1 row's worth of header + inter-group margin. The split point is
+  // chosen to minimise the height difference between the two columns.
+  const groupColumns = (() => {
+    const heights = glyphGroups.map(g =>
+      Math.ceil(expandCharacters(g.characterSets, glyphNames).length / 6) + 1)
+    const total = heights.reduce((a, b) => a + b, 0)
+    let acc = 0, splitIdx = glyphGroups.length, bestDiff = Infinity
+    for (let i = 1; i < glyphGroups.length; i++) {
+      acc += heights[i - 1]
+      const diff = Math.abs(2 * acc - total)
+      if (diff < bestDiff) { bestDiff = diff; splitIdx = i }
+    }
+    return [glyphGroups.slice(0, splitIdx), glyphGroups.slice(splitIdx)]
+  })()
+
   const previewStyle = { fontFamily, fontVariationSettings }
   const gridStyle = (fontFeatureSettings) => ({ fontFamily, fontVariationSettings, fontFeatureSettings })
 
@@ -206,31 +224,37 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
           </div>
         </div>
 
-        {/* ── Right: all categories stacked ───────────────────── */}
+        {/* ── Right: all categories, pre-split into two balanced columns ── */}
+        {/* Two explicit flex columns instead of CSS multicol, which WebKit
+            mis-renders here (see CSS). groupColumns is balanced in JS above. */}
         <div className="glyph-overview__groups">
-          {glyphGroups.map((group) => {
-            const chars = expandCharacters(group.characterSets, glyphNames)
-            const fontFeatureSettings = featureSettings(group.characterSets)
+          {groupColumns.map((col, ci) => (
+            <div key={ci} className="glyph-overview__col">
+              {col.map((group) => {
+                const chars = expandCharacters(group.characterSets, glyphNames)
+                const fontFeatureSettings = featureSettings(group.characterSets)
 
-            return (
-              <div key={group.name} className="glyph-overview__group">
-                <div className="glyph-overview__group-name">{group.name}</div>
-                <div className="glyph-overview__grid" style={gridStyle(fontFeatureSettings)}>
-                  {chars.map((char, i) => (
-                    <div
-                      key={i}
-                      className={`glyph-overview__cell${selected[selected.length - 1]?.char === char ? ' selected' : ''}`}
-                      onMouseEnter={() => setHovered({ char, fontFeatureSettings })}
-                      onMouseLeave={() => setHovered(null)}
-                      onClick={() => setSelected(prev => [...prev, { char, fontFamily, fontVariationSettings, fontFeatureSettings }])}
-                    >
-                      <span>{char}</span>
+                return (
+                  <div key={group.name} className="glyph-overview__group">
+                    <div className="glyph-overview__group-name">{group.name}</div>
+                    <div className="glyph-overview__grid" style={gridStyle(fontFeatureSettings)}>
+                      {chars.map((char, i) => (
+                        <div
+                          key={i}
+                          className={`glyph-overview__cell${selected[selected.length - 1]?.char === char ? ' selected' : ''}`}
+                          onMouseEnter={() => setHovered({ char, fontFeatureSettings })}
+                          onMouseLeave={() => setHovered(null)}
+                          onClick={() => setSelected(prev => [...prev, { char, fontFamily, fontVariationSettings, fontFeatureSettings }])}
+                        >
+                          <span>{char}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )
-          })}
+                  </div>
+                )
+              })}
+            </div>
+          ))}
         </div>
 
       </div>
