@@ -12,18 +12,6 @@
     <link rel="manifest" href="/favicons/site.webmanifest" />
 
     <script>
-      // Restore path encoded by 404.html for GitHub Pages SPA routing
-      (function(l) {
-        if (l.search[1] === '/') {
-          var decoded = l.search.slice(1).split('&').map(function(s) {
-            return s.replace(/~and~/g, '&');
-          });
-          window.history.replaceState(null, null,
-            l.pathname.slice(0, -1) + decoded[0] +
-            (decoded[1] ? '?' + decoded[1] : '') + l.hash
-          );
-        }
-      }(window.location));
       window.FontdueConfig = { store: 'https://store.poi.tf' };
     </script>
     <script async src="https://cdn.fontdue.com/js/fontdue.js"></script>

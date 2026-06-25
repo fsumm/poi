@@ -21,7 +21,7 @@ window.addEventListener('resize', () => {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter basename="/poi">
+    <BrowserRouter>
       <App />
     </BrowserRouter>
   </React.StrictMode>
