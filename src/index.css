@@ -1100,7 +1100,6 @@ button:disabled { cursor: default; }
 .glyph-overview__group {
   break-inside: avoid;
   margin-bottom: calc((100cqi - 140px) / 12 - 15px);
-  overflow: hidden;
 }
 
 .glyph-overview__group-name {
@@ -1115,7 +1114,6 @@ button:disabled { cursor: default; }
   gap: 0;
   font-weight: 400;
   container-type: inline-size;
-  margin: -3px;
 }
 
 .glyph-overview__cell {
@@ -1128,6 +1126,11 @@ button:disabled { cursor: default; }
   user-select: none;
   padding: 3px;
 }
+
+.glyph-overview__cell:nth-child(6n+1) { padding-left: 0; }
+.glyph-overview__cell:nth-child(6n)   { padding-right: 0; }
+.glyph-overview__cell:nth-child(-n+6) { padding-top: 0; }
+.glyph-overview__cell:nth-last-child(-n+6) { padding-bottom: 0; }
 
 .glyph-overview__cell > span {
   display: flex;
