@@ -30,6 +30,19 @@ export default function Nav() {
       return
     }
     const el = submenuRef.current
+    // The submenu uses overflow-y: clip (not a scroll container), so scrollHeight
+    // can't be trusted for the full content height. Sum the items' offsetHeights
+    // plus the ::after bottom spacer instead — offsetHeight ignores the items'
+    // fade-in transform and the max-height clamp, both of which would skew a
+    // getBoundingClientRect/scrollHeight measurement at open time.
+    const measure = () => {
+      let h = 0
+      // getBoundingClientRect().height is fractional and unaffected by the items'
+      // translateY fade (translate doesn't change height), so it sums precisely.
+      el.querySelectorAll(':scope > li').forEach((li) => { h += li.getBoundingClientRect().height })
+      h += parseFloat(getComputedStyle(el, '::after').height) || 0
+      return Math.round(h)
+    }
     const publish = (animate) => {
       if (animate) {
         // Commit the start value (0) with a forced reflow first so the dependent
@@ -38,7 +51,7 @@ export default function Nav() {
         document.body.style.setProperty('--submenu-h', '0px')
         void document.body.offsetWidth // flush the 0 state
       }
-      document.body.style.setProperty('--submenu-h', `${el.scrollHeight}px`)
+      document.body.style.setProperty('--submenu-h', `${measure()}px`)
     }
     publish(true)
     // If a webfont is still loading, the first measure used fallback metrics;
@@ -67,9 +80,11 @@ export default function Nav() {
 
   return (
     <nav ref={navRef} className={`nav${menuOpen ? ' nav--open' : ''}`}>
-      <NavLink to="/" className="nav-logo" aria-label="Place of Interest" onClick={close}>
-        ⌘
-      </NavLink>
+      <div className="nav-logo">
+        <NavLink to="/" className="nav-logo-link" aria-label="Place of Interest" onClick={close}>
+          ⌘
+        </NavLink>
+      </div>
       <button
         className="nav-toggle"
         aria-label="Menu"

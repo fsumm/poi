@@ -221,12 +221,19 @@ button:disabled { cursor: default; }
   transition: height 0.4s cubic-bezier(.5, 0, .5, 1);
 }
 
+/* Non-interactive box that holds the bar height and centers the logo; the link
+   inside is natural size, so the clickable area is just the glyph (matching the
+   other nav items, whose hit area is only their text). */
 .nav-logo {
   grid-column: 1;
-  line-height: 1;
   height: var(--nav-h);
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+}
+
+.nav-logo-link {
+  line-height: 1;
 }
 
 .nav-links {
@@ -281,10 +288,15 @@ button:disabled { cursor: default; }
   list-style: none;
   margin: 0;
   padding: 0;
-  width: max-content;
+  /* Zero-width with horizontal overflow so the (wider-than-column) item names
+     spill to the right WITHOUT sizing the grid column. Otherwise the Catalog
+     item grows past its track and shoves the other nav items around. overflow-y
+     stays clipped so the open/close height slide still works. */
+  width: 0;
+  overflow-x: visible;
+  overflow-y: clip;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   max-height: 0;
   /* Non-interactive while collapsed so the (invisible) items can't be clicked */
   pointer-events: none;
@@ -296,19 +308,20 @@ button:disabled { cursor: default; }
    collapses fully to 0 when closed. Counted in scrollHeight → --submenu-h. */
 .nav-submenu::after {
   content: '';
-  flex: 0 0 24px;
+  flex: 0 0 26px;
 }
 
 /* Target kept close to the real content height (items + spacer) so the
    ease-out curve plays out over the full slide rather than finishing early. */
 .nav-item--submenu-open .nav-submenu {
-  max-height: 164px;
+  max-height: 170px;
   pointer-events: auto;
 }
 
 /* Items fade + drift in (and out), staggered — matching the dropdown links */
 .nav-submenu > li {
   padding: 6px 0;
+  white-space: nowrap; /* names stay on one line as they overflow the 0-width box */
   opacity: 0;
   transform: translateY(-6px);
   transition: opacity 0.3s linear, transform 0.3s linear;
@@ -1272,6 +1285,7 @@ button:disabled { cursor: default; }
   padding: var(--padding-sm);
   font-size: var(--font-size-sm);
   font-weight: 600;
+  color: var(--ink-black);
   cursor: pointer;
   transition: background 150ms;
 }
@@ -1688,10 +1702,11 @@ body[data-page-phase=entering] .footer {
   /* Legal docs — text fills all 4 mobile columns */
   .legal-body { grid-column: 1 / 5; }
 
-  /* ── Nav → "Menu" toggle sits right of the logo; Cart pinned far right ── */
-  .nav { display: flex; align-items: center; }
-  .nav-toggle { display: inline-block; margin-left: 24px; }
-  .nav-cart { margin-left: auto; }
+  /* ── Nav → 4-col grid: logo in col 1, "Menu" aligned to col 2, Cart far right.
+     (Grid, not flex, so Menu lines up with the column-2 submenu items.) ── */
+  .nav { display: grid; align-items: center; }
+  .nav-toggle { display: inline-block; grid-column: 2; justify-self: start; }
+  .nav-cart { grid-column: 4; justify-self: end; }
 
   /* The dropdown panel IS the nav's frosted background: it starts at the
      very top, blurs the whole nav-bar strip (its padding-top) plus the
@@ -1702,6 +1717,9 @@ body[data-page-phase=entering] .footer {
 
   .nav-links {
     position: absolute;
+    /* auto placement → containing block is the nav's full padding box (not the
+       inherited desktop grid-column 3/7 area), so the overlay spans full width */
+    grid-column: auto;
     top: 0;
     left: 0;
     right: 0;
@@ -1752,7 +1770,11 @@ body[data-page-phase=entering] .footer {
      Items align to column 2 of the dropdown's 4-col grid; collapse/expand and
      the staggered per-item fade carry over from the base submenu rules. */
   .nav-submenu {
-    width: auto;
+    /* Fill the dropdown width (auto would shrink-wrap to content) so the 4-col
+       grid spans the row and items land on column 2. */
+    width: 100%;
+    /* full-width dropdown here — no horizontal overflow needed, plain clip */
+    overflow: hidden;
     padding: 0;
     display: grid;
     grid-template-columns: repeat(4, 1fr);

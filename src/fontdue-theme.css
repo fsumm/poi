@@ -894,7 +894,7 @@ input:checked + .checkbox__icon {
   display: block;
   margin-left: auto;
 }
-.btn-dim:disabled .store-modal__container__container .store-modal__cart__checkout-section .store-modal__cart__button:disabled {
+.store-modal__container__container .store-modal__cart__checkout-section .store-modal__cart__button:disabled {
   background: var(--gray-2);
   color: var(--gray-5);
   border-color: var(--gray-2);
