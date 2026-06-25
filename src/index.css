@@ -133,6 +133,13 @@ html[data-resizing] *::after {
   /* Height the open Catalog submenu adds to the header; 0 when closed. Drives
      the frosted backdrop and the offset of sticky items below the nav. */
   --submenu-h: 0px;
+  /* iOS safe-area insets — the status-bar strip up top and the home-indicator
+     strip at the bottom. 0 everywhere that isn't a notched device, so the calcs
+     below are no-ops on desktop. With viewport-fit=cover (see index.html) these
+     let the frosted nav/buy bars bleed under the browser chrome to the true
+     screen edges, while content is padded clear of it. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
   --font-ui: 'POI Orbiter', system-ui, -apple-system, sans-serif;
   --font-size-sm: 12px;
   --font-size-lg: 18px;
@@ -201,7 +208,9 @@ button:disabled { cursor: default; }
   align-items: start;
   min-height: var(--nav-h);
   position: sticky;
-  top: 0;
+  /* Pin the bar content below the status bar; the frosted strip below bleeds
+     up to the screen top to fill it. */
+  top: var(--safe-top);
   z-index: 100;
 }
 
@@ -212,8 +221,9 @@ button:disabled { cursor: default; }
   left: 0;
   right: 0;
   /* Frosted strip behind the bar; extends to cover the open Catalog submenu so
-     it reads as one continuous header (and obscures content scrolled beneath). */
-  height: calc(var(--nav-h) + var(--submenu-h, 0px));
+     it reads as one continuous header (and obscures content scrolled beneath).
+     The extra --safe-top reaches up under the status bar to the screen edge. */
+  height: calc(var(--nav-h) + var(--submenu-h, 0px) + var(--safe-top));
   background: rgba(255, 255, 255, 0.85);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   backdrop-filter: blur(16px) saturate(180%);
@@ -505,7 +515,7 @@ button:disabled { cursor: default; }
   grid-row: 1;
   position: sticky;
   /* Drops below the open Catalog submenu so the panel never covers it */
-  top: calc(var(--nav-h) + var(--submenu-h) + 12px);
+  top: calc(var(--nav-h) + var(--submenu-h) + var(--safe-top) + 12px);
   transition: top 0.4s cubic-bezier(.5, 0, .5, 1);
   align-self: start;
   justify-self: end;
@@ -1058,7 +1068,7 @@ button:disabled { cursor: default; }
 .glyph-overview__preview-sticky {
   position: sticky;
   /* Drops below the open Catalog submenu so the panel never covers it */
-  top: calc(var(--nav-h) + var(--submenu-h) + 12px);
+  top: calc(var(--nav-h) + var(--submenu-h) + var(--safe-top) + 12px);
   transition: top 0.4s cubic-bezier(.5, 0, .5, 1);
   max-width: 540px;
 }
@@ -1720,15 +1730,17 @@ body[data-page-phase=entering] .footer {
     /* auto placement → containing block is the nav's full padding box (not the
        inherited desktop grid-column 3/7 area), so the overlay spans full width */
     grid-column: auto;
-    top: 0;
+    /* Bleed up under the status bar to the screen top; padding-top then reserves
+       both that strip and the bar height so the dropdown links start below the bar. */
+    top: calc(-1 * var(--safe-top));
     left: 0;
     right: 0;
     z-index: -1; /* behind the bar content (logo/Menu/Cart), above the page */
     display: grid;
     grid-template-columns: 1fr;
     gap: 0;
-    padding: var(--nav-h) var(--pad) 0;
-    max-height: var(--nav-h); /* closed: only the bar strip shows */
+    padding: calc(var(--nav-h) + var(--safe-top)) var(--pad) 0;
+    max-height: calc(var(--nav-h) + var(--safe-top)); /* closed: status strip + bar */
     overflow: hidden;
     background: rgba(255, 255, 255, 0.85);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -1738,7 +1750,7 @@ body[data-page-phase=entering] .footer {
       padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .nav--open .nav-links {
-    max-height: 320px; /* snug above the four links so the slide fills its duration */
+    max-height: calc(320px + var(--safe-top)); /* snug above the four links so the slide fills its duration */
     padding-bottom: 16px;
     /* Quick intro, with a gentle ease-out curve */
     transition:
@@ -1800,7 +1812,7 @@ body[data-page-phase=entering] .footer {
   .nav-item--submenu-open .nav-submenu { max-height: 220px; }
 
   /* Grow the dropdown so the expanded submenu isn't clipped by nav-links */
-  .nav--open .nav-links:has(.nav-item--submenu-open) { max-height: 560px; }
+  .nav--open .nav-links:has(.nav-item--submenu-open) { max-height: calc(560px + var(--safe-top)); }
 
   /* ── Footer → stack ── */
   .footer {
@@ -1863,7 +1875,9 @@ body[data-page-phase=entering] .footer {
        both screen edges instead of clipping at the content width */
     margin-left: calc(-1 * var(--pad));
     margin-right: calc(-1 * var(--pad));
-    padding: 0 var(--pad);
+    /* Frosted glass extends down under the home indicator (padding-bottom adds
+       to this content-box height); the buttons stay centered in the bar above it. */
+    padding: 0 var(--pad) var(--safe-bottom);
     background: rgba(255, 255, 255, 0.7);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     backdrop-filter: blur(16px) saturate(180%);
