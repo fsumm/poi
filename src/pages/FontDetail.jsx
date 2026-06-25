@@ -1,12 +1,16 @@
 import { useParams, Navigate } from 'react-router-dom'
 import { Suspense, Component, useMemo, useState } from 'react'
-import aeronaut001 from '../../img/aeronaut001.jpg'
-import carbonic001 from '../../img/carbonic001.jpg'
-import orbiter001 from '../../img/orbiter001.jpg'
-import diode001 from '../../img/diode001.jpg'
-import { lqip } from '../data/imagePlaceholders.js'
+import FrameImage from '../components/FrameImage.jsx'
 
-const fontImages = { aeronaut: aeronaut001, carbonic: carbonic001, orbiter: orbiter001, diode: diode001 }
+const fontImages = {
+  aeronaut: 'aeronaut001.jpg',
+  carbonic: 'carbonic001.jpg',
+  orbiter: 'orbiter001.jpg',
+  diode: 'diode001.jpg',
+}
+// The header image spans 4 cols. Rendered width per tier (see index.css):
+// full width ≤580px, ~50vw-30 on the ≤1140 8-col grid, ~540px on desktop.
+const IMG_SIZES = '(max-width: 580px) calc(100vw - 40px), (max-width: 1140px) calc(50vw - 30px), 540px'
 import BuyButton from 'fontdue-js/BuyButton'
 import GlyphOverview from '../components/GlyphOverview.jsx'
 import TypeTester from '../components/TypeTester.jsx'
@@ -57,9 +61,11 @@ export default function FontDetail() {
     <div className="font-detail">
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="font-detail-header">
-        <div className="font-detail-img" style={{ backgroundImage: fontImages[fontId] ? lqip(fontImages[fontId]) : undefined }}>
-          <span className="catalog-card-text" style={overlay.style}>{overlay.text}</span>
-        </div>
+        {fontImages[fontId] && (
+          <FrameImage file={fontImages[fontId]} className="font-detail-img" sizes={IMG_SIZES} eager>
+            <span className="catalog-card-text" style={overlay.style}>{overlay.text}</span>
+          </FrameImage>
+        )}
 
         <div
           className="font-detail-specimen"
