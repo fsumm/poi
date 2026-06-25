@@ -1677,9 +1677,20 @@ body[data-page-phase=entering] .footer {
   opacity: 0;
 }
 
-[data-cart-page=entering] .store-modal__page__body > *,
+/* Enabled sections fade to full opacity. Disabled sections are excluded here so
+   this opacity:1 doesn't clobber fontdue's 0.2 dim (they're direct children of
+   page-body on the product page, so they tie this rule's specificity). */
+[data-cart-page=entering] .store-modal__page__body > *:not([data-disabled=true]),
 [data-cart-page=entering] .store-modal__page__sticky-footer {
   opacity: 1;
+  transition: opacity 0.4s linear;
+}
+
+/* Disabled sections fade in to their dimmed rest state. Outranks fontdue's
+   [data-disabled=true] rule, and the persistent transition cross-fades smoothly
+   between 1 and 0.2 when a section is enabled/disabled at runtime. */
+[data-cart-page=entering] .store-modal__page__body > *[data-disabled=true] {
+  opacity: 0.2;
   transition: opacity 0.4s linear;
 }
 
