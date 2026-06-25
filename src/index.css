@@ -124,15 +124,6 @@ html[data-resizing] *::after {
   --yellow: #e9ff15;
 
   --color-bg: #ffffff;
-  --color-text: #171716;
-  --color-muted: #686868;
-  --color-placeholder: #d9d9d9;
-  --color-input: #f0f0f0;
-  --color-dark: #171716;
-  --color-dim: #e2e2e2;
-  --color-check: #2563eb;
-  --color-blue: #2e5bff;
-  --color-neon: #e9ff15;
   --radius-pill: 100px;
   --radius-ui: 20px;
   --max-w: 1700px;
@@ -146,11 +137,12 @@ html[data-resizing] *::after {
   --font-size-sm: 12px;
   --font-size-lg: 18px;
   --padding-sm: 6px 14px;
+  --padding-lg: 8px 20px;
 }
 
 html, body {
   background: var(--color-bg);
-  color: var(--color-text);
+  color: var(--ink-black);
   font-family: var(--font-ui);
   font-size: var(--font-size-lg);
   font-weight: 600;
@@ -169,6 +161,7 @@ button, input {
 }
 
 button { cursor: pointer; }
+button:disabled { cursor: default; }
 
 /* ─── Layout ─────────────────────────────────────────────────────────────── */
 
@@ -440,7 +433,7 @@ button { cursor: pointer; }
 .catalog-grid > *:nth-child(4) { grid-column: 9 / 13; grid-row: 2; } /* Diode,    portrait  */
 
 .catalog-card-img {
-  background: var(--color-placeholder);
+  background: var(--gray-2);
   width: 100%;
   border-radius: 10px;
   overflow: hidden;
@@ -503,7 +496,7 @@ button { cursor: pointer; }
 }
 
 .font-detail-actions-sticky .buy-button {
-  background: var(--color-blue);
+  background: var(--poi-blue);
   color: #fff;
   border-radius: var(--radius-pill);
   padding: 8px 20px;
@@ -516,8 +509,8 @@ button { cursor: pointer; }
 }
 
 .font-detail-actions-sticky .buy-button:hover {
-  background: var(--color-neon);
-  color: var(--color-text);
+  background: var(--yellow);
+  color: var(--ink-black);
 }
 
 .font-detail {
@@ -539,7 +532,7 @@ button { cursor: pointer; }
 
 .font-detail-img {
   grid-column: 1 / 5;
-  background: var(--color-placeholder);
+  background: var(--gray-2);
   height: 360px;
   border-radius: 10px;
   overflow: hidden;
@@ -619,14 +612,14 @@ button { cursor: pointer; }
   border: none;
   outline: none;
   background: transparent;
-  color: var(--color-text);
+  color: var(--ink-black);
   resize: none;
   overflow: hidden;
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: clip;
-  caret-color: var(--color-text);
+  caret-color: var(--ink-black);
 }
 
 .type-tester-controls {
@@ -643,7 +636,7 @@ button { cursor: pointer; }
   align-items: center;
   padding: var(--padding-sm);
   border-radius: var(--radius-pill);
-  background: var(--color-dim);
+  background: var(--gray-2);
   font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
@@ -674,7 +667,7 @@ button { cursor: pointer; }
 
 .tester-tracking input[type=range] {
   width: 140px;
-  accent-color: var(--color-dark);
+  accent-color: var(--ink-black);
 }
 
 .tester-axes-label,
@@ -694,7 +687,7 @@ button { cursor: pointer; }
   font-size: var(--font-size-sm);
   font-weight: 600;
   margin-bottom: 10px;
-  color: var(--color-muted);
+  color: var(--gray-5);
 }
 
 .tester-features-list {
@@ -738,7 +731,7 @@ button { cursor: pointer; }
 }
 
 .feature-toggle-dot.on {
-  background: var(--color-check);
+  background: var(--poi-blue);
 }
 
 .feature-toggle-dot.on::after {
@@ -766,7 +759,7 @@ button { cursor: pointer; }
 
 .page-grid-img {
   grid-column: 1 / 3;
-  background: var(--color-placeholder);
+  background: var(--gray-2);
   height: 360px;
   border-radius: 10px;
   overflow: hidden;
@@ -800,7 +793,7 @@ button { cursor: pointer; }
 
 /* Legacy alias kept for backwards-compat */
 .page-img {
-  background: var(--color-placeholder);
+  background: var(--gray-2);
   aspect-ratio: 3 / 4;
 }
 
@@ -865,23 +858,23 @@ button { cursor: pointer; }
 }
 
 .btn-dark {
-  background: var(--color-dark);
+  background: var(--ink-black);
   color: #fff;
 }
 
 .btn-blue {
-  background: var(--color-blue);
+  background: var(--poi-blue);
   color: #fff;
 }
 
 .btn-dim {
-  background: var(--color-dim);
-  color: var(--color-muted);
+  background: var(--gray-2);
+  color: var(--gray-5);
 }
 
 .btn:not(:disabled):hover {
-  background: var(--color-neon);
-  color: var(--color-text);
+  background: var(--yellow);
+  color: var(--ink-black);
 }
 
 /* ─── Copy-email button ──────────────────────────────────────────────────── */
@@ -897,8 +890,8 @@ button { cursor: pointer; }
   left: 50%;
   padding: 8px 16px;
   border-radius: 8px;
-  background: var(--color-dim);
-  color: var(--color-muted);
+  background: var(--gray-2);
+  color: var(--gray-5);
   font-weight: 600;
   white-space: nowrap;
   opacity: 0;
@@ -914,7 +907,7 @@ button { cursor: pointer; }
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: var(--color-dim);
+  border-top-color: var(--gray-2);
   transition: border-top-color 0.12s;
 }
 
@@ -925,12 +918,12 @@ button { cursor: pointer; }
 }
 
 .copy-email.is-copied .copy-email-tip {
-  background: var(--color-dark);
+  background: var(--ink-black);
   color: #fff;
 }
 
 .copy-email.is-copied .copy-email-tip::after {
-  border-top-color: var(--color-dark);
+  border-top-color: var(--ink-black);
 }
 
 /* ─── Forms ──────────────────────────────────────────────────────────────── */
@@ -943,17 +936,17 @@ button { cursor: pointer; }
   width: calc(150% + var(--gap) / 2);
   padding: 10px 14px;
   border-radius: var(--radius-pill);
-  background: var(--color-input);
+  background: var(--gray-1);
   border: none;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--ink-black);
   outline: none;
   margin-bottom: 8px;
 }
 
 .form-field::placeholder {
-  color: var(--color-muted);
+  color: var(--gray-5);
 }
 
 .form-toggle {
@@ -1093,7 +1086,7 @@ button { cursor: pointer; }
 
 
 .glyph-overview__preview-char.glyph-selected-bg {
-  color: var(--color-neon);
+  color: var(--yellow);
   pointer-events: none;
   transition: opacity 1.5s ease, filter 1.5s ease;
 }
@@ -1191,7 +1184,7 @@ button { cursor: pointer; }
 
 .about-secondary-img {
   grid-column: 5 / 7;
-  background: var(--color-placeholder);
+  background: var(--gray-2);
   height: 360px;
   border-radius: 10px;
   overflow: hidden;
@@ -1225,7 +1218,7 @@ button { cursor: pointer; }
 .about-caption {
   margin-top: 12px;
   font-weight: 600;
-  color: var(--color-muted);
+  color: var(--gray-5);
 }
 
 /* ── Custom TypeTester ──────────────────────────────────────────────────────── */
@@ -1250,7 +1243,7 @@ button { cursor: pointer; }
   outline: none;
   user-select: text;
   -webkit-user-select: text;
-  caret-color: var(--color-text);
+  caret-color: var(--ink-black);
 }
 
 /* Toolbar */
@@ -1259,7 +1252,6 @@ button { cursor: pointer; }
   flex-direction: column;
   gap: 10px;
   padding: 12px 0;
-  border-top: 1px solid var(--color-border);
 }
 
 .tt-toolbar-row {
@@ -1322,13 +1314,13 @@ button { cursor: pointer; }
   font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
-  color: var(--color-muted);
+  color: var(--gray-5);
 }
 
 .tt-slider-value {
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-muted);
+  color: var(--gray-5);
   background: var(--gray-1);
   border: none;
   border-radius: 100px;
@@ -1397,7 +1389,7 @@ button { cursor: pointer; }
   font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
-  color: var(--color-muted);
+  color: var(--gray-5);
 }
 
 .tt-features-grid {
@@ -1445,12 +1437,11 @@ button { cursor: pointer; }
 }
 
 .tt-feature-label {
-  color: var(--color-text);
+  color: var(--ink-black);
 }
 
 .tt-loading {
   height: 200px;
-  border-top: 1px solid var(--color-border);
 }
 
 /* ─── Page transition animations ─────────────────────────────────────────── */
