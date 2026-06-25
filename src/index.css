@@ -175,7 +175,7 @@ button:disabled { cursor: default; }
   overflow-x: clip;
 }
 
-.main { flex: 1; margin-top: 12px;}
+.main { flex: 1; margin-top: 12px; overflow-x: clip; }
 
 .nav,
 .main,
