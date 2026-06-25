@@ -1,11 +1,16 @@
 // Image optimization pipeline.
 //
-// For every JPEG in /img this generates:
-//   1. A set of downscaled width variants (for responsive <img srcset>), so the
-//      browser downloads only as many pixels as the layout needs — including the
-//      extra pixels Retina/HiDPI displays ask for via devicePixelRatio.
-//   2. A tiny inline base64 LQIP (Low-Quality Image Placeholder) that paints
-//      instantly while the real image streams in / lazy-loads.
+// Every image frame on the site is a FIXED-HEIGHT box (360px) with
+// object-fit/cover, so the dimension that drives sharpness is HEIGHT, not
+// width. We therefore generate variants by height and describe them with
+// DENSITY (x) descriptors: density = variantHeight / frameHeight. Because the
+// rendered height never changes across breakpoints, the browser picks the
+// variant purely from the display density (devicePixelRatio) — a 1× display
+// gets the 360px-tall file, a Retina 2× display gets the 720px-tall file, etc.
+//
+// For each /img/*.jpg this generates:
+//   1. Height variants (for responsive <img srcset> with x descriptors).
+//   2. A tiny inline base64 LQIP that paints instantly while the image loads.
 //
 // Variants are written to /public/responsive (served verbatim by Vite under the
 // configured base path). A manifest is written to src/data/images.js.
@@ -29,7 +34,10 @@ const OUT_DIR = join(ROOT, 'public', 'responsive')
 const OUT_REL = 'responsive' // path under the served base, e.g. /poi/responsive/...
 const MANIFEST = join(ROOT, 'src', 'data', 'images.js')
 
-const TARGET_WIDTHS = [360, 540, 720, 900, 1080] // candidate widths, capped at source
+// Frames render at this height everywhere (see the *-img rules in index.css).
+// Variant heights are multiples of it so each maps to a clean density.
+const FRAME_HEIGHT = 360
+const DENSITIES = [1, 1.5, 2, 3] // → heights 360 / 540 / 720 / 1080
 const JPEG_QUALITY = 72
 const PLACEHOLDER_EDGE = 24
 const PLACEHOLDER_QUALITY = 40
@@ -41,6 +49,8 @@ function dims(file) {
   return { w, h }
 }
 
+// Start clean so renamed/removed source images don't leave stale variants.
+rmSync(OUT_DIR, { recursive: true, force: true })
 mkdirSync(OUT_DIR, { recursive: true })
 const tmp = mkdtempSync(join(tmpdir(), 'imgopt-'))
 
@@ -53,19 +63,20 @@ try {
     const { w: srcW, h: srcH } = dims(src)
     const stem = basename(file).replace(/\.jpe?g$/i, '')
 
-    // Widths to actually produce: never upscale past the source.
-    let widths = TARGET_WIDTHS.filter((w) => w <= srcW)
-    if (widths.length === 0) widths = [srcW]
+    // Heights to produce, capped so we never upscale past the source height.
+    let densities = DENSITIES.filter((d) => Math.round(d * FRAME_HEIGHT) <= srcH)
+    if (densities.length === 0) densities = [+(srcH / FRAME_HEIGHT).toFixed(3)]
 
-    const variants = widths.map((w) => {
-      const outName = `${stem}-${w}.jpg`
+    const variants = densities.map((density) => {
+      const h = Math.round(density * FRAME_HEIGHT)
+      const outName = `${stem}-h${h}.jpg`
       execFileSync('sips', [
-        '--resampleWidth', String(w),
+        '--resampleHeight', String(h),
         '-s', 'format', 'jpeg',
         '-s', 'formatOptions', String(JPEG_QUALITY),
         src, '--out', join(OUT_DIR, outName),
       ], { stdio: 'ignore' })
-      return { w, src: `${OUT_REL}/${outName}` }
+      return { density, src: `${OUT_REL}/${outName}` }
     })
 
     // Tiny inline placeholder.
@@ -86,17 +97,16 @@ try {
     '// Run `npm run images` to regenerate after adding/replacing images in /img.\n\n' +
     'const images = ' + JSON.stringify(manifest, null, 2) + '\n\n' +
     '// Resolve a responsive <img> prop bundle for an image (keyed by its /img\n' +
-    '// filename, e.g. "about001.jpg"). srcSet lets the browser pick the right\n' +
-    '// resolution for the viewport AND the display density (Retina). The chosen\n' +
-    '// `sizes` string tells it how wide the image renders at each breakpoint.\n' +
+    '// filename, e.g. "about001.jpg"). Frames are fixed-height + cover, so the\n' +
+    '// variants are described by DENSITY (x) descriptors keyed off height: the\n' +
+    '// browser selects by display density (Retina → 2×/3×), independent of width.\n' +
     'export function imgProps(file) {\n' +
     '  const base = import.meta.env.BASE_URL\n' +
     '  const entry = images[file]\n' +
     '  if (!entry) throw new Error(`No optimized image for "${file}" — run npm run images`)\n' +
-    '  const srcSet = entry.variants.map((v) => `${base}${v.src} ${v.w}w`).join(", ")\n' +
-    '  const largest = entry.variants[entry.variants.length - 1]\n' +
+    '  const srcSet = entry.variants.map((v) => `${base}${v.src} ${v.density}x`).join(", ")\n' +
     '  return {\n' +
-    '    src: `${base}${largest.src}`,\n' +
+    '    src: `${base}${entry.variants[0].src}`,\n' +
     '    srcSet,\n' +
     '    width: entry.width,\n' +
     '    height: entry.height,\n' +
@@ -108,7 +118,7 @@ try {
   writeFileSync(MANIFEST, body)
 
   const totalVariants = Object.values(manifest).reduce((n, e) => n + e.variants.length, 0)
-  console.log(`Generated ${totalVariants} variants for ${files.length} images → public/${OUT_REL}/`)
+  console.log(`Generated ${totalVariants} height variants for ${files.length} images → public/${OUT_REL}/`)
   console.log(`Wrote manifest → src/data/images.js`)
 } finally {
   rmSync(tmp, { recursive: true, force: true })

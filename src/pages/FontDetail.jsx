@@ -8,9 +8,6 @@ const fontImages = {
   orbiter: 'orbiter001.jpg',
   diode: 'diode001.jpg',
 }
-// The header image spans 4 cols. Rendered width per tier (see index.css):
-// full width ≤580px, ~50vw-30 on the ≤1140 8-col grid, ~540px on desktop.
-const IMG_SIZES = '(max-width: 580px) calc(100vw - 40px), (max-width: 1140px) calc(50vw - 30px), 540px'
 import BuyButton from 'fontdue-js/BuyButton'
 import GlyphOverview from '../components/GlyphOverview.jsx'
 import TypeTester from '../components/TypeTester.jsx'
@@ -62,7 +59,7 @@ export default function FontDetail() {
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="font-detail-header">
         {fontImages[fontId] && (
-          <FrameImage file={fontImages[fontId]} className="font-detail-img" sizes={IMG_SIZES} eager>
+          <FrameImage file={fontImages[fontId]} className="font-detail-img" eager>
             <span className="catalog-card-text" style={overlay.style}>{overlay.text}</span>
           </FrameImage>
         )}

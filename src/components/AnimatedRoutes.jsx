@@ -39,6 +39,9 @@ export default function AnimatedRoutes({ children }) {
     timerRef.current = setTimeout(() => {
       setDisplayLocation(location)
       setPhase('idle')
+      // Reset scroll as the new page swaps in (while still faded out), so it
+      // enters from the top instead of inheriting the previous page's offset.
+      window.scrollTo(0, 0)
     }, EXIT_DURATION)
 
     return () => clearTimeout(timerRef.current)
