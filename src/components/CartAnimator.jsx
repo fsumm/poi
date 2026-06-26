@@ -1,12 +1,19 @@
 import { useEffect } from 'react'
-import { waitUntilReady } from '../animUtils.js'
+import { waitUntilReady, waitForPending, hasFontduePending } from '../animUtils.js'
 
+// Hold the enter animation until fontdue's font specimens have swapped from
+// their Fallback face to the real one, then settle as usual — otherwise the
+// specimen text visibly re-renders after the fade-in has finished.
+async function waitForCartReady(el) {
+  await waitForPending(el, hasFontduePending)
+  await waitUntilReady(el)
+}
 
 async function animatePage(container) {
   if (!container || container.dataset.cartPage) return
   container.dataset.cartPage = 'loading'
 
-  await waitUntilReady(container)
+  await waitForCartReady(container)
 
   if (!container.isConnected) return
   container.dataset.cartPage = 'entering'
@@ -33,7 +40,7 @@ async function handleOpen(overlay) {
   overlay.dataset.cartAnim = 'loading'
   overlay.classList.add('cart-anim--loading')
 
-  await waitUntilReady(overlay)
+  await waitForCartReady(overlay)
 
   if (!overlay.isConnected) return
 

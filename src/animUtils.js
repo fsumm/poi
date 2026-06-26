@@ -5,15 +5,25 @@ const SETTLE_MAX  = 2000
 // Give it longer than the generic settle window before falling through.
 const PENDING_MAX = 4000
 
-// Resolves once no [data-anim-pending] elements remain in the subtree, so the
-// enter animation doesn't start while content is still rendering in.
-export function waitForPending(el) {
+// Default pending marker: async content (type tester etc.) tags itself with
+// [data-anim-pending] while loading.
+const hasAnimPending = el => el.querySelector('[data-anim-pending]') != null
+
+// fontdue's useFont renders font specimens with inline `font-family: Fallback`
+// while the real FontFace is still loading, then swaps to `"<Real>", Fallback`.
+// The bare `font-family: Fallback` substring therefore appears only while a
+// specimen is still unstyled — the cart-modal equivalent of [data-anim-pending].
+export const hasFontduePending = el => el.querySelector('[style*="font-family: Fallback"]') != null
+
+// Resolves once nothing in the subtree is still rendering in, so the enter
+// animation doesn't start mid-load. `isPending` reports whether content is still
+// pending; defaults to the [data-anim-pending] marker.
+export function waitForPending(el, isPending = hasAnimPending) {
   return new Promise(resolve => {
     if (!el) return resolve()
-    const settled = () => el.querySelector('[data-anim-pending]') == null
-    if (settled()) return resolve()
+    if (!isPending(el)) return resolve()
     const done = () => { observer.disconnect(); clearTimeout(timer); resolve() }
-    const observer = new MutationObserver(() => { if (settled()) done() })
+    const observer = new MutationObserver(() => { if (!isPending(el)) done() })
     observer.observe(el, { subtree: true, childList: true, attributes: true })
     const timer = setTimeout(done, PENDING_MAX)
   })
