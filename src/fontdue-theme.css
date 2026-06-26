@@ -319,13 +319,41 @@ input:checked + .checkbox__icon {
   font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  background-color: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(16px) saturate(180%);
+  /* Transparent: the frosted glass is a separate fixed layer on the overlay (see
+     .store-modal__container__overlay::before). It can't live here — this is the
+     scroll container holding the page subtree fontdue swaps on every route change,
+     and a backdrop-filter on it makes Safari re-rasterize the blur on each swap
+     (the 1-frame white flash). It also can't be a pseudo on THIS element: the panel
+     is transformed (slide-in), which makes a fixed child behave like an absolute
+     one — it then scrolls with the content and only covers the first screenful. */
+  background-color: transparent;
   overscroll-behavior: none;
   /* Override --font-family so merchant-injected rules resolve to the variable font */
   --font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
   --font-family__bold: 'POI Orbiter', system-ui, -apple-system, sans-serif;
+}
+
+/* Frosted glass: a viewport-fixed layer matching the drawer's footprint, painted
+   behind the transparent panel. It lives on the overlay — which is fixed, untransformed
+   and never scrolls — so it stays put under scrolling content AND sits outside the
+   swapping panel subtree, so Safari never re-rasterizes it on a page change. Width/right
+   mirror the panel (incl. the responsive breakpoints below); it slides in/out with it. */
+.store-modal__container__overlay::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: max(0px, (100vw - var(--max-w)) / 2);
+  width: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
+  pointer-events: none;
+  background-color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  animation: slideIn 300ms forwards;
+}
+/* Slide the frost out in sync when the panel is closing */
+.store-modal__container__overlay:has(.store-modal__container__container[data-closing])::before {
+  animation: poi-slide-out 280ms ease-in forwards;
 }
 
 /* Override merchant-injected font-weight: 400 on specific elements */
@@ -1221,6 +1249,11 @@ body[data-fontdue-store-modal=open] {
     max-width: calc((100vw - 2 * var(--pad) - 7 * var(--gap)) / 2 + 3 * var(--gap) + var(--pad) + var(--gap));
     right: 0;
   }
+  /* Keep the frosted layer matched to the panel footprint */
+  .store-modal__container__overlay::before {
+    width: calc((100vw - 2 * var(--pad) - 7 * var(--gap)) / 2 + 3 * var(--gap) + var(--pad) + var(--gap));
+    right: 0;
+  }
 }
 
 @media (max-width: 580px) {
@@ -1229,6 +1262,10 @@ body[data-fontdue-store-modal=open] {
   [data-route=checkout] .store-modal__container__container,
   [data-route=cart]:has(.empty-cart__container) .store-modal__container__container {
     max-width: 100vw;
+    right: 0;
+  }
+  .store-modal__container__overlay::before {
+    width: 100vw;
     right: 0;
   }
 }
