@@ -1,6 +1,34 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTilt } from '../useTilt.js'
 
 const STORE_URL = 'https://store.poi.tf'
+
+// A single glyph grid cell. Adds the cursor-following perspective tilt (rotation
+// only — `scale: 1` leaves the existing hover scale-down on the inner span
+// untouched) on top of the hover/select behaviour.
+//
+// The tilt rides on an inner `__cell-tilt` wrapper, NOT the cell itself, and
+// that wrapper is `pointer-events: none`. The cell stays flat so its hit-test
+// box keeps tiling perfectly with its neighbours — transforming the cell would
+// rotate its pointer region too and break the seamless cell-to-cell hover. The
+// span (which CSS scales on hover) nests inside the wrapper, so tilt and scale
+// live on different elements and never clash.
+function GlyphCell({ char, selected, onHover, onLeave, onSelect }) {
+  const tilt = useTilt({ scale: 1, max: 30 })
+  return (
+    <div
+      className={`glyph-overview__cell${selected ? ' selected' : ''}`}
+      onMouseEnter={(e) => { onHover(); tilt.onMouseEnter(e) }}
+      onMouseMove={tilt.onMouseMove}
+      onMouseLeave={(e) => { onLeave(); tilt.onMouseLeave(e) }}
+      onClick={onSelect}
+    >
+      <div ref={tilt.ref} className="glyph-overview__cell-tilt">
+        <span>{char}</span>
+      </div>
+    </div>
+  )
+}
 
 const COLLECTION_FIELDS = `
   name
@@ -239,15 +267,14 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
                     <div className="glyph-overview__group-name">{group.name}</div>
                     <div className="glyph-overview__grid" style={gridStyle(fontFeatureSettings)}>
                       {chars.map((char, i) => (
-                        <div
+                        <GlyphCell
                           key={i}
-                          className={`glyph-overview__cell${selected[selected.length - 1]?.char === char ? ' selected' : ''}`}
-                          onMouseEnter={() => setHovered({ char, fontFeatureSettings })}
-                          onMouseLeave={() => setHovered(null)}
-                          onClick={() => setSelected(prev => [...prev, { char, fontFamily, fontVariationSettings, fontFeatureSettings }])}
-                        >
-                          <span>{char}</span>
-                        </div>
+                          char={char}
+                          selected={selected[selected.length - 1]?.char === char}
+                          onHover={() => setHovered({ char, fontFeatureSettings })}
+                          onLeave={() => setHovered(null)}
+                          onSelect={() => setSelected(prev => [...prev, { char, fontFamily, fontVariationSettings, fontFeatureSettings }])}
+                        />
                       ))}
                     </div>
                   </div>

@@ -19,7 +19,11 @@ const tiltEnabled = () =>
   window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
   !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export function useTilt() {
+// Options:
+//   max   — peak rotation in degrees at the element's edge
+//   scale — hover grow factor (pass 1 to disable, e.g. when something else
+//           already scales the element on hover)
+export function useTilt({ max = TILT_MAX, scale = TILT_SCALE } = {}) {
   const ref = useRef(null)
   // Mutable animation state kept off React's render path: t* = target,
   // c* = current (eased) values; rect is cached on enter so mousemove never
@@ -89,12 +93,12 @@ export function useTilt() {
       if (!s.hovering || !s.rect) return
       const px = clamp((e.clientX - s.rect.left) / s.rect.width - 0.5)
       const py = clamp((e.clientY - s.rect.top) / s.rect.height - 0.5)
-      s.tx = px * 2 * TILT_MAX // rotateY: turn toward the cursor horizontally
-      s.ty = -py * 2 * TILT_MAX // rotateX: tip toward the cursor vertically
-      s.ts = TILT_SCALE
+      s.tx = px * 2 * max // rotateY: turn toward the cursor horizontally
+      s.ty = -py * 2 * max // rotateX: tip toward the cursor vertically
+      s.ts = scale
       ensureLoop()
     },
-    [s, ensureLoop],
+    [s, ensureLoop, max, scale],
   )
 
   const onMouseLeave = useCallback(() => {

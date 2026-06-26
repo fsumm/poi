@@ -1187,7 +1187,16 @@ button:disabled { cursor: default; }
   padding: 3px;
 }
 
-.glyph-overview__cell > span {
+/* Carries the perspective tilt (written inline by useTilt). `pointer-events:
+   none` keeps it out of hit-testing so the flat cell box drives hover — see the
+   GlyphCell comment. It stretches to fill the cell so the span sizes as before. */
+.glyph-overview__cell-tilt {
+  display: flex;
+  width: 100%;
+  pointer-events: none;
+}
+
+.glyph-overview__cell-tilt > span {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1200,13 +1209,13 @@ button:disabled { cursor: default; }
   transition: background 0.1s, transform 0.1s 0.1s;
 }
 
-.glyph-overview__cell:hover > span {
+.glyph-overview__cell:hover .glyph-overview__cell-tilt > span {
   background: var(--gray-2);
   transform: scale(0.85);
   transition: background 0.1s, transform 0.1s;
 }
 
-.glyph-overview__cell.selected > span {
+.glyph-overview__cell.selected .glyph-overview__cell-tilt > span {
   background: var(--ink-black);
   color: #fff;
   transform: scale(0.85);
