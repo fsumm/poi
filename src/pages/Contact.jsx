@@ -9,8 +9,9 @@ export default function Contact() {
         <div className="page-grid-body">
           <div className="page-section-label">Contact</div>
           <p className="page-text">
-            We're open for custom projects, collaborations, and modifications to
-            the catalog. Have a font ready for retail release? We'd love to see that too.
+            The foundry is available for custom projects and bespoke modifications to
+            the catalog. Proposals for new retail fonts are reviewed on a case-by-case basis. Kindly 
+            reach out to the email below.
           </p>
           <CopyEmailButton email="hello@poi.tf" />
         </div>

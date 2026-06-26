@@ -64,7 +64,7 @@ export default function TrialForm() {
           <div className="page-section-label">Trials</div>
           <p className="page-text">
             Trial fonts include the complete character set and all OpenType
-            features. Perfect for client pitches, personal projects, and student work.
+            features. Intended for client pitches, personal projects, and student work.
           </p>
 
           <input
