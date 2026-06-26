@@ -1,9 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { fonts } from '../data/fonts.js'
 import { openCart } from '../fontdueCart.js'
 
 export default function Nav() {
+  const location = useLocation()
+  // Catalog now lives at "/", with font detail pages under "/catalog/:id".
+  // Highlight the Catalog label on the home page and any font detail page.
+  const catalogActive = location.pathname === '/' || location.pathname.startsWith('/catalog')
   const [menuOpen, setMenuOpen] = useState(false)
   const [catalogOpen, setCatalogOpen] = useState(false)
   const navRef = useRef(null)
@@ -95,7 +99,7 @@ export default function Nav() {
       </button>
       <ul className="nav-links">
         <li className={`nav-item nav-item--has-submenu${catalogOpen ? ' nav-item--submenu-open' : ''}`}>
-          <NavLink to="/catalog" onClick={onCatalogClick} aria-haspopup="true" aria-expanded={catalogOpen} className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>Catalog</NavLink>
+          <NavLink to="/" onClick={onCatalogClick} aria-haspopup="true" aria-expanded={catalogOpen} className={'nav-link' + (catalogActive ? ' active' : '')}>Catalog</NavLink>
           <ul className="nav-submenu" ref={submenuRef}>
             {fonts.map(font => (
               <li key={font.id}>

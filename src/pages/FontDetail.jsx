@@ -52,7 +52,7 @@ export default function FontDetail() {
     tracking: SPECIMEN_TRACKING,
   })
 
-  if (!font) return <Navigate to="/catalog" replace />
+  if (!font) return <Navigate to="/" replace />
 
   return (
     <div className="font-detail">

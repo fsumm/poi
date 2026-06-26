@@ -61,8 +61,8 @@ export default function App() {
         <Nav />
         <main className="main">
           <AnimatedRoutes>
-            <Route path="/" element={<Navigate to="/catalog" replace />} />
-            <Route path="/catalog" element={<Catalog />} />
+            <Route path="/" element={<Catalog />} />
+            <Route path="/catalog" element={<Navigate to="/" replace />} />
             <Route path="/catalog/:fontId" element={<FontDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
