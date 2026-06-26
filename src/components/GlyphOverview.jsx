@@ -179,7 +179,7 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
 
         {/* ── Left: label (non-sticky) + sticky preview ───────── */}
         <div className="glyph-overview__preview-col">
-          <div className="page-section-label">Glyph Overview</div>
+          <div className="glyph-overview__group-name">Glyph Overview</div>
           <div className="glyph-overview__preview-sticky">
             <div className="glyph-overview__preview" style={previewStyle}>
               {selected.map((entry, i) => {
