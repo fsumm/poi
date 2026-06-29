@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react'
 import { useTilt } from '../useTilt.js'
 
 const STORE_URL = 'https://store.poi.tf'
@@ -13,22 +13,28 @@ const STORE_URL = 'https://store.poi.tf'
 // rotate its pointer region too and break the seamless cell-to-cell hover. The
 // span (which CSS scales on hover) nests inside the wrapper, so tilt and scale
 // live on different elements and never clash.
-function GlyphCell({ char, selected, onHover, onLeave, onSelect }) {
+//
+// memo()'d so a hover (which calls setHovered for the live preview, re-rendering
+// the whole overview) doesn't re-render all ~490 cells — that reconcile was
+// occasionally dropping a frame mid tilt-animation. All props are referentially
+// stable across hovers (the callbacks are useCallback'd in the parent), so memo
+// skips every cell whose selected flag hasn't flipped.
+const GlyphCell = memo(function GlyphCell({ char, fontFamily, fontVariationSettings, fontFeatureSettings, selected, onHover, onLeave, onSelect }) {
   const tilt = useTilt({ scale: 1, max: 30 })
   return (
     <div
       className={`glyph-overview__cell${selected ? ' selected' : ''}`}
-      onMouseEnter={(e) => { onHover(); tilt.onMouseEnter(e) }}
+      onMouseEnter={(e) => { onHover(char, fontFeatureSettings); tilt.onMouseEnter(e) }}
       onMouseMove={tilt.onMouseMove}
       onMouseLeave={(e) => { onLeave(); tilt.onMouseLeave(e) }}
-      onClick={onSelect}
+      onClick={() => onSelect({ char, fontFamily, fontVariationSettings, fontFeatureSettings })}
     >
       <div ref={tilt.ref} className="glyph-overview__cell-tilt">
         <span>{char}</span>
       </div>
     </div>
   )
-}
+})
 
 const COLLECTION_FIELDS = `
   name
@@ -147,12 +153,47 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
     setSelected([])
   }, [collectionSlug, collectionId])
 
+  // Expanding every group's glyph set (and the balanced two-column split) is the
+  // costly part of a render: it runs glyphExists() over the whole cmap for
+  // hundreds of characters. It depends only on `collection`, so memoize it —
+  // otherwise every hover (which calls setHovered to drive the live preview)
+  // re-runs it and can drop a frame mid tilt-animation (see GlyphCell).
+  const glyphData = useMemo(() => {
+    if (!collection) return null
+    const glyphNames = collection.featureStyle.glyphNames ?? []
+    const groups = collection.glyphGroups
+      .filter(g => g.name !== 'Access All Alternates')
+      .map(g => ({
+        name: g.name,
+        chars: expandCharacters(g.characterSets, glyphNames),
+        fontFeatureSettings: featureSettings(g.characterSets),
+      }))
+
+    // Balanced, contiguous two-column split (mirrors CSS multicol's column-major
+    // flow, which WebKit renders buggily — see CSS). A group's column height ≈
+    // (rows + 1) × cellHeight: `rows` grid rows of 6 cells plus ~1 row's worth of
+    // header + inter-group margin. Pick the split minimising the height diff.
+    const heights = groups.map(g => Math.ceil(g.chars.length / 6) + 1)
+    const total = heights.reduce((a, b) => a + b, 0)
+    let acc = 0, splitIdx = groups.length, bestDiff = Infinity
+    for (let i = 1; i < groups.length; i++) {
+      acc += heights[i - 1]
+      const diff = Math.abs(2 * acc - total)
+      if (diff < bestDiff) { bestDiff = diff; splitIdx = i }
+    }
+    const groupColumns = [groups.slice(0, splitIdx), groups.slice(splitIdx)]
+    const firstChar = groups[0]?.chars.find(c => c.trim() !== '') ?? ''
+    return { groupColumns, firstChar }
+  }, [collection])
+
+  // Stable handlers so the memo'd cells don't see new props on every hover.
+  const handleHover = useCallback((char, fontFeatureSettings) => setHovered({ char, fontFeatureSettings }), [])
+  const handleLeave = useCallback(() => setHovered(null), [])
+  const handleSelect = useCallback((entry) => setSelected(prev => [...prev, entry]), [])
 
   if (!collection) return <div className="glyph-overview-loading" />
 
-  const { name, featureStyle, fontStyles, glyphGroups: allGroups } = collection
-  const glyphGroups = allGroups.filter(g => g.name !== 'Access All Alternates')
-  const glyphNames = featureStyle.glyphNames ?? []
+  const { featureStyle, fontStyles } = collection
 
   // Variable font instances take priority over static fontStyles, then fallback weights
   const apiInstances = featureStyle.variableInstances ?? []
@@ -171,32 +212,11 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
     ? selectedInstance.coordinates.map(c => `"${c.axis}" ${c.value}`).join(', ')
     : 'normal'
 
-  const firstChar = expandCharacters(glyphGroups[0]?.characterSets ?? [], glyphNames)
-    .find(c => c.trim() !== '') ?? ''
-
-  // Split the groups into two balanced, contiguous columns (mirroring CSS
-  // multicol's column-major flow, which WebKit renders buggily — see CSS). A
-  // group's column height ≈ (rows + 1) × cellHeight: `rows` grid rows of 6 cells
-  // plus ~1 row's worth of header + inter-group margin. The split point is
-  // chosen to minimise the height difference between the two columns.
-  const groupColumns = (() => {
-    const heights = glyphGroups.map(g =>
-      Math.ceil(expandCharacters(g.characterSets, glyphNames).length / 6) + 1)
-    const total = heights.reduce((a, b) => a + b, 0)
-    let acc = 0, splitIdx = glyphGroups.length, bestDiff = Infinity
-    for (let i = 1; i < glyphGroups.length; i++) {
-      acc += heights[i - 1]
-      const diff = Math.abs(2 * acc - total)
-      if (diff < bestDiff) { bestDiff = diff; splitIdx = i }
-    }
-    return [glyphGroups.slice(0, splitIdx), glyphGroups.slice(splitIdx)]
-  })()
-
   const previewStyle = { fontFamily, fontVariationSettings }
   const gridStyle = (fontFeatureSettings) => ({ fontFamily, fontVariationSettings, fontFeatureSettings })
 
   const activeEntry = hovered ?? selected[selected.length - 1] ?? null
-  const activeChar = activeEntry?.char ?? firstChar
+  const activeChar = activeEntry?.char ?? glyphData.firstChar
   const activeFeatures = activeEntry?.fontFeatureSettings ?? 'normal'
 
   const pills = hasInstances ? instances : hasMultiStyle ? fontStyles : []
@@ -256,11 +276,10 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
         {/* Two explicit flex columns instead of CSS multicol, which WebKit
             mis-renders here (see CSS). groupColumns is balanced in JS above. */}
         <div className="glyph-overview__groups">
-          {groupColumns.map((col, ci) => (
+          {glyphData.groupColumns.map((col, ci) => (
             <div key={ci} className="glyph-overview__col">
               {col.map((group) => {
-                const chars = expandCharacters(group.characterSets, glyphNames)
-                const fontFeatureSettings = featureSettings(group.characterSets)
+                const { chars, fontFeatureSettings } = group
 
                 return (
                   <div key={group.name} className="glyph-overview__group">
@@ -270,10 +289,13 @@ export default function GlyphOverview({ collectionSlug, collectionId, fallbackWe
                         <GlyphCell
                           key={i}
                           char={char}
+                          fontFamily={fontFamily}
+                          fontVariationSettings={fontVariationSettings}
+                          fontFeatureSettings={fontFeatureSettings}
                           selected={selected[selected.length - 1]?.char === char}
-                          onHover={() => setHovered({ char, fontFeatureSettings })}
-                          onLeave={() => setHovered(null)}
-                          onSelect={() => setSelected(prev => [...prev, { char, fontFamily, fontVariationSettings, fontFeatureSettings }])}
+                          onHover={handleHover}
+                          onLeave={handleLeave}
+                          onSelect={handleSelect}
                         />
                       ))}
                     </div>

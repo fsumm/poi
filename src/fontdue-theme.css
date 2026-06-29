@@ -346,9 +346,9 @@ input:checked + .checkbox__icon {
   right: max(0px, (100vw - var(--max-w)) / 2);
   width: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
   pointer-events: none;
-  background-color: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(16px) saturate(180%);
+  background-color: var(--glass-tint);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   animation: slideIn 300ms forwards;
 }
 /* Slide the frost out in sync when the panel is closing */
@@ -530,9 +530,9 @@ input:checked + .checkbox__icon {
   align-items: center;
   position: sticky;
   top: 0;
-  background: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(16px) saturate(180%);
+  background: var(--glass-tint);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   z-index: 10;
 }
 @media (min-width: 900px) {
@@ -831,7 +831,7 @@ input:checked + .checkbox__icon {
   background: var(--gray-1);
   color: var(--ink-black);
   border: none;
-  border-radius: 20px;
+  border-radius: 10px;
   box-shadow: none;
   margin: 0;
   padding: 14px 16px;
@@ -842,7 +842,7 @@ input:checked + .checkbox__icon {
   background: var(--gray-1);
   color: var(--ink-black);
   border: none;
-  border-radius: 20px;
+  border-radius: 10px;
   box-shadow: none;
   margin: 0;
   padding: 14px 16px;
@@ -1308,9 +1308,9 @@ body[data-fontdue-store-modal=open] {
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--ink-black);
-  background-color: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(16px) saturate(180%);
+  background-color: var(--glass-tint);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   animation: poi-slide-in 300ms forwards;
 }
 .trial-modal__panel[data-closing] {
@@ -1333,9 +1333,9 @@ body[data-page-phase=exiting] .trial-modal__panel {
   margin-bottom: 20px;
   position: sticky;
   top: 0;
-  background: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(16px) saturate(180%);
+  background: var(--glass-tint);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   z-index: 10;
 }
 

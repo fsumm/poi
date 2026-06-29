@@ -140,6 +140,12 @@ html[data-resizing] *::after {
      screen edges, while content is padded clear of it. */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Frosted-glass tokens — shared by every backdrop-filter surface (nav bars,
+     mobile dropdown, buy bar, cart/trial modals) so the effect stays uniform.
+     --glass-tint is a full rgba() value so call sites read `background: var(--glass-tint)`. */
+  --glass-blur: 16px;
+  --glass-saturate: 180%;
+  --glass-tint: rgba(255, 255, 255, 0.6);
   --font-ui: 'POI Orbiter', system-ui, -apple-system, sans-serif;
   --font-size-sm: 12px;
   --font-size-lg: 18px;
@@ -226,9 +232,9 @@ button:disabled { cursor: default; }
      it reads as one continuous header (and obscures content scrolled beneath).
      The extra --safe-top reaches up under the status bar to the screen edge. */
   height: calc(var(--nav-h) + var(--submenu-h, 0px) + var(--safe-top));
-  background: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(16px) saturate(180%);
+  background: var(--glass-tint);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   z-index: -1;
   transition: height 0.4s cubic-bezier(.5, 0, .5, 1);
 }
@@ -471,9 +477,10 @@ button:disabled { cursor: default; }
 }
 
 /* The cursor-following perspective tilt shared by every framed image is driven
-   entirely from JS (see useTilt): a rAF loop eases the inline `transform` and
-   toggles `will-change` only while active. A CSS `transition` is deliberately
-   NOT used — restarting one per mousemove is what makes Safari jitter. */
+   entirely from JS (see useTilt): a rAF loop eases the inline `transform`. A CSS
+   `transition` is deliberately NOT used — restarting one per mousemove is what
+   makes Safari jitter — and neither is `will-change` (it paint-flashes on the
+   per-hover layer promotion; see useTilt). */
 
 /* Centered random-glyph overlay; font family/style set inline per card.
    `filter` carries a slight permanent blur which the intro animation
@@ -1810,9 +1817,9 @@ body[data-page-phase=entering] .footer {
     padding: calc(var(--nav-h) + var(--safe-top)) var(--pad) 0;
     max-height: calc(var(--nav-h) + var(--safe-top)); /* closed: status strip + bar */
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.85);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    backdrop-filter: blur(16px) saturate(180%);
+    background: var(--glass-tint);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
     transition:
       max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
       padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1948,9 +1955,9 @@ body[data-page-phase=entering] .footer {
     /* Frosted glass extends down under the home indicator (padding-bottom adds
        to this content-box height); the buttons stay centered in the bar above it. */
     padding: 0 var(--pad) var(--safe-bottom);
-    background: rgba(255, 255, 255, 0.7);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    backdrop-filter: blur(16px) saturate(180%);
+    background: var(--glass-tint);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
     z-index: 50;
   }
 

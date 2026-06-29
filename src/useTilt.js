@@ -58,9 +58,7 @@ export function useTilt({ max = TILT_MAX, scale = TILT_SCALE } = {}) {
         if (s.hovering) {
           el.style.transform = `perspective(900px) rotateX(${s.cy}deg) rotateY(${s.cx}deg) scale(${s.cs})`
         } else {
-          // Fully reset: drop the inline transform + compositing hint.
-          el.style.transform = ''
-          el.style.willChange = ''
+          el.style.transform = '' // settled back to flat
         }
         s.raf = 0 // stop; the next enter/move/leave restarts the loop
         return
@@ -84,7 +82,10 @@ export function useTilt({ max = TILT_MAX, scale = TILT_SCALE } = {}) {
     if (!el || !tiltEnabled()) return
     s.rect = el.getBoundingClientRect()
     s.hovering = true
-    el.style.willChange = 'transform'
+    // Deliberately NO `will-change: transform` here. Toggling it per hover
+    // eagerly promotes the element to its own compositor layer on enter, which
+    // re-rasterizes a rounded/clipped box into a fresh GPU texture — a visible
+    // one-frame paint flash. The running transform composites on its own anyway.
     ensureLoop()
   }, [s, ensureLoop])
 
