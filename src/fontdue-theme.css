@@ -433,8 +433,8 @@ input:checked + .checkbox__icon {
   .store-modal__container__container .cart-item {
     display: grid;
     grid-template-columns: 1fr auto;
-    column-gap: 20px;
-    row-gap: 10px;
+    column-gap: 6px;
+    row-gap: 6px;
     align-items: baseline;
     padding-bottom: 0;
   }
@@ -460,8 +460,16 @@ input:checked + .checkbox__icon {
 
 @media (max-width: 1199px) {
   .store-modal__container__container .cart-item {
-    row-gap: 10px;
+    row-gap: 6px;
   }
+  .cart-item__product {
+    margin-bottom: 0px;
+  }
+}
+
+/* Remove margin from cart item*/
+.cart-item {
+  padding-bottom: 0px;
 }
 
 /* Cart item license delete button — radio circle style, red */
@@ -526,7 +534,7 @@ input:checked + .checkbox__icon {
 .store-modal__container__nav {
   min-height: var(--nav-h);
   padding: 0 var(--pad);
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   align-items: center;
   position: sticky;
   top: 0;
@@ -542,9 +550,21 @@ input:checked + .checkbox__icon {
 .store-modal__container__nav[data-has-back-text=true] .store-modal__container__buttons {
   grid-column: 3;
 }
-/* On page 1 (no back button), span buttons across full grid to reach the right edge */
+/* On page 1 (no back button), span buttons across full grid to reach the right
+   edge, and center the cart + close pills vertically. Without this they default
+   to baseline alignment, so the shorter "Close" pill rides up against the taller
+   "Items in cart" pill. */
 .store-modal__container__nav[data-has-back-text=false] .store-modal__container__buttons {
   grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+/* Only show the "Items in cart" button on the catalog overview (page 1, no back
+   button). On every deeper page the back button + close fill the row, and the
+   cart pill collides with them at mid widths — so hide it there. */
+.store-modal__container__nav[data-has-back-text=true] .store-modal__container__cart-button {
+  display: none;
 }
 
 /* Body padding */
@@ -1075,7 +1095,15 @@ input:checked + .checkbox__icon {
 /* ── Collection index items (All collections view) ───────────────────────────── */
 .store-modal__container__container .store-modal__index-item__button {
   border: none;
-  padding: 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--gray-1);
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.store-modal__container__container .store-modal__index-item__button:hover {
+  background: var(--gray-2);
 }
 
 .store-modal__container__container .store-modal__index-item__buy {
@@ -1087,8 +1115,9 @@ input:checked + .checkbox__icon {
   font-weight: 600;
   white-space: nowrap;
   transition: background 120ms, color 120ms;
+  display: none;
 }
-.store-modal__container__container .store-modal__index-item__buy:hover {
+.store-modal__container__container .store-modal__index-item__button:hover .store-modal__index-item__buy {
   background: var(--yellow);
   color: var(--ink-black);
 }

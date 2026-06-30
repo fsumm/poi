@@ -1,6 +1,7 @@
 import { Route, Navigate } from 'react-router-dom'
 import AnimatedRoutes from './components/AnimatedRoutes.jsx'
 import CartAnimator from './components/CartAnimator.jsx'
+import StoreModalTilt from './components/StoreModalTilt.jsx'
 import FontdueProvider from 'fontdue-js/FontdueProvider'
 import StoreModal from 'fontdue-js/StoreModal'
 import 'fontdue-js/fontdue.css'
@@ -57,6 +58,7 @@ export default function App() {
     <FontdueProvider url={STORE_URL} config={{ stripe: { appearance: STRIPE_APPEARANCE } }}>
       <StoreModal />
       <CartAnimator />
+      <StoreModalTilt />
       <div className="app">
         <Nav />
         <main className="main">
