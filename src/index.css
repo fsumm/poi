@@ -1192,18 +1192,39 @@ button:disabled { cursor: default; }
   cursor: default;
   user-select: none;
   padding: 3px;
+  /* Skip rendering (layout/paint/composite) for cells that are off-screen, so a
+     fast scroll doesn't pay to run the reveal transition on the hundreds of
+     cells animating in the off-screen parts of the (large) reveal band. The
+     placeholder size only applies to cells that have never rendered; `auto` then
+     remembers each cell's real (square) size once it has. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 40px;
+  /* Scroll-reveal: scaled to nothing until the cell enters the active band, then
+     scales up; scales back out when it leaves (data-revealed toggled by the
+     IntersectionObserver in useReveal, so it's reversible on scroll up/down).
+     Plain opacity + 2D scale — no 3D transform — so resting cells hold no GPU
+     compositing layer (a resting 3D transform on all ~490 cells is what made
+     scrolling lag). transition-delay is set per-cell inline (random 0–200ms). */
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.4s cubic-bezier(0, 1, 0.3, 1),
+              transform 0.4s cubic-bezier(0, 1, 0.3, 1);
 }
 
-/* Carries the perspective tilt (written inline by useTilt). `pointer-events:
-   none` keeps it out of hit-testing so the flat cell box drives hover — see the
-   GlyphCell comment. It stretches to fill the cell so the span sizes as before. */
-.glyph-overview__cell-tilt {
-  display: flex;
-  width: 100%;
-  pointer-events: none;
+.glyph-overview__cell[data-revealed] {
+  opacity: 1;
+  transform: none;
 }
 
-.glyph-overview__cell-tilt > span {
+@media (prefers-reduced-motion: reduce) {
+  .glyph-overview__cell {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.glyph-overview__cell > span {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1216,13 +1237,13 @@ button:disabled { cursor: default; }
   transition: background 0.1s, transform 0.1s 0.1s;
 }
 
-.glyph-overview__cell:hover .glyph-overview__cell-tilt > span {
+.glyph-overview__cell:hover > span {
   background: var(--gray-2);
   transform: scale(0.85);
   transition: background 0.1s, transform 0.1s;
 }
 
-.glyph-overview__cell.selected .glyph-overview__cell-tilt > span {
+.glyph-overview__cell.selected > span {
   background: var(--ink-black);
   color: #fff;
   transform: scale(0.85);
@@ -1393,7 +1414,7 @@ button:disabled { cursor: default; }
 .tt-slider-value {
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--gray-5);
+  color: var(--ink-black);
   background: var(--gray-1);
   border: none;
   border-radius: 100px;
