@@ -145,7 +145,7 @@ html[data-resizing] *::after {
      --glass-tint is a full rgba() value so call sites read `background: var(--glass-tint)`. */
   --glass-blur: 16px;
   --glass-saturate: 180%;
-  --glass-tint: rgba(255, 255, 255, 0.6);
+  --glass-tint: rgba(255, 255, 255, 0.8);
   --font-ui: 'POI Orbiter', system-ui, -apple-system, sans-serif;
   --font-size-sm: 12px;
   --font-size-lg: 16px;
