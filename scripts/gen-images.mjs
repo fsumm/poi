@@ -15,17 +15,20 @@
 // Variants are written to /public/responsive (served verbatim by Vite under the
 // configured base path). A manifest is written to src/data/images.js.
 //
-// Regenerate after adding/replacing images:  npm run images
+// Regenerate everything:        npm run images
+// Regenerate specific images:   npm run images -- about001.jpg orbiter001.jpg
+//   (only the named images' variants + manifest entries are rebuilt; all other
+//    entries are preserved, and the output dir is left otherwise untouched.)
 //
 // Uses macOS `sips` so there are no extra npm dependencies.
 
 import { execFileSync } from 'node:child_process'
 import {
-  readdirSync, readFileSync, writeFileSync, mkdtempSync, rmSync, mkdirSync,
+  readdirSync, readFileSync, writeFileSync, mkdtempSync, rmSync, mkdirSync, existsSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname, basename } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -49,19 +52,41 @@ function dims(file) {
   return { w, h }
 }
 
-// Start clean so renamed/removed source images don't leave stale variants.
-rmSync(OUT_DIR, { recursive: true, force: true })
-mkdirSync(OUT_DIR, { recursive: true })
+// Optional CLI filter: only (re)generate the named images. Without args we do a
+// full rebuild and wipe the output dir so renamed/removed sources don't leave
+// stale variants; with args we preserve every other image's files + manifest.
+const only = process.argv.slice(2).map((a) => basename(a))
+const targeted = only.length > 0
+
+let manifest = {}
+if (targeted) {
+  if (!existsSync(MANIFEST)) {
+    throw new Error('No existing manifest to update — run `npm run images` once for a full build first.')
+  }
+  manifest = { ...(await import(pathToFileURL(MANIFEST).href)).default }
+  mkdirSync(OUT_DIR, { recursive: true })
+} else {
+  rmSync(OUT_DIR, { recursive: true, force: true })
+  mkdirSync(OUT_DIR, { recursive: true })
+}
 const tmp = mkdtempSync(join(tmpdir(), 'imgopt-'))
 
 try {
-  const files = readdirSync(IMG_DIR).filter((f) => /\.jpe?g$/i.test(f)).sort()
-  const manifest = {}
+  const allFiles = readdirSync(IMG_DIR).filter((f) => /\.jpe?g$/i.test(f)).sort()
+  const files = targeted ? allFiles.filter((f) => only.includes(f)) : allFiles
+  const missing = only.filter((f) => !allFiles.includes(f))
+  if (missing.length) throw new Error(`No such image(s) in /img: ${missing.join(', ')}`)
 
   for (const file of files) {
     const src = join(IMG_DIR, file)
     const { w: srcW, h: srcH } = dims(src)
     const stem = basename(file).replace(/\.jpe?g$/i, '')
+
+    // Clear this image's previous variants (height set may change with the new
+    // source) so no stale files linger.
+    for (const f of readdirSync(OUT_DIR)) {
+      if (/^(.+)-h\d+\.jpg$/.exec(f)?.[1] === stem) rmSync(join(OUT_DIR, f))
+    }
 
     // Heights to produce, capped so we never upscale past the source height.
     let densities = DENSITIES.filter((d) => Math.round(d * FRAME_HEIGHT) <= srcH)
@@ -117,8 +142,9 @@ try {
 
   writeFileSync(MANIFEST, body)
 
-  const totalVariants = Object.values(manifest).reduce((n, e) => n + e.variants.length, 0)
-  console.log(`Generated ${totalVariants} height variants for ${files.length} images → public/${OUT_REL}/`)
+  const builtVariants = files.reduce((n, f) => n + manifest[f].variants.length, 0)
+  const scope = targeted ? `${files.join(', ')}` : `all ${files.length} images`
+  console.log(`Generated ${builtVariants} height variants for ${scope} → public/${OUT_REL}/`)
   console.log(`Wrote manifest → src/data/images.js`)
 } finally {
   rmSync(tmp, { recursive: true, force: true })

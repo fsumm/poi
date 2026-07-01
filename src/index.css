@@ -1555,11 +1555,11 @@ button:disabled { cursor: default; }
   opacity: 0;
 }
 
-/* Frame images always carry the scale transition so switching phases
+/* Frame images always carry the blur transition so switching phases
    mid-animation doesn't snap. Idle overrides with transition:none so the initial
-   scale(1.04) reset is instantaneous. */
+   blur reset is instantaneous. */
 .page-anim .frame-img {
-  transition: transform 2.75s cubic-bezier(0.16, 1, 0.3, 1), filter 3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: filter 3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .page-anim .catalog-card-text {
@@ -1567,7 +1567,6 @@ button:disabled { cursor: default; }
 }
 
 .page-anim--idle .frame-img {
-  transform: scale(1.04);
   filter: blur(8px);
   transition: none;
 }
@@ -1589,7 +1588,6 @@ button:disabled { cursor: default; }
 }
 
 .page-anim--entering .frame-img {
-  transform: scale(1);
   filter: blur(0px);
 }
 
