@@ -477,7 +477,7 @@ input:checked + .checkbox__icon {
   display: none;
 }
 .store-modal__container__container .cart-item__license {
-  gap: 10px;
+  gap: 6px;
 }
 .store-modal__container__container .cart-item__license__delete-button {
   background: none;

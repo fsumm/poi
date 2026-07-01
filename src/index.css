@@ -1496,7 +1496,7 @@ button:disabled { cursor: default; }
 .tt-feature-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   background: none;
   border: none;
   cursor: pointer;
