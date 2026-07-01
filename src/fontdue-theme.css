@@ -851,7 +851,7 @@ input:checked + .checkbox__icon {
   background: var(--gray-1);
   color: var(--ink-black);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-ui);
   box-shadow: none;
   margin: 0;
   padding: 14px 16px;
@@ -862,7 +862,7 @@ input:checked + .checkbox__icon {
   background: var(--gray-1);
   color: var(--ink-black);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-ui);
   box-shadow: none;
   margin: 0;
   padding: 14px 16px;
@@ -1096,7 +1096,7 @@ input:checked + .checkbox__icon {
 .store-modal__container__container .store-modal__index-item__button {
   border: none;
   padding: 14px 16px;
-  border-radius: 10px;
+  border-radius: var(--radius-ui);
   background: var(--gray-1);
   margin-top: 0;
   margin-bottom: 12px;
@@ -1217,6 +1217,12 @@ input:checked + .checkbox__icon {
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: #fff;
+}
+/* While the panel slides in it sweeps under a stationary cursor, which would
+   latch the cart button's :hover state. Suppress its hit-testing until the slide
+   settles (CartAnimator toggles data-cart-opening around the slide-in). */
+.store-modal__container__overlay[data-cart-opening] .store-modal__container__cart-button {
+  pointer-events: none;
 }
 
 /* Allow page to scroll while cart modal is open */

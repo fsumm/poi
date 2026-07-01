@@ -125,7 +125,7 @@ html[data-resizing] *::after {
 
   --color-bg: #ffffff;
   --radius-pill: 100px;
-  --radius-ui: 20px;
+  --radius-ui: 6px;
   --max-w: 1700px;
   --pad: 20px;
   --gap: 20px;
@@ -148,7 +148,7 @@ html[data-resizing] *::after {
   --glass-tint: rgba(255, 255, 255, 0.6);
   --font-ui: 'POI Orbiter', system-ui, -apple-system, sans-serif;
   --font-size-sm: 12px;
-  --font-size-lg: 18px;
+  --font-size-lg: 16px;
   --padding-sm: 6px 14px;
   --padding-lg: 8px 20px;
 }
@@ -469,7 +469,7 @@ button:disabled { cursor: default; }
   background-position: center;
   background-repeat: no-repeat;
   width: 100%;
-  border-radius: 10px;
+  border-radius: var(--radius-ui);
   overflow: hidden;
   position: relative;
   /* Query container so the overlay text can size to the image width (cqi) */
@@ -580,7 +580,7 @@ button:disabled { cursor: default; }
   background-position: center;
   background-repeat: no-repeat;
   height: 360px;
-  border-radius: 10px;
+  border-radius: var(--radius-ui);
   overflow: hidden;
   position: relative;
   /* Query container so the overlay glyphs size like the catalog cards */
@@ -800,7 +800,7 @@ button:disabled { cursor: default; }
   background-position: center;
   background-repeat: no-repeat;
   height: 360px;
-  border-radius: 10px;
+  border-radius: var(--radius-ui);
   overflow: hidden;
   position: relative;
 }
@@ -1089,7 +1089,7 @@ button:disabled { cursor: default; }
 
 .glyph-overview__preview {
   background: var(--gray-1);
-  border-radius: 10px;
+  border-radius: var(--radius-ui);
   aspect-ratio: 1;
   width: 100%;
   max-width: 540px;
@@ -1232,7 +1232,7 @@ button:disabled { cursor: default; }
   /* height comes from the cell's `align-items: stretch`, not a percentage —
      see the cell rule (Safari resolves % height against the border box). */
   background: var(--gray-1);
-  border-radius: 10px;
+  border-radius: var(--radius-ui);
   transform: scale(1);
   transition: background 0.1s, transform 0.1s 0.1s;
 }
@@ -1278,7 +1278,7 @@ button:disabled { cursor: default; }
   background-position: center;
   background-repeat: no-repeat;
   height: 360px;
-  border-radius: 10px;
+  border-radius: var(--radius-ui);
   overflow: hidden;
   position: relative;
 }
@@ -1677,19 +1677,19 @@ body[data-page-phase=entering] .footer {
 
 /* ─── Cart modal animations ──────────────────────────────────────────────── */
 
-.cart-anim--loading .store-modal__container__nav,
+.cart-anim--loading .store-modal__container__cart-button,
 .cart-anim--loading .store-modal__index-item__button {
   opacity: 0;
 }
 
 /* ── Enter ── */
-.cart-anim--entering .store-modal__container__nav,
+.cart-anim--entering .store-modal__container__cart-button,
 .cart-anim--entering .store-modal__index-item__button {
   opacity: 1;
   transition: opacity 0.4s linear;
 }
 
-.cart-anim--entering .store-modal__container__nav           { transition-delay: 0ms; }
+.cart-anim--entering .store-modal__container__cart-button   { transition-delay: 100ms; }
 .cart-anim--entering .store-modal__index-item__button:nth-child(1) { transition-delay: 80ms; }
 .cart-anim--entering .store-modal__index-item__button:nth-child(2) { transition-delay: 160ms; }
 .cart-anim--entering .store-modal__index-item__button:nth-child(3) { transition-delay: 240ms; }
