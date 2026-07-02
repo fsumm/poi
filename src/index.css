@@ -1642,6 +1642,15 @@ button:disabled { cursor: default; }
 .page-anim--exiting > *:not(.catalog-page) > *:nth-child(5)  { transition-delay: 160ms; }
 .page-anim--exiting > *:not(.catalog-page) > *:nth-child(6)  { transition-delay: 200ms; }
 
+/* Same clobbering as the enter fix above: the exit rule replaces the buy bar's
+   transition list with opacity-only, so when a submenu navigation closes the
+   Catalog panel mid-scroll (--submenu-h → 0 while the bar is stuck), its `top`
+   snaps instead of sliding up with the collapsing submenu. Restore both. */
+.page-anim--exiting > *:not(.catalog-page) > .font-detail-actions-sticky {
+  transition: top 0.4s cubic-bezier(.5, 0, .5, 1), opacity 0.3s linear;
+  transition-delay: 0s;
+}
+
 .page-anim--exiting .catalog-hero,
 .page-anim--exiting .catalog-grid > * {
   opacity: 0;

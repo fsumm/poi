@@ -41,7 +41,7 @@ const QUERY_BY_SLUG = `query POITypeTesterBySlug($slug: String!) {
     slug(name: $slug) {
       collection: fontCollection {
         typeTesters(first: 999) {
-          edges { node { content featureSettings { feature value } variableSettings { axis value } fontStyle { ${FONT_STYLE_FIELDS} } } }
+          edges { node { content letterSpacing featureSettings { feature value } variableSettings { axis value } fontStyle { ${FONT_STYLE_FIELDS} } } }
         }
       }
     }
@@ -52,7 +52,7 @@ const QUERY_BY_ID = `query POITypeTesterById($id: ID!) {
   node(id: $id) {
     ... on FontCollection {
       typeTesters(first: 999) {
-        edges { node { content featureSettings { feature value } variableSettings { axis value } fontStyle { ${FONT_STYLE_FIELDS} } } }
+        edges { node { content letterSpacing featureSettings { feature value } variableSettings { axis value } fontStyle { ${FONT_STYLE_FIELDS} } } }
       }
     }
   }
@@ -74,7 +74,9 @@ function parseEdges(edges) {
     // Default variable-axis positions fontdue set for this tester (e.g. wght/slnt)
     const defaultAxes = {}
     for (const v of node.variableSettings ?? []) defaultAxes[v.axis] = v.value
-    result.push({ ...fs, defaultContent: node.content ?? 'Type something', defaultFeatures, defaultAxes })
+    // Default tracking fontdue set for this tester, in em (matches letter-spacing)
+    const defaultTracking = Number(node.letterSpacing) || 0
+    result.push({ ...fs, defaultContent: node.content ?? 'Type something', defaultFeatures, defaultAxes, defaultTracking })
   }
   return result
 }
@@ -328,6 +330,7 @@ export default function TypeTester({ collectionSlug, collectionId }) {
       if (textAreaRef.current) textAreaRef.current.textContent = initial
       setAxisValues(styleAxisDefaults(preferred))
       setEnabledFeatures(new Set(preferred.defaultFeatures ?? []))
+      setTracking(preferred.defaultTracking ?? 0)
     }
   }, [styles])
 
@@ -339,6 +342,7 @@ export default function TypeTester({ collectionSlug, collectionId }) {
     if (textAreaRef.current) textAreaRef.current.textContent = initial
     setAxisValues(styleAxisDefaults(style))
     setEnabledFeatures(new Set(style.defaultFeatures ?? []))
+    setTracking(style.defaultTracking ?? 0)
   }, [style?.id])
 
   const fontLoaded = useFontFace(style?.cssFamily, style?.webfontSources, style?.cssWeight, style?.cssStyle)
