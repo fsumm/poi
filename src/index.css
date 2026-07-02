@@ -1327,6 +1327,13 @@ button:disabled { cursor: default; }
 .tt-text-wrap {
   overflow: visible;
   padding: 24px 0;
+  /* Bottom-align the editable inside the reserved frame (set inline via
+     minHeight) so lighter styles' slack floats above the text and the text
+     stays anchored just above the toolbar. Flex lives on the wrapper, not the
+     contenteditable itself, to keep caret behavior sane. */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   min-height: 120px;
   cursor: text;
 }

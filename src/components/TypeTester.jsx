@@ -138,8 +138,12 @@ const DEFAULT_FONT_SIZE = 120
 // sets the size manually; re-enabled only on a fresh mount (navigation/refresh).
 function useAutofit(containerRef, setFontSize, opts) {
   const { enabled, fontLoaded, fontFamily, fontWeight, fontStyle,
-          featureSettings, variationSettings, tracking, text } = opts
+          featureSettings, variationSettings, tracking, text, lineHeight, instances } = opts
   const measureRef = useRef(null)
+  // Height (px) reserved for the text so the toolbar below never moves when a
+  // style pill re-fits the text at a different size: the tallest fit across all
+  // of the font's named instances, at the current text/tracking/line-height.
+  const [reservedHeight, setReservedHeight] = useState(null)
 
   useEffect(() => {
     const span = document.createElement('span')
@@ -157,8 +161,10 @@ function useAutofit(containerRef, setFontSize, opts) {
     span.style.fontWeight = fontWeight ?? 400
     span.style.fontStyle = fontStyle ?? 'normal'
     span.style.fontFeatureSettings = featureSettings || 'normal'
-    span.style.fontVariationSettings = variationSettings || 'normal'
     span.style.letterSpacing = `${tracking ?? 0}em`
+    const containerW = container.clientWidth
+    if (!containerW) return
+
     // Multi-line text (the user pressed Enter) must fill the width based on its
     // WIDEST line, not the lines concatenated — otherwise the size shrinks far
     // too small. innerText carries the line breaks as "\n".
@@ -168,16 +174,30 @@ function useAutofit(containerRef, setFontSize, opts) {
     // edge, not the layout edge, lands on the margin.
     const trailing = (tracking ?? 0) * 100 // px at the 100px reference size
     const lines = String(text || ' ').split('\n')
-    let textW = 0
-    for (const line of lines) {
-      span.textContent = line.length ? line : ' '
-      const w = span.offsetWidth - trailing
-      if (w > textW) textW = w
+    const fitFor = variation => {
+      span.style.fontVariationSettings = variation || 'normal'
+      let textW = 0
+      for (const line of lines) {
+        span.textContent = line.length ? line : ' '
+        const w = span.offsetWidth - trailing
+        if (w > textW) textW = w
+      }
+      return textW > 0 ? Math.min(900, Math.max(12, Math.floor((containerW / textW) * 100))) : null
     }
-    const containerW = container.clientWidth
-    if (!textW || !containerW) return
-    setFontSize(Math.min(900, Math.max(12, Math.floor((containerW / textW) * 100))))
-  }, [enabled, fontLoaded, fontFamily, fontWeight, fontStyle, featureSettings, variationSettings, tracking, text])
+
+    const current = fitFor(variationSettings)
+    if (current == null) return
+    setFontSize(current)
+
+    // Reserve the text area for the LARGEST instance's fit so pill clicks never
+    // change the block's height (glyphs resize inside a static frame).
+    let maxFit = current
+    for (const inst of instances ?? []) {
+      const f = fitFor(inst.coordinates.map(c => `"${c.axis}" ${c.value}`).join(', '))
+      if (f != null && f > maxFit) maxFit = f
+    }
+    setReservedHeight(Math.ceil(maxFit * (lineHeight ?? 1.1) * lines.length))
+  }, [enabled, fontLoaded, fontFamily, fontWeight, fontStyle, featureSettings, variationSettings, tracking, text, lineHeight, instances])
 
   // useLayoutEffect runs before paint, so load / style change / typing never
   // flash a stale size.
@@ -197,6 +217,8 @@ function useAutofit(containerRef, setFontSize, opts) {
     ro.observe(container)
     return () => { ro.disconnect(); clearTimeout(t) }
   }, [fit, enabled])
+
+  return reservedHeight
 }
 
 // ── Slider with value pill ────────────────────────────────────────────────────
@@ -382,7 +404,7 @@ export default function TypeTester({ collectionSlug, collectionId }) {
     : 'normal'
 
   // Keep the text filling the container width until the user sets a size.
-  useAutofit(containerRef, setFontSize, {
+  const reservedHeight = useAutofit(containerRef, setFontSize, {
     enabled: autofit,
     fontLoaded,
     fontFamily: style?.cssFamily,
@@ -392,6 +414,8 @@ export default function TypeTester({ collectionSlug, collectionId }) {
     variationSettings: fontVariationSettings,
     tracking,
     text,
+    lineHeight,
+    instances: style?.variableInstances,
   })
 
   const textStyle = style ? {
@@ -454,7 +478,15 @@ export default function TypeTester({ collectionSlug, collectionId }) {
       {/* .tt-text-clip full-bleeds to the window and clips the overflowing text
           there; .tt-text-wrap keeps the content-column width autofit measures. */}
       <div className="tt-text-clip">
-        <div className="tt-text-wrap" ref={containerRef}>
+        {/* Reserve the tallest instance-fit height (+ the wrap's 24px top and
+            bottom padding) so pill clicks resize glyphs inside a static frame
+            instead of pushing the toolbar up/down; the wrap's flex-end in CSS
+            bottom-aligns the text within the frame. */}
+        <div
+          className="tt-text-wrap"
+          ref={containerRef}
+          style={{ minHeight: reservedHeight ? `calc(${reservedHeight}px + 48px)` : undefined }}
+        >
           <div
             ref={textAreaRef}
             className="tt-text"
