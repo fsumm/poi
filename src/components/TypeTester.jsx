@@ -162,11 +162,17 @@ function useAutofit(containerRef, setFontSize, opts) {
     // Multi-line text (the user pressed Enter) must fill the width based on its
     // WIDEST line, not the lines concatenated — otherwise the size shrinks far
     // too small. innerText carries the line breaks as "\n".
+    // letter-spacing is also applied AFTER the last character, so the advance
+    // width under-reports the painted ink by one tracking unit when tracking is
+    // negative (glyph paints past the box) — subtract it so the visual right
+    // edge, not the layout edge, lands on the margin.
+    const trailing = (tracking ?? 0) * 100 // px at the 100px reference size
     const lines = String(text || ' ').split('\n')
     let textW = 0
     for (const line of lines) {
       span.textContent = line.length ? line : ' '
-      if (span.offsetWidth > textW) textW = span.offsetWidth
+      const w = span.offsetWidth - trailing
+      if (w > textW) textW = w
     }
     const containerW = container.clientWidth
     if (!textW || !containerW) return
@@ -311,6 +317,11 @@ export default function TypeTester({ collectionSlug, collectionId }) {
   // Text fills the container by default; turns off once the user sets a size,
   // and is only restored on a fresh mount (navigation / refresh).
   const [autofit, setAutofit] = useState(true)
+  // True only while an instance-pill click animates the axes. Kept off for
+  // slider drags so they don't reflow-animate on every frame.
+  const [axesAnimating, setAxesAnimating] = useState(false)
+  const axesAnimTimer = useRef(null)
+  useEffect(() => () => clearTimeout(axesAnimTimer.current), [])
 
   const containerRef = useRef(null)
   // Uncontrolled ref for the contenteditable — React never sets its children,
@@ -395,6 +406,11 @@ export default function TypeTester({ collectionSlug, collectionId }) {
     // No letter-spacing transition: while dragging the tracking slider it would
     // animate (reflowing every frame), and with the now-visible overflowing text
     // each reflow is costly. Applying tracking instantly matches the Size slider.
+    // font-variation-settings IS transitioned, but only for instance-pill clicks
+    // (axesAnimating) — never during slider drags, for the same reason.
+    // font-size joins it so the autofit re-fit tweens in sync with the axes
+    // instead of snapping ahead of the glyph animation.
+    transition: axesAnimating ? 'font-variation-settings 0.4s ease, font-size 0.4s ease' : undefined,
   } : {}
 
   function toggleFeature(tag) {
@@ -424,7 +440,12 @@ export default function TypeTester({ collectionSlug, collectionId }) {
   function selectInstance(inst) {
     const next = {}
     inst.coordinates.forEach(c => { next[c.axis] = c.value })
+    // Animate to the instance instead of snapping: enable the CSS transition
+    // for just this change, then drop it once the transition has finished.
+    setAxesAnimating(true)
     setAxisValues(next)
+    clearTimeout(axesAnimTimer.current)
+    axesAnimTimer.current = setTimeout(() => setAxesAnimating(false), 450)
   }
 
   return (
@@ -513,7 +534,12 @@ export default function TypeTester({ collectionSlug, collectionId }) {
               label={axis.name}
               min={axis.minValue} max={axis.maxValue}
               value={axisValues[axis.axis] ?? axis.minValue}
-              onChange={v => setAxisValues(prev => ({ ...prev, [axis.axis]: v }))}
+              onChange={v => {
+                // Slider drags apply instantly — cancel any pill-triggered transition
+                clearTimeout(axesAnimTimer.current)
+                setAxesAnimating(false)
+                setAxisValues(prev => ({ ...prev, [axis.axis]: v }))
+              }}
             />
           ))}
         </div>
