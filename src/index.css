@@ -1400,7 +1400,7 @@ button:disabled { cursor: default; }
 .tt-controls {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
@@ -1408,7 +1408,7 @@ button:disabled { cursor: default; }
 .tt-slider {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tt-slider-label {
