@@ -91,7 +91,7 @@ export default function TrialForm() {
               <span className={`form-toggle-dot${eulaAgreed ? ' checked' : ''}`} />
               I agree to the EULA
             </label>
-            <Link to="/license" className="pill-link">View EULA</Link>
+            <Link to="/eula" className="pill-link">View EULA</Link>
           </div>
 
           <label className="form-toggle" onClick={() => setNewsletterOptIn(v => !v)}>

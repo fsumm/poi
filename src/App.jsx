@@ -70,7 +70,7 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/newsletter" element={<Newsletter />} />
             <Route path="/trials" element={<Trials />} />
-            <Route path="/license" element={<License />} />
+            <Route path="/eula" element={<License />} />
             <Route path="/privacy" element={<Privacy />} />
           </AnimatedRoutes>
         </main>
