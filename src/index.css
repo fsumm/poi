@@ -1715,6 +1715,25 @@ body[data-page-phase=entering] .footer {
 .cart-anim--entering .store-modal__index-item__button:nth-child(7) { transition-delay: 560ms; }
 .cart-anim--entering .store-modal__index-item__button:nth-child(8) { transition-delay: 640ms; }
 
+/* ── Index → product exit ── */
+/* The index is itself a store-modal page, so its items are page-body children.
+   CartAnimator flips it to data-cart-page=exiting on item click and holds the
+   navigation until this staggered fade (mirroring the webpage exit) completes.
+   Placed after the entering rules so the delays win at equal specificity. */
+[data-cart-page=exiting] .store-modal__page__body > * {
+  opacity: 0;
+  transition: opacity 0.3s linear;
+}
+
+[data-cart-page=exiting] .store-modal__page__body > *:nth-child(1) { transition-delay: 0ms; }
+[data-cart-page=exiting] .store-modal__page__body > *:nth-child(2) { transition-delay: 40ms; }
+[data-cart-page=exiting] .store-modal__page__body > *:nth-child(3) { transition-delay: 80ms; }
+[data-cart-page=exiting] .store-modal__page__body > *:nth-child(4) { transition-delay: 120ms; }
+[data-cart-page=exiting] .store-modal__page__body > *:nth-child(5) { transition-delay: 160ms; }
+[data-cart-page=exiting] .store-modal__page__body > *:nth-child(6) { transition-delay: 200ms; }
+[data-cart-page=exiting] .store-modal__page__body > *:nth-child(7) { transition-delay: 240ms; }
+[data-cart-page=exiting] .store-modal__page__body > *:nth-child(8) { transition-delay: 280ms; }
+
 /* ── Cart page transitions (index → product → cart → checkout) ── */
 
 [data-cart-page=loading] .store-modal__page__body > *,
