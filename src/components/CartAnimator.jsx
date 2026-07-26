@@ -9,19 +9,30 @@ async function waitForCartReady(el) {
   await waitUntilReady(el)
 }
 
-// Index → product exit: mirrors the webpage exit stagger (0.3s fade, 40ms per
-// item) before letting fontdue swap pages.
+// Page exit: mirrors the webpage exit stagger (0.3s fade, 40ms per item)
+// before letting fontdue swap pages.
 const EXIT_STEP = 40
 const EXIT_DURATION = 300
+// The exiting CSS defines staggered delays for the first 8 page-body children
+const EXIT_STAGGER_MAX = 8
 
-// Fontdue swaps index → product in a single render, so to animate the catalog
-// out first we intercept the click before React sees it, flip the index page
-// (itself a store-modal page) to data-cart-page=exiting, then re-dispatch the
-// click on the same button once the fade completes.
-function setupIndexExit(overlay) {
+// In-modal controls that navigate to another page of the store modal
+const NAV_SELECTORS = [
+  '.store-modal__index-item__button',                  // catalog items
+  '.store-modal__container__back-button',              // All collections / Buying options
+  '.store-modal__container__cart-button',              // Items in cart
+  '.store-modal__product-summary__add-to-cart-button', // Add to cart
+  '.store-modal__cart__button',                        // Continue → checkout
+].join(', ')
+
+// Fontdue swaps pages in a single render, so to animate the current page out
+// first we intercept navigation clicks before React sees them, flip the page
+// to data-cart-page=exiting, then re-dispatch the click on the same button
+// once the fade completes.
+function setupNavExit(overlay) {
   overlay.addEventListener('click', e => {
-    const button = e.target.closest?.('.store-modal__index-item__button')
-    if (!button) return
+    const button = e.target.closest?.(NAV_SELECTORS)
+    if (!button || button.disabled) return
     if (overlay.dataset.cartExit === 'done') return
     if (overlay.dataset.cartExit === 'exiting') {
       // Swallow further clicks while the exit is playing
@@ -29,28 +40,58 @@ function setupIndexExit(overlay) {
       e.stopPropagation()
       return
     }
-    const page = button.closest('.store-modal__page__container')
+    // The cart button is a no-op while the cart page is already showing
+    if (overlay.dataset.route === 'cart' &&
+        button.matches('.store-modal__container__cart-button')) return
+    // The current page (skip fontdue's display:none "Loading..." fallback)
+    const page = [...overlay.querySelectorAll('.store-modal__page__container')]
+      .find(p => p.style.display !== 'none')
     if (!page) return
-    // Still loading — items are invisible, so an exit fade would only add lag
+    // Still loading — content is invisible, so an exit fade would only add lag
     if (page.dataset.cartPage === 'loading') return
+    // Continue (checkout) validates required fields synchronously — with a
+    // blank one the click just renders errors, so don't play the exit for it
+    if (button.matches('.store-modal__cart__button')) {
+      const blank = [...page.querySelectorAll('input[type=text], input[type=email], select')]
+        .some(el => el.offsetParent !== null && !el.value)
+      if (blank) return
+    }
     e.preventDefault()
     e.stopPropagation()
 
     overlay.dataset.cartExit = 'exiting'
     page.dataset.cartPage = 'exiting'
-    const items = overlay.querySelectorAll('.store-modal__index-item__button')
-    const wait = EXIT_DURATION + EXIT_STEP * Math.max(0, items.length - 1)
+    const count = Math.min(
+      page.querySelectorAll('.store-modal__page__body > *').length,
+      EXIT_STAGGER_MAX
+    )
+    const wait = EXIT_DURATION + EXIT_STEP * Math.max(0, count - 1)
     setTimeout(() => {
       if (!overlay.isConnected) return
       overlay.dataset.cartExit = 'done'
+      const errsBefore = page.querySelectorAll('[class*="error"]').length
       button.click()
-      // If navigation didn't happen (index still mounted), restore the items
-      setTimeout(() => {
-        if (page.isConnected) {
+      // Checkout creation is a server round-trip, so give it longer before
+      // concluding navigation failed; everything else swaps in one render.
+      const maxWait = button.matches('.store-modal__cart__button') ? 3000 : 1000
+      // If navigation didn't happen (page still mounted), restore it — right
+      // away if fontdue rendered validation errors, else after maxWait.
+      const started = Date.now()
+      const poll = setInterval(() => {
+        if (!page.isConnected) {
+          // Navigated. Views without a page container (checkout) never reach
+          // animatePage, so clear the pass-through flag here as well.
+          clearInterval(poll)
+          delete overlay.dataset.cartExit
+          return
+        }
+        const failed = page.querySelectorAll('[class*="error"]').length > errsBefore
+        if (failed || Date.now() - started >= maxWait) {
+          clearInterval(poll)
           page.dataset.cartPage = 'entering'
           delete overlay.dataset.cartExit
         }
-      }, 1000)
+      }, 250)
     }, wait)
   }, true)
 }
@@ -144,7 +185,7 @@ async function handleOpen(overlay) {
   overlay.dataset.cartAnim = 'open'
 
   watchPageChanges(overlay)
-  setupIndexExit(overlay)
+  setupNavExit(overlay)
 }
 
 export default function CartAnimator() {

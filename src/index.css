@@ -1715,12 +1715,14 @@ body[data-page-phase=entering] .footer {
 .cart-anim--entering .store-modal__index-item__button:nth-child(7) { transition-delay: 560ms; }
 .cart-anim--entering .store-modal__index-item__button:nth-child(8) { transition-delay: 640ms; }
 
-/* ── Index → product exit ── */
-/* The index is itself a store-modal page, so its items are page-body children.
-   CartAnimator flips it to data-cart-page=exiting on item click and holds the
-   navigation until this staggered fade (mirroring the webpage exit) completes.
-   Placed after the entering rules so the delays win at equal specificity. */
-[data-cart-page=exiting] .store-modal__page__body > * {
+/* ── Page exit (any in-modal navigation) ── */
+/* CartAnimator flips the current page to data-cart-page=exiting when a nav
+   control is clicked (catalog item, back, cart, add to cart, checkout) and
+   holds the navigation until this staggered fade (mirroring the webpage exit)
+   completes. Placed after the entering rules so the delays win at equal
+   specificity. */
+[data-cart-page=exiting] .store-modal__page__body > *,
+[data-cart-page=exiting] .store-modal__page__sticky-footer {
   opacity: 0;
   transition: opacity 0.3s linear;
 }
