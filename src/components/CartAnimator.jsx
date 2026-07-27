@@ -25,6 +25,16 @@ const NAV_SELECTORS = [
   '.store-modal__cart__button',                        // Continue → checkout
 ].join(', ')
 
+// Fade the nav chrome (back button, title, items-in-cart) back in after a page
+// exit, then drop the attribute so the rest state keeps fontdue's own styles.
+function navEnter(overlay) {
+  if (overlay.dataset.cartNav !== 'exiting') return
+  overlay.dataset.cartNav = 'entering'
+  setTimeout(() => {
+    if (overlay.dataset.cartNav === 'entering') delete overlay.dataset.cartNav
+  }, 600)
+}
+
 // Fontdue swaps pages in a single render, so to animate the current page out
 // first we intercept navigation clicks before React sees them, flip the page
 // to data-cart-page=exiting, then re-dispatch the click on the same button
@@ -60,6 +70,7 @@ function setupNavExit(overlay) {
     e.stopPropagation()
 
     overlay.dataset.cartExit = 'exiting'
+    overlay.dataset.cartNav = 'exiting'
     page.dataset.cartPage = 'exiting'
     const count = Math.min(
       page.querySelectorAll('.store-modal__page__body > *').length,
@@ -77,12 +88,13 @@ function setupNavExit(overlay) {
       // If navigation didn't happen (page still mounted), restore it — right
       // away if fontdue rendered validation errors, else after maxWait.
       const started = Date.now()
-      const poll = setInterval(() => {
+      const check = () => {
         if (!page.isConnected) {
           // Navigated. Views without a page container (checkout) never reach
           // animatePage, so clear the pass-through flag here as well.
           clearInterval(poll)
           delete overlay.dataset.cartExit
+          navEnter(overlay)
           return
         }
         const failed = page.querySelectorAll('[class*="error"]').length > errsBefore
@@ -90,8 +102,13 @@ function setupNavExit(overlay) {
           clearInterval(poll)
           page.dataset.cartPage = 'entering'
           delete overlay.dataset.cartExit
+          navEnter(overlay)
         }
-      }, 250)
+      }
+      const poll = setInterval(check, 250)
+      // Normal navigations swap synchronously on the re-click — check now so
+      // the nav re-enters together with the new page instead of a tick later
+      check()
     }, wait)
   }, true)
 }

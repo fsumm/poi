@@ -1767,6 +1767,27 @@ body[data-page-phase=entering] .footer {
 [data-cart-page=entering] .store-modal__page__body > *:nth-child(5) { transition-delay: 400ms; }
 [data-cart-page=entering] .store-modal__page__sticky-footer        { transition-delay: 150ms; }
 
+/* ── Nav chrome transitions (back button, title, items-in-cart) ── */
+/* CartAnimator sets data-cart-nav=exiting on the overlay when a page exit
+   starts so the nav fades with the page, flips it to entering when the next
+   view arrives, and removes it once the fade completes. Placed after the
+   cart-anim rules so these win at equal specificity (incl. the cart button's
+   100ms enter delay); background stays in the shorthand to keep its hover
+   transition alive. */
+[data-cart-nav=exiting] .store-modal__container__back-button,
+[data-cart-nav=exiting] .store-modal__container__title,
+[data-cart-nav=exiting] .store-modal__container__cart-button {
+  opacity: 0;
+  transition: opacity 0.3s linear, background 120ms;
+}
+
+[data-cart-nav=entering] .store-modal__container__back-button,
+[data-cart-nav=entering] .store-modal__container__title,
+[data-cart-nav=entering] .store-modal__container__cart-button {
+  opacity: 1;
+  transition: opacity 0.4s linear, background 120ms;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    RESPONSIVE
    12-col grid (≤1700px) → 8-col (≤1140px) → 4-col (≤580px).
