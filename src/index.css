@@ -500,14 +500,13 @@ button:disabled { cursor: default; }
   filter: blur(0px);
 }
 
-/* The actual responsive <img> (rendered by <FrameImage>). It bleeds 8px past
-   the frame on every side so the intro blur/scale never reveals an edge, and
-   covers the frame like the old background did. */
+/* The actual responsive <img> (rendered by <FrameImage>). Covers the frame
+   like the old background did. */
 .frame-img {
   position: absolute;
-  inset: -8px;
-  width: calc(100% + 16px);
-  height: calc(100% + 16px);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
   display: block;
