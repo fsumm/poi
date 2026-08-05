@@ -1110,6 +1110,11 @@ button:disabled { cursor: default; }
   font-size: 70cqi;
   line-height: 1;
   position: absolute;
+  /* Morph through the variable axes on style-pill clicks (matches TypeTester's
+     instance-pill tween). Pills are the only thing that changes the inherited
+     font-variation-settings here, so no animate-flag gating is needed. Static
+     (non-variable) collections swap font-family instead, which simply snaps. */
+  transition: font-variation-settings 0.4s ease;
 }
 
 
@@ -1169,6 +1174,9 @@ button:disabled { cursor: default; }
   margin: -3px;
   font-weight: 400;
   container-type: inline-size;
+  /* One transition on the grid animates all cells: they inherit the
+     interpolated font-variation-settings each frame during a style-pill tween. */
+  transition: font-variation-settings 0.4s ease;
 }
 
 .glyph-overview__cell {
