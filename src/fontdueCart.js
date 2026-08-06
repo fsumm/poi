@@ -20,12 +20,8 @@ function findStore() {
 function animateClose(overlay, scrollTop) {
   const container = overlay.querySelector('.store-modal__container__container')
   if (!container) return
-  // If fonts were still loading when the user closed, snap content visible so
-  // the slide-out animation doesn't play with an empty-looking panel.
-  if (overlay.classList.contains('cart-anim--loading')) {
-    overlay.classList.remove('cart-anim--loading')
-    overlay.classList.add('cart-anim--entering')
-  }
+  // Contents arrive here already faded out (the CLOSE_CART intercept plays the
+  // exit fade before React unmounts), so the panel slides out empty on purpose.
   container.dataset.closing = 'true'
   overlay.style.pointerEvents = 'none'
   // Re-append to body so the animation plays after React's removal
@@ -45,18 +41,70 @@ function watchForClose() {
     if (!overlay) { if (++attempts > 40) clearInterval(poll); return }
     clearInterval(poll)
 
-    const container = overlay.querySelector('.store-modal__container__container')
+    // Repeated openCart calls (e.g. double clicks) each start a poll — never
+    // install the listeners/wrapper twice on the same overlay.
+    if (overlay.dataset.cartWatch != null) return
+    overlay.dataset.cartWatch = ''
 
-    // Close when clicking the transparent background (outside the panel)
-    const bg = overlay.querySelector('.store-modal__container__background')
-    if (bg) bg.addEventListener('click', () => _store?.dispatch({ type: 'CLOSE_CART' }), { once: true })
+    const container = overlay.querySelector('.store-modal__container__container')
 
     // Capture scrollTop BEFORE React re-renders on CLOSE_CART (re-render resets it to 0)
     let capturedScrollTop = 0
+    let closeFadePlayed = false
     const originalDispatch = _store.dispatch.bind(_store)
+
+    // Fade the modal contents out (mirroring the enter fade), then run fn.
+    // Mirrors CartAnimator's exit stagger (0.3s fade + 40ms/child, CSS delays
+    // cap at 8 children); nav chrome alone needs just the 0.3s.
+    const fadeOutThen = fn => {
+      closeFadePlayed = true
+      capturedScrollTop = container?.scrollTop ?? 0
+      overlay.style.pointerEvents = 'none'
+      overlay.dataset.cartNav = 'exiting'
+      overlay.classList.add('cart-anim--closing')
+      const page = [...overlay.querySelectorAll('.store-modal__page__container')]
+        .find(p => p.style.display !== 'none')
+      let wait = 300
+      if (page && page.dataset.cartPage === 'entering') {
+        page.dataset.cartPage = 'exiting'
+        const count = Math.min(page.querySelectorAll('.store-modal__page__body > *').length, 8)
+        wait = 300 + 40 * Math.max(0, count - 1)
+      }
+      setTimeout(fn, wait)
+    }
+
+    // Close gestures (background click, close button) are intercepted in the
+    // capture phase and re-dispatched after the exit fade — fontdue's own
+    // handlers hold a dispatch reference captured before the wrapper below was
+    // installed, so their CLOSE_CART would bypass it and unmount mid-fade.
+    // stopPropagation keeps the event from React's root-delegated handlers
+    // (the same pattern setupNavExit uses for page swaps).
+    overlay.addEventListener('click', e => {
+      if (!e.target.closest?.('.store-modal__container__background') &&
+          !e.target.closest?.('.store-modal__container__close-button')) return
+      e.preventDefault()
+      e.stopPropagation()
+      if (closeFadePlayed) return // exit fade already playing — swallow repeats
+      capturedScrollTop = container?.scrollTop ?? 0
+      if (overlay.dataset.cartAnim !== 'open') {
+        // Still loading — nothing visible to fade, close immediately
+        originalDispatch({ type: 'CLOSE_CART' })
+        return
+      }
+      fadeOutThen(() => originalDispatch({ type: 'CLOSE_CART' }))
+    }, true)
+
+    // Fallback for CLOSE_CART routed through the store itself (e.g. Escape, if
+    // the handler picked up the wrapped dispatch): capture scroll and fade
+    // first when content is visible.
     _store.dispatch = function(action) {
       if (action.type === 'CLOSE_CART') {
         capturedScrollTop = container?.scrollTop ?? 0
+        if (closeFadePlayed) return action
+        if (overlay.dataset.cartAnim === 'open') {
+          fadeOutThen(() => originalDispatch(action))
+          return action
+        }
       }
       return originalDispatch(action)
     }

@@ -294,18 +294,36 @@ input:checked + .checkbox__icon {
   border-color: var(--primary_text_color);
 }
 
-/* ── Store modal: right-side drawer ─────────────────────────────────────────── */
+/* ── Store modal: right-pinned drawer, enters from the top edge ─────────────── */
 
-/* Invisible backdrop — crosshair cursor signals click-to-close */
+/* Invisible backdrop — plain cursor (overrides fontdue's pointer); clicking
+   it still closes the drawer. The content blur behind the modal does NOT live
+   here: this overlay sits above the site nav, and a backdrop-filter on it
+   would blur the nav too. The blur layer is .nav::after (index.css),
+   triggered by body[data-fontdue-store-modal=open], which keeps the header
+   crisp. */
 .store-modal__container__background {
   background: transparent;
-  cursor: crosshair;
+  cursor: default;
 }
 
-/* Slide-out close animation */
+/* ── Slide direction: top edge ── */
+/* fontdue's own `slideIn` keyframes (fontdue.css) slide the panel in from the
+   right. Redefining the SAME keyframe name here (the later definition wins)
+   turns the entry vertical without touching the animation shorthand fontdue
+   applies — and keeps the animation name the JS hooks listen for intact
+   (CartAnimator's waitForSlideIn / suppressHoverDuringSlide both match
+   'slideIn'). fontdue uses `slideIn` only for the store-modal panel, so the
+   override can't leak anywhere else. */
+@keyframes slideIn {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Slide-out close animation (shared by the cart and trial drawers) */
 @keyframes poi-slide-out {
-  from { transform: translateX(0); }
-  to   { transform: translateX(100%); }
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
 }
 .store-modal__container__container[data-closing] {
   animation: poi-slide-out 280ms ease-in forwards;
@@ -319,13 +337,13 @@ input:checked + .checkbox__icon {
   font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  /* Transparent: the frosted glass is a separate fixed layer on the overlay (see
-     .store-modal__container__overlay::before). It can't live here — this is the
-     scroll container holding the page subtree fontdue swaps on every route change,
-     and a backdrop-filter on it makes Safari re-rasterize the blur on each swap
-     (the 1-frame white flash). It also can't be a pseudo on THIS element: the panel
-     is transformed (slide-in), which makes a fixed child behave like an absolute
-     one — it then scrolls with the content and only covers the first screenful. */
+  /* Transparent: the white background is a separate fixed layer on the overlay
+     (see .store-modal__container__overlay::before). It can't live here — this is
+     the scroll container, and a background here would scroll/re-rasterize with
+     the page subtree fontdue swaps on every route change. It also can't be a
+     pseudo on THIS element: the panel is transformed (slide-in), which makes a
+     fixed child behave like an absolute one — it then scrolls with the content
+     and only covers the first screenful. */
   background-color: transparent;
   overscroll-behavior: none;
   /* Override --font-family so merchant-injected rules resolve to the variable font */
@@ -333,25 +351,32 @@ input:checked + .checkbox__icon {
   --font-family__bold: 'POI Orbiter', system-ui, -apple-system, sans-serif;
 }
 
-/* Frosted glass: a viewport-fixed layer matching the drawer's footprint, painted
-   behind the transparent panel. It lives on the overlay — which is fixed, untransformed
-   and never scrolls — so it stays put under scrolling content AND sits outside the
-   swapping panel subtree, so Safari never re-rasterizes it on a page change. Width/right
-   mirror the panel (incl. the responsive breakpoints below); it slides in/out with it. */
+/* Drawer background: an opaque white viewport-fixed layer painted behind the
+   transparent panel. It lives on the overlay — which is fixed, untransformed
+   and never scrolls — so it stays put under scrolling content AND sits outside
+   the swapping panel subtree, so Safari never re-rasterizes it on a page
+   change. It spans from the panel's left edge to the WINDOW's right edge (not
+   the panel's): beyond --max-w the full-viewport .nav::after blur would
+   otherwise show in the gutter right of the panel. Layer and panel are both
+   full viewport height, so sharing the vertical slide keyframes keeps them in
+   lockstep for the whole animation. Panel width mirrors the panel rules incl.
+   the responsive breakpoints below. */
+.store-modal__container__overlay {
+  --cart-panel-w: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
+  --cart-gutter: max(0px, (100vw - var(--max-w)) / 2);
+}
 .store-modal__container__overlay::before {
   content: '';
   position: fixed;
   top: 0;
   bottom: 0;
-  right: max(0px, (100vw - var(--max-w)) / 2);
-  width: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
+  right: 0;
+  width: calc(var(--cart-panel-w) + var(--cart-gutter));
   pointer-events: none;
-  background-color: var(--glass-tint);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  background-color: #fff;
   animation: slideIn 300ms forwards;
 }
-/* Slide the frost out in sync when the panel is closing */
+/* Slide the white layer out in sync when the panel is closing */
 .store-modal__container__overlay:has(.store-modal__container__container[data-closing])::before {
   animation: poi-slide-out 280ms ease-in forwards;
 }
@@ -538,9 +563,7 @@ input:checked + .checkbox__icon {
   align-items: center;
   position: sticky;
   top: 0;
-  background: var(--glass-tint);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  background: #fff;
   z-index: 10;
 }
 @media (min-width: 900px) {
@@ -559,6 +582,11 @@ input:checked + .checkbox__icon {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+}
+/* "Items in cart" pins to the nav's left edge; margin-right: auto (rather than
+   space-between) keeps Close right-aligned even when the cart pill is absent */
+.store-modal__container__nav[data-has-back-text=false] .store-modal__container__cart-button {
+  margin-right: auto;
 }
 /* Only show the "Items in cart" button on the catalog overview (page 1, no back
    button). On every deeper page the back button + close fill the row, and the
@@ -1284,10 +1312,10 @@ body[data-fontdue-store-modal=open] {
     max-width: calc((100vw - 2 * var(--pad) - 7 * var(--gap)) / 2 + 3 * var(--gap) + var(--pad) + var(--gap));
     right: 0;
   }
-  /* Keep the frosted layer matched to the panel footprint */
-  .store-modal__container__overlay::before {
-    width: calc((100vw - 2 * var(--pad) - 7 * var(--gap)) / 2 + 3 * var(--gap) + var(--pad) + var(--gap));
-    right: 0;
+  /* Keep the white layer's slide matched to the panel footprint (the gutter
+     term is already 0 below --max-w) */
+  .store-modal__container__overlay {
+    --cart-panel-w: calc((100vw - 2 * var(--pad) - 7 * var(--gap)) / 2 + 3 * var(--gap) + var(--pad) + var(--gap));
   }
 }
 
@@ -1299,34 +1327,59 @@ body[data-fontdue-store-modal=open] {
     max-width: 100vw;
     right: 0;
   }
-  .store-modal__container__overlay::before {
-    width: 100vw;
-    right: 0;
+  .store-modal__container__overlay {
+    --cart-panel-w: 100vw;
   }
 }
 
-/* ── Trial modal: right-side drawer mirroring the cart modal ─────────────────── */
+/* ── Trial modal: top-edge drawer mirroring the cart modal ───────────────────── */
 
 .trial-modal__overlay {
   position: fixed;
   inset: 0;
   z-index: 999;
+  /* Same variable names as the cart overlay purely for symmetry — both layers
+     size their white strip from panel width + gutter */
+  --cart-panel-w: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
+  --cart-gutter: max(0px, (100vw - var(--max-w)) / 2);
 }
 
-/* Invisible backdrop — crosshair cursor signals click-to-close, matching the cart */
+/* Drawer background: mirrors the cart's — a viewport-fixed white layer behind
+   the transparent panel, spanning from the panel's left edge to the WINDOW's
+   right edge so the .nav::after blur can't show in the gutter beyond --max-w.
+   Full viewport height like the panel, so the shared vertical slide keyframes
+   keep the two in lockstep. */
+.trial-modal__overlay::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: calc(var(--cart-panel-w) + var(--cart-gutter));
+  pointer-events: none;
+  background-color: #fff;
+  animation: slideIn 300ms forwards;
+}
+.trial-modal__overlay:has(.trial-modal__panel[data-closing])::before {
+  animation: poi-slide-out 280ms ease-in forwards;
+}
+
+/* Invisible backdrop — plain cursor, matching the cart; clicking it still
+   closes the modal */
 .trial-modal__background {
   position: absolute;
   inset: 0;
   background: transparent;
-  cursor: crosshair;
 }
 
+/* Enter from the top edge, matching the cart drawer's redefined slideIn */
 @keyframes poi-slide-in {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
 }
 
-/* Panel: same frosted glass + sizing as the cart drawer */
+/* Panel: transparent — the white is the overlay::before layer above, so it can
+   extend past the panel to the window edge; same sizing as the cart drawer */
 .trial-modal__panel {
   position: absolute;
   top: 0;
@@ -1343,9 +1396,7 @@ body[data-fontdue-store-modal=open] {
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--ink-black);
-  background-color: var(--glass-tint);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  background-color: transparent;
   animation: poi-slide-in 300ms forwards;
 }
 .trial-modal__panel[data-closing] {
@@ -1357,8 +1408,13 @@ body[data-page-phase=exiting] .trial-modal__panel {
   animation: poi-slide-out 280ms ease-in forwards;
   animation-delay: 200ms;
 }
+body[data-page-phase=exiting] .trial-modal__overlay::before {
+  animation: poi-slide-out 280ms ease-in forwards;
+  animation-delay: 200ms;
+}
 
-/* Nav bar matching the cart modal nav: close button pinned to the right */
+/* Nav bar matching the cart modal nav: close button pinned to the right,
+   opaque white like the panel so content scrolls away under it */
 .trial-modal__nav {
   display: flex;
   justify-content: flex-end;
@@ -1368,9 +1424,7 @@ body[data-page-phase=exiting] .trial-modal__panel {
   margin-bottom: 20px;
   position: sticky;
   top: 0;
-  background: var(--glass-tint);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  background: #fff;
   z-index: 10;
 }
 
@@ -1412,16 +1466,85 @@ body[data-page-phase=exiting] .trial-modal__panel {
   width: 75%;
 }
 
-/* Responsive widths mirror the cart drawer breakpoints exactly */
+/* ── Enter fade ── */
+/* Content is held invisible while the panel slides in; TrialModal flips
+   --entered once the 300ms slide has played, releasing a staggered fade that
+   mirrors the cart modal's page fade (0.4s linear, 100ms steps). Elements
+   mounted after entry (validation errors, the post-submit message) appear
+   instantly, matching the cart. */
+.trial-modal__panel:not(.trial-modal__panel--entered) .trial-modal__body form > *,
+.trial-modal__panel:not(.trial-modal__panel--entered) .trial-modal__body > .page-text {
+  opacity: 0;
+}
+.trial-modal__panel--entered .trial-modal__body form > *,
+.trial-modal__panel--entered .trial-modal__body > .page-text {
+  opacity: 1;
+  transition: opacity 0.4s linear;
+}
+.trial-modal__panel--entered .trial-modal__body form > *:nth-child(2) { transition-delay: 100ms; }
+.trial-modal__panel--entered .trial-modal__body form > *:nth-child(3) { transition-delay: 200ms; }
+.trial-modal__panel--entered .trial-modal__body form > *:nth-child(4) { transition-delay: 300ms; }
+.trial-modal__panel--entered .trial-modal__body form > *:nth-child(5) { transition-delay: 400ms; }
+.trial-modal__panel--entered .trial-modal__body form > *:nth-child(6) { transition-delay: 500ms; }
+.trial-modal__panel--entered .trial-modal__body form > *:nth-child(7) { transition-delay: 600ms; }
+
+/* Close button: same hold-then-fade as the cart modal's close button — a
+   one-shot animation (keyframes in index.css) with no fill, so the opacity
+   hover dim above keeps working once the fade ends. The :not() rule outranks
+   the :hover rule, so the held button can't flash on hover. */
+.trial-modal__panel:not(.trial-modal__panel--entered) .trial-modal__close-button {
+  opacity: 0;
+}
+.trial-modal__panel--entered .trial-modal__close-button {
+  animation: poi-fade-in 0.4s linear;
+}
+/* ── Exit fade ── */
+/* TrialModal flips --exiting on close and holds the slide-out until this fade
+   completes (mirroring the cart's exit: 0.3s + 40ms/child), so the panel
+   slides out empty. Placed after the --entered rules to win the tie; the
+   animation: none cancels a still-running enter fade on the close button. */
+.trial-modal__panel--exiting .trial-modal__body form > *,
+.trial-modal__panel--exiting .trial-modal__body > .page-text,
+.trial-modal__panel--exiting .trial-modal__close-button {
+  opacity: 0;
+  transition: opacity 0.3s linear;
+  animation: none;
+}
+.trial-modal__panel--exiting .trial-modal__body form > *:nth-child(2) { transition-delay: 40ms; }
+.trial-modal__panel--exiting .trial-modal__body form > *:nth-child(3) { transition-delay: 80ms; }
+.trial-modal__panel--exiting .trial-modal__body form > *:nth-child(4) { transition-delay: 120ms; }
+.trial-modal__panel--exiting .trial-modal__body form > *:nth-child(5) { transition-delay: 160ms; }
+.trial-modal__panel--exiting .trial-modal__body form > *:nth-child(6) { transition-delay: 200ms; }
+.trial-modal__panel--exiting .trial-modal__body form > *:nth-child(7) { transition-delay: 240ms; }
+
+/* The modal is inert once the close is underway */
+.trial-modal__overlay:has(.trial-modal__panel--exiting) {
+  pointer-events: none;
+}
+
+/* No enter-fade replay while the panel slides out; opacity is left to the
+   exiting rules above — the content is already faded */
+.trial-modal__panel[data-closing] .trial-modal__close-button {
+  animation: none;
+}
+
+/* Responsive widths mirror the cart drawer breakpoints exactly (the white
+   layer follows via --cart-panel-w; the gutter term is already 0 below --max-w) */
 @media (max-width: 1140px) {
   .trial-modal__panel {
     max-width: calc((100vw - 2 * var(--pad) - 7 * var(--gap)) / 2 + 3 * var(--gap) + var(--pad) + var(--gap));
     right: 0;
+  }
+  .trial-modal__overlay {
+    --cart-panel-w: calc((100vw - 2 * var(--pad) - 7 * var(--gap)) / 2 + 3 * var(--gap) + var(--pad) + var(--gap));
   }
 }
 @media (max-width: 580px) {
   .trial-modal__panel {
     max-width: 100vw;
     right: 0;
+  }
+  .trial-modal__overlay {
+    --cart-panel-w: 100vw;
   }
 }

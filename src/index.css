@@ -130,8 +130,8 @@ html[data-resizing] *::after {
   --pad: 20px;
   --gap: 20px;
   --nav-h: 84px;
-  /* Height the open Catalog submenu adds to the header; 0 when closed. Drives
-     the frosted backdrop and the offset of sticky items below the nav. */
+  /* Height of the open Catalog submenu panel; 0 when closed. Grows the
+     header's white backdrop so it covers the overlaid panel. */
   --submenu-h: 0px;
   /* iOS safe-area insets — the status-bar strip up top and the home-indicator
      strip at the bottom. 0 everywhere that isn't a notched device, so the calcs
@@ -140,8 +140,14 @@ html[data-resizing] *::after {
      screen edges, while content is padded clear of it. */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  /* Frosted-glass tokens — shared by every backdrop-filter surface (nav bars,
-     mobile dropdown, buy bar, cart/trial modals) so the effect stays uniform.
+  /* Blur applied to the page content behind an open Catalog submenu or an
+     open cart/trial modal (the .nav::after layer — blur plus a light gray
+     tint, see --overlay-tint). */
+  --overlay-blur: 18px;
+  --overlay-tint: rgba(186, 186, 185, 0.25);
+  /* Frosted-glass tokens — used by the mobile buy bar and the trial modal.
+     (The main nav and cart modal are opaque white; the page behind them gets
+     the --overlay-blur treatment above instead.)
      --glass-tint is a full rgba() value so call sites read `background: var(--glass-tint)`. */
   --glass-blur: 16px;
   --glass-saturate: 180%;
@@ -208,12 +214,12 @@ button:disabled { cursor: default; }
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: var(--gap);
-  /* Top-aligned so an open Catalog submenu can grow the bar downward (and, as
-     the nav is in normal flow, push the main content down with it). The bar
-     items keep their 84px-tall centered boxes via per-item heights below. */
+  /* Bar items keep their 84px-tall centered boxes via per-item heights below;
+     the open Catalog submenu is absolutely positioned, so the bar itself never
+     grows. */
   align-items: start;
   /* padding-top reserves the status-bar strip so the bar content always sits
-     below the notch (both at rest and when stuck); the frosted backdrop fills
+     below the notch (both at rest and when stuck); the white backdrop fills
      that strip. min-height grows to keep the bar a full 84px below the inset. */
   padding-top: var(--safe-top);
   min-height: calc(var(--nav-h) + var(--safe-top));
@@ -228,15 +234,44 @@ button:disabled { cursor: default; }
   top: 0;
   left: 0;
   right: 0;
-  /* Frosted strip behind the bar; extends to cover the open Catalog submenu so
-     it reads as one continuous header (and obscures content scrolled beneath).
-     The extra --safe-top reaches up under the status bar to the screen edge. */
+  /* Opaque white strip behind the bar; extends to cover the open Catalog
+     submenu so it reads as one continuous header (and hides content scrolled
+     beneath). The extra --safe-top reaches up under the status bar to the
+     screen edge. */
   height: calc(var(--nav-h) + var(--submenu-h, 0px) + var(--safe-top));
-  background: var(--glass-tint);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  background: #fff;
   z-index: -1;
   transition: height 0.4s cubic-bezier(.5, 0, .5, 1);
+}
+
+/* Full-viewport blur over the page while the Catalog submenu or the cart modal
+   is open. Lives in the nav's stacking context behind the white header strip
+   (z-index -2 vs the strip's -1), so the header and its links stay crisp while
+   everything below blurs — and the cart drawer (z-index above the nav) stays
+   crisp above it too. pointer-events pass through so clicks outside the nav
+   still close the menu; fades via opacity (which composites the backdrop-filter
+   effect along with it). */
+.nav::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background: var(--overlay-tint);
+  -webkit-backdrop-filter: blur(var(--overlay-blur));
+  backdrop-filter: blur(var(--overlay-blur));
+  opacity: 0;
+  transition: opacity 0.25s ease-out;
+}
+
+/* Triggers: open Catalog submenu, the fontdue cart modal (flagged on <body>
+   while it's mounted — the flag clears at close, so the fade-out plays during
+   the drawer's slide-out), or the trial modal (same flag pattern, set by
+   TrialModal, cleared when its slide-out starts). */
+.nav:has(.nav-item--submenu-open)::after,
+body[data-fontdue-store-modal='open'] .nav::after,
+body[data-trial-modal='open'] .nav::after {
+  opacity: 1;
 }
 
 /* Non-interactive box that holds the bar height and centers the logo; the link
@@ -282,37 +317,29 @@ button:disabled { cursor: default; }
 .nav-link.active { }
 
 /* --submenu-h (the open submenu's real rendered height) is published on <body>
-   from JS when the menu opens; the backdrop and sticky page items offset by it. */
+   from JS when the menu opens; the header's white backdrop (.nav::before)
+   grows by it so the overlaid panel sits on solid white. */
 
-/* ── Catalog submenu (desktop/tablet, click-toggled) ────────────────────────
-   In-flow under the Catalog label, stacked within its column (col 3). Opening
-   it slides the bar taller and the items fade in one by one; because the nav is
-   in normal flow this also pushes the page content down (at the top of scroll).
-   Items below that are sticky (pinned under the bar) are offset separately via
-   --submenu-h so the open panel never covers them when scrolled. */
-/* Two rows: an 84px bar row holding the Catalog label, then the submenu row.
-   A grid (rather than a tall flex link) keeps the label centered in the bar in
-   both states while leaving the link itself natural height — so its hit area is
-   just the text, matching the other nav items. */
+/* ── Catalog submenu (desktop/tablet) ───────────────────────────────────────
+   Absolutely positioned under the Catalog label (col 3), overlaying the page —
+   the bar keeps its height and nothing below gets pushed down. Opening slides
+   the panel out while the white backdrop grows with it and the page behind
+   blurs (.nav::after). */
 .nav-links > .nav-item--has-submenu {
-  display: grid;
-  grid-template-rows: var(--nav-h) auto;
-  align-items: center;
-  justify-items: start;
-  height: auto;
+  position: relative;
 }
 
 .nav-submenu {
   list-style: none;
   margin: 0;
   padding: 0;
-  /* Zero-width with horizontal overflow so the (wider-than-column) item names
-     spill to the right WITHOUT sizing the grid column. Otherwise the Catalog
-     item grows past its track and shoves the other nav items around. overflow-y
-     stays clipped so the open/close height slide still works. */
-  width: 0;
-  overflow-x: visible;
-  overflow-y: clip;
+  /* Out of flow, directly below the Catalog item's 84px bar box. The absolute
+     box shrink-wraps to the widest (nowrap) item name, so the wider-than-column
+     names never size the grid column or shove the other nav items around. */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   max-height: 0;
@@ -339,7 +366,7 @@ button:disabled { cursor: default; }
 /* Items fade + drift in (and out), staggered — matching the dropdown links */
 .nav-submenu > li {
   padding: 6px 0;
-  white-space: nowrap; /* names stay on one line as they overflow the 0-width box */
+  white-space: nowrap; /* single-line names size the shrink-wrapped panel */
   opacity: 0;
   transform: translateY(-6px);
   transition: opacity 0.3s linear, transform 0.3s linear;
@@ -527,9 +554,7 @@ button:disabled { cursor: default; }
   grid-column: 9 / 13;
   grid-row: 1;
   position: sticky;
-  /* Drops below the open Catalog submenu so the panel never covers it */
-  top: calc(var(--nav-h) + var(--submenu-h) + var(--safe-top) + 12px);
-  transition: top 0.4s cubic-bezier(.5, 0, .5, 1);
+  top: calc(var(--nav-h) + var(--safe-top) + 12px);
   align-self: start;
   justify-self: end;
   display: flex;
@@ -1080,9 +1105,7 @@ button:disabled { cursor: default; }
 /* Only the preview box + pills are sticky */
 .glyph-overview__preview-sticky {
   position: sticky;
-  /* Drops below the open Catalog submenu so the panel never covers it */
-  top: calc(var(--nav-h) + var(--submenu-h) + var(--safe-top) + 12px);
-  transition: top 0.4s cubic-bezier(.5, 0, .5, 1);
+  top: calc(var(--nav-h) + var(--safe-top) + 12px);
   max-width: 540px;
 }
 
@@ -1622,16 +1645,6 @@ button:disabled { cursor: default; }
 .page-anim--entering > *:not(.catalog-page) > *:nth-child(5)  { transition-delay: 600ms; }
 .page-anim--entering > *:not(.catalog-page) > *:nth-child(6)  { transition-delay: 750ms; }
 
-/* The enter rule above sets `transition: opacity` on every direct child of the
-   page root, which clobbers the buy bar's `top` transition (it's a direct child;
-   the glyph preview is nested deeper, so it's unaffected). Restore both here —
-   higher specificity, and after the nth-child delays so the offset animates with
-   no stagger delay — so the buy bar still slides clear of the open submenu. */
-.page-anim--entering > *:not(.catalog-page) > .font-detail-actions-sticky {
-  transition: top 0.4s cubic-bezier(.5, 0, .5, 1), opacity 0.4s linear;
-  transition-delay: 0s;
-}
-
 .page-anim--entering .catalog-hero,
 .page-anim--entering .catalog-grid > * {
   opacity: 1;
@@ -1655,15 +1668,6 @@ button:disabled { cursor: default; }
 .page-anim--exiting > *:not(.catalog-page) > *:nth-child(4)  { transition-delay: 120ms; }
 .page-anim--exiting > *:not(.catalog-page) > *:nth-child(5)  { transition-delay: 160ms; }
 .page-anim--exiting > *:not(.catalog-page) > *:nth-child(6)  { transition-delay: 200ms; }
-
-/* Same clobbering as the enter fix above: the exit rule replaces the buy bar's
-   transition list with opacity-only, so when a submenu navigation closes the
-   Catalog panel mid-scroll (--submenu-h → 0 while the bar is stuck), its `top`
-   snaps instead of sliding up with the collapsing submenu. Restore both. */
-.page-anim--exiting > *:not(.catalog-page) > .font-detail-actions-sticky {
-  transition: top 0.4s cubic-bezier(.5, 0, .5, 1), opacity 0.3s linear;
-  transition-delay: 0s;
-}
 
 .page-anim--exiting .catalog-hero,
 .page-anim--exiting .catalog-grid > * {
@@ -1700,6 +1704,7 @@ body[data-page-phase=entering] .footer {
 
 /* ─── Cart modal animations ──────────────────────────────────────────────── */
 
+.cart-anim--loading .store-modal__container__back-button,
 .cart-anim--loading .store-modal__container__cart-button,
 .cart-anim--loading .store-modal__index-item__button {
   opacity: 0;
@@ -1710,6 +1715,49 @@ body[data-page-phase=entering] .footer {
 .cart-anim--entering .store-modal__index-item__button {
   opacity: 1;
   transition: opacity 0.4s linear;
+}
+
+/* Back button: opacity delay per-property so the background hover (120ms,
+   defined on the rest style) isn't delayed along with it */
+.cart-anim--entering .store-modal__container__back-button {
+  opacity: 1;
+  transition: opacity 0.4s linear 100ms, background 120ms;
+}
+
+/* Close button: held invisible during the intro, then a one-shot fade on
+   release. An ANIMATION rather than a transition/filled state because the
+   button's hover dims via opacity (fontdue-theme) — with no fill mode the
+   cascade (hover included) takes opacity back the moment the fade ends. The
+   loading rule carries the container class so it outranks the :hover rule
+   (this sheet loads after fontdue-theme, winning the tie). */
+@keyframes poi-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.cart-anim--loading .store-modal__container__container .store-modal__container__close-button {
+  opacity: 0;
+}
+.cart-anim--entering .store-modal__container__close-button {
+  animation: poi-fade-in 0.4s linear;
+}
+/* ── Modal close (whole-drawer exit) ── */
+/* fontdueCart intercepts CLOSE_CART and plays a full exit fade before letting
+   React unmount: the page via data-cart-page=exiting, nav chrome via
+   data-cart-nav=exiting, and the close button via this class (page swaps keep
+   the close button visible, so it can't ride on the nav-exit attr).
+   animation: none cancels a still-running intro fade, which would otherwise
+   pin opacity until it finished. */
+.cart-anim--closing .store-modal__container__close-button {
+  opacity: 0;
+  transition: opacity 0.3s linear;
+  animation: none;
+}
+
+/* No fade replay while the drawer slides out: animateClose re-appends the
+   overlay (restarting animations), and a replayed intro fade would blink the
+   button. Opacity is left to the rules above — everything is already faded. */
+.store-modal__container__container[data-closing] .store-modal__container__close-button {
+  animation: none;
 }
 
 .cart-anim--entering .store-modal__container__cart-button   { transition-delay: 100ms; }
@@ -1876,11 +1924,11 @@ body[data-page-phase=entering] .footer {
   .nav-toggle { display: inline-block; grid-column: 2; justify-self: start; }
   .nav-cart { grid-column: 4; justify-self: end; }
 
-  /* The dropdown panel IS the nav's frosted background: it starts at the
-     very top, blurs the whole nav-bar strip (its padding-top) plus the
-     revealed links below, so the bar and the dropdown share one continuous
-     blur. The bar's own ::before blur is therefore disabled here to avoid a
-     second overlapping layer (the seam the split came from). */
+  /* The dropdown panel IS the nav's background on mobile: it starts at the
+     very top and covers the nav-bar strip (its padding-top) plus the revealed
+     links below as one continuous opaque white panel. The bar's own ::before
+     strip is therefore disabled here to avoid a second overlapping layer
+     (the seam the split came from). */
   .nav::before { display: none; }
 
   .nav-links {
@@ -1901,9 +1949,7 @@ body[data-page-phase=entering] .footer {
     padding: calc(var(--nav-h) + var(--safe-top)) var(--pad) 0;
     max-height: calc(var(--nav-h) + var(--safe-top)); /* closed: status strip + bar */
     overflow: hidden;
-    background: var(--glass-tint);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    background: #fff;
     transition:
       max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
       padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1941,10 +1987,12 @@ body[data-page-phase=entering] .footer {
      Items align to column 2 of the dropdown's 4-col grid; collapse/expand and
      the staggered per-item fade carry over from the base submenu rules. */
   .nav-submenu {
+    /* Back in normal flow inside the dropdown (the desktop absolute overlay
+       doesn't apply — the dropdown itself is the overlay here). */
+    position: static;
     /* Fill the dropdown width (auto would shrink-wrap to content) so the 4-col
        grid spans the row and items land on column 2. */
     width: 100%;
-    /* full-width dropdown here — no horizontal overflow needed, plain clip */
     overflow: hidden;
     padding: 0;
     display: grid;
@@ -1960,12 +2008,6 @@ body[data-page-phase=entering] .footer {
     padding: 10px 0;
   }
   .nav-sublink { font-size: var(--font-size-lg); }
-
-  /* Undo the desktop two-row grid so the Catalog row is a normal stacked menu
-     item (label, then submenu) at its natural height. */
-  .nav-links > .nav-item--has-submenu {
-    display: block;
-  }
 
   /* Target close to the real content height so the slide isn't cut short */
   .nav-item--submenu-open .nav-submenu { max-height: 220px; }

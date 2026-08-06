@@ -31,12 +31,32 @@ export default function Nav() {
     setCatalogOpen(v => !v)
   }
   const onCatalogEnter = () => { if (isDesktop()) setCatalogOpen(true) }
-  const onCatalogLeave = () => { if (isDesktop()) setCatalogOpen(false) }
+
+  // While open on desktop, the panel behaves as a full-width band: moving the
+  // cursor left/right of the item names keeps it open; it only closes when the
+  // cursor leaves vertically — up into the nav bar (unless it's over the
+  // Catalog item itself) or down into the page content. Tracked via document
+  // mousemove because mouseleave on the (narrow) Catalog item would also fire
+  // on horizontal exits.
+  useEffect(() => {
+    if (!catalogOpen || !isDesktop()) return
+    const onMove = (e) => {
+      const sub = submenuRef.current
+      if (!sub) return
+      if (sub.closest('.nav-item--has-submenu')?.contains(e.target)) return
+      const band = sub.getBoundingClientRect() // live panel box; top = bar bottom
+      if (e.clientY >= band.top && e.clientY <= band.bottom) return
+      setCatalogOpen(false)
+    }
+    document.addEventListener('mousemove', onMove)
+    return () => document.removeEventListener('mousemove', onMove)
+  }, [catalogOpen])
 
   // Publish the open submenu's *actual* height as --submenu-h on <body> so the
-  // nav's frosted backdrop and the sticky items below it can offset by exactly
-  // the amount the bar grows. Measured (not a fixed guess) so the offset matches
-  // the real content height rather than the max-height cap. 0 when closed.
+  // nav's white backdrop can grow by exactly the panel's height (the submenu
+  // is absolutely positioned and overlays the page content). Measured (not a
+  // fixed guess) so the backdrop matches the real content height rather than
+  // the max-height cap. 0 when closed.
   useEffect(() => {
     if (!catalogOpen || !submenuRef.current) {
       document.body.style.removeProperty('--submenu-h')
@@ -58,9 +78,9 @@ export default function Nav() {
     }
     const publish = (animate) => {
       if (animate) {
-        // Commit the start value (0) with a forced reflow first so the dependent
-        // `top`/`height` transitions have a distinct state to animate from —
-        // otherwise they snap straight to the end.
+        // Commit the start value (0) with a forced reflow first so the backdrop's
+        // dependent `height` transition has a distinct state to animate from —
+        // otherwise it snaps straight to the end.
         document.body.style.setProperty('--submenu-h', '0px')
         void document.body.offsetWidth // flush the 0 state
       }
@@ -110,7 +130,6 @@ export default function Nav() {
         <li
           className={`nav-item nav-item--has-submenu${catalogOpen ? ' nav-item--submenu-open' : ''}`}
           onMouseEnter={onCatalogEnter}
-          onMouseLeave={onCatalogLeave}
         >
           <NavLink to="/" onClick={onCatalogClick} aria-haspopup="true" aria-expanded={catalogOpen} className={'nav-link' + (catalogActive ? ' active' : '')}>Catalog</NavLink>
           <ul className="nav-submenu" ref={submenuRef}>

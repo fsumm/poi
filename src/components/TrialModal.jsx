@@ -4,33 +4,81 @@ import TrialForm from './TrialForm.jsx'
 
 export default function TrialModal({ open, onClose }) {
   const [closing, setClosing] = useState(false)
+  // Content fades hold until the panel's 300ms slide-in has played (matching
+  // the cart modal); --entered releases the staggered fade.
+  const [entered, setEntered] = useState(false)
+  // Content fades back out before the slide-out (matching the cart modal's
+  // close); --exiting drives the staggered fade.
+  const [exiting, setExiting] = useState(false)
   const closeTimer = useRef(null)
+  const exitTimer = useRef(null)
 
-  // Play the slide-out animation, then unmount via onClose. A timer guarantees
-  // the modal still closes if the animation never fires (reduced motion, etc.).
+  // 0.3s fade + 40ms stagger across the 7 form rows, mirroring the cart exit
+  const EXIT_FADE = 540
+
+  // Fade the content out, play the slide-out animation, then unmount via
+  // onClose. Timers guarantee the modal still closes if the animations never
+  // fire (reduced motion, etc.).
   function requestClose() {
-    if (closeTimer.current) return
-    setClosing(true)
-    closeTimer.current = setTimeout(() => {
-      closeTimer.current = null
-      // Reset before unmounting so a reopened modal's first frame isn't
-      // painted with the leftover data-closing (slide-out) state.
-      setClosing(false)
-      onClose()
-    }, 300)
+    if (closeTimer.current || exitTimer.current) return
+    setExiting(true)
+    const beginSlide = () => {
+      setClosing(true)
+      closeTimer.current = setTimeout(() => {
+        closeTimer.current = null
+        // Reset before unmounting so a reopened modal's first frame isn't
+        // painted with leftover state. entered especially: the open-effect
+        // reset below runs only AFTER the first paint, so a stale true here
+        // would flash the content fully visible for one frame at the slide's
+        // start position.
+        setClosing(false)
+        setExiting(false)
+        setEntered(false)
+        onClose()
+      }, 300)
+    }
+    // Before --entered the content is still invisible — nothing to fade out
+    if (!entered) return beginSlide()
+    exitTimer.current = setTimeout(() => {
+      exitTimer.current = null
+      beginSlide()
+    }, EXIT_FADE)
   }
 
   useEffect(() => {
     if (open) {
       setClosing(false)
-      // Drop any lingering timer id so a reopened modal can close again.
+      setExiting(false)
+      // Drop any lingering timer ids so a reopened modal can close again.
       clearTimeout(closeTimer.current)
       closeTimer.current = null
+      clearTimeout(exitTimer.current)
+      exitTimer.current = null
     }
   }, [open])
 
-  // Clear any pending close timer on unmount.
-  useEffect(() => () => clearTimeout(closeTimer.current), [])
+  // Release the content fade once the slide-in has finished; reset on reopen.
+  useEffect(() => {
+    if (!open) return
+    setEntered(false)
+    const t = setTimeout(() => setEntered(true), 300)
+    return () => clearTimeout(t)
+  }, [open])
+
+  // Blur the page behind the modal (the .nav::after layer, same as the cart
+  // modal). The flag drops when the slide-out starts so the blur's 0.25s
+  // opacity fade plays during the slide, mirroring the cart's close.
+  useEffect(() => {
+    if (open && !closing) document.body.dataset.trialModal = 'open'
+    else delete document.body.dataset.trialModal
+    return () => delete document.body.dataset.trialModal
+  }, [open, closing])
+
+  // Clear any pending close/exit timers on unmount.
+  useEffect(() => () => {
+    clearTimeout(closeTimer.current)
+    clearTimeout(exitTimer.current)
+  }, [])
 
   // Close on Escape while open.
   useEffect(() => {
@@ -50,7 +98,11 @@ export default function TrialModal({ open, onClose }) {
       <div className="trial-modal__background" onClick={requestClose} />
 
       <div
-        className="trial-modal__panel"
+        className={
+          'trial-modal__panel' +
+          (entered ? ' trial-modal__panel--entered' : '') +
+          (exiting ? ' trial-modal__panel--exiting' : '')
+        }
         data-closing={closing ? '' : undefined}
       >
         <div className="trial-modal__nav">
