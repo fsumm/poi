@@ -17,12 +17,21 @@ export default function Nav() {
     setCatalogOpen(false)
   }
 
-  // The Catalog submenu is click-toggled on every viewport (clicking the label
-  // opens/closes it rather than navigating). Closes on outside click or Escape.
+  // Desktop (no hamburger, >580px): the submenu opens on hover of the Catalog
+  // item and the label click navigates like a normal link. Mobile keeps the
+  // tap-to-toggle behavior (tapping the label opens/closes the submenu rather
+  // than navigating). Closes on outside click or Escape.
+  const isDesktop = () => window.matchMedia('(min-width: 581px)').matches
   const onCatalogClick = (e) => {
+    if (isDesktop()) {
+      close()
+      return
+    }
     e.preventDefault()
     setCatalogOpen(v => !v)
   }
+  const onCatalogEnter = () => { if (isDesktop()) setCatalogOpen(true) }
+  const onCatalogLeave = () => { if (isDesktop()) setCatalogOpen(false) }
 
   // Publish the open submenu's *actual* height as --submenu-h on <body> so the
   // nav's frosted backdrop and the sticky items below it can offset by exactly
@@ -98,7 +107,11 @@ export default function Nav() {
         Menu
       </button>
       <ul className="nav-links">
-        <li className={`nav-item nav-item--has-submenu${catalogOpen ? ' nav-item--submenu-open' : ''}`}>
+        <li
+          className={`nav-item nav-item--has-submenu${catalogOpen ? ' nav-item--submenu-open' : ''}`}
+          onMouseEnter={onCatalogEnter}
+          onMouseLeave={onCatalogLeave}
+        >
           <NavLink to="/" onClick={onCatalogClick} aria-haspopup="true" aria-expanded={catalogOpen} className={'nav-link' + (catalogActive ? ' active' : '')}>Catalog</NavLink>
           <ul className="nav-submenu" ref={submenuRef}>
             {fonts.map(font => (
