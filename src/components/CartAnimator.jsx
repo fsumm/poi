@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { waitUntilReady, waitForPending, hasFontduePending } from '../animUtils.js'
+import { setupCartOverlay } from '../fontdueCart.js'
 
 // Hold the enter animation until fontdue's font specimens have swapped from
 // their Fallback face to the real one, then settle as usual — otherwise the
@@ -14,24 +15,6 @@ async function waitForCartReady(el) {
 const EXIT_STEP = 40
 const EXIT_DURATION = 300
 
-// Enter fades hold until the panel's 300ms slide-in has finished, so content
-// fades in place instead of fading while the drawer is still moving. Keyed by
-// overlay; the promise stays resolved for later page swaps (no-op await).
-const slideDone = new WeakMap()
-const SLIDE_FALLBACK = 500
-
-function waitForSlideIn(overlay) {
-  return new Promise(resolve => {
-    let settled = false
-    const finish = () => { if (!settled) { settled = true; resolve() } }
-    // Fallback in case animationend never fires (reduced motion, missing panel)
-    setTimeout(finish, SLIDE_FALLBACK)
-    const panel = overlay.querySelector('.store-modal__container__container')
-    panel?.addEventListener('animationend', e => {
-      if (e.target === panel && e.animationName === 'slideIn') finish()
-    })
-  })
-}
 // The exiting CSS defines staggered delays for the first 8 page-body children
 const EXIT_STAGGER_MAX = 8
 
@@ -142,10 +125,6 @@ async function animatePage(container) {
   await waitForCartReady(container)
 
   if (!container.isConnected) return
-  // Hold the fade until the panel has finished sliding in (no-op once open)
-  if (overlay) await slideDone.get(overlay)
-
-  if (!container.isConnected) return
   // Don't clobber an exit that started while this page was still settling
   if (container.dataset.cartPage !== 'loading') return
   container.dataset.cartPage = 'entering'
@@ -205,7 +184,9 @@ async function handleOpen(overlay) {
   overlay.dataset.cartAnim = 'loading'
   overlay.classList.add('cart-anim--loading')
   suppressHoverDuringSlide(overlay)
-  slideDone.set(overlay, waitForSlideIn(overlay))
+  // Close orchestration + the fixed "Cart" toggle — from here (not openCart)
+  // so fontdue-internal opens (the Buy button) are covered too.
+  setupCartOverlay(overlay)
 
   // The first page's data loads before watchPageChanges is attached below, so
   // sweep here too — both anything already present and whatever appears while
@@ -222,16 +203,10 @@ async function handleOpen(overlay) {
 
   await waitForCartReady(overlay)
 
-  if (!overlay.isConnected) { openObs.disconnect(); return }
-  // Keep everything held until the slide-in has finished. The sweep observer
-  // stays live through this wait: fast navigation while the first page is
-  // still loading (e.g. cart → All collections) swaps pages in before
-  // watchPageChanges below exists, and a page mounted unobserved would skip
-  // its enter fade entirely.
-  await slideDone.get(overlay)
   openObs.disconnect()
   // Records pending at disconnect are dropped — sweep once more so a page
-  // that mounted as the observer wound down is still animated.
+  // that mounted as the observer wound down (fast navigation while loading)
+  // is still animated before watchPageChanges takes over below.
   sweepPages()
   if (!overlay.isConnected) return
 

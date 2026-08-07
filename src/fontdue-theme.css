@@ -312,7 +312,7 @@ input:checked + .checkbox__icon {
    right. Redefining the SAME keyframe name here (the later definition wins)
    turns the entry vertical without touching the animation shorthand fontdue
    applies — and keeps the animation name the JS hooks listen for intact
-   (CartAnimator's waitForSlideIn / suppressHoverDuringSlide both match
+   (CartAnimator's suppressHoverDuringSlide matches
    'slideIn'). fontdue uses `slideIn` only for the store-modal panel, so the
    override can't leak anywhere else. */
 @keyframes slideIn {
@@ -528,31 +528,11 @@ input:checked + .checkbox__icon {
   background: var(--ink-black);
 }
 
-/* Close button — "Close" text styled like the main nav links */
-.store-modal__container__container .store-modal__container__close-button .icon {
-  display: none;
-}
+/* Close button: hidden — replaced by the fixed "Cart" toggle (.poi-cart-toggle,
+   see index.css) that fontdueCart mounts on the overlay, pinned over the nav
+   cart button so it holds still while the panel slides beneath it. */
 .store-modal__container__container .store-modal__container__close-button {
-  background: none;
-  border: none;
-  padding: 0;
-  flex-shrink: 0;
-  cursor: pointer;
-  color: var(--ink-black);
-  font-family: var(--font-ui);
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  /* Use the font's natural line box (not a tight 20px) so the generated
-     ::before text gets the same inline box as the real-text nav links,
-     keeping the baseline on the same sub-pixel row across Chrome/Safari. */
-  line-height: normal;
-  transition: opacity 0.12s;
-}
-.store-modal__container__container .store-modal__container__close-button::before {
-  content: 'Close';
-}
-.store-modal__container__container .store-modal__container__close-button:hover {
-  opacity: 0.6;
+  display: none;
 }
 
 /* Nav bar matching site nav */

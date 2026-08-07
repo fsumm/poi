@@ -1739,41 +1739,40 @@ body[data-page-phase=entering] .footer {
   transition: opacity 0.4s linear 100ms, background 120ms;
 }
 
-/* Close button: held invisible during the intro, then a one-shot fade on
-   release. An ANIMATION rather than a transition/filled state because the
-   button's hover dims via opacity (fontdue-theme) — with no fill mode the
-   cascade (hover included) takes opacity back the moment the fade ends. The
-   loading rule carries the container class so it outranks the :hover rule
-   (this sheet loads after fontdue-theme, winning the tie). */
+/* (Used by the trial modal's close-button intro fade in fontdue-theme.css) */
 @keyframes poi-fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-.cart-anim--loading .store-modal__container__container .store-modal__container__close-button {
-  opacity: 0;
-}
-.cart-anim--entering .store-modal__container__close-button {
-  animation: poi-fade-in 0.4s linear;
-}
-/* ── Modal close (whole-drawer exit) ── */
-/* fontdueCart intercepts CLOSE_CART and plays a full exit fade before letting
-   React unmount: the page via data-cart-page=exiting, nav chrome via
-   data-cart-nav=exiting, and the close button via this class (page swaps keep
-   the close button visible, so it can't ride on the nav-exit attr).
-   animation: none cancels a still-running intro fade, which would otherwise
-   pin opacity until it finished. */
-.cart-anim--closing .store-modal__container__close-button {
-  opacity: 0;
-  transition: opacity 0.3s linear;
-  animation: none;
-}
 
-/* No fade replay while the drawer slides out: animateClose re-appends the
-   overlay (restarting animations), and a replayed intro fade would blink the
-   button. Opacity is left to the rules above — everything is already faded. */
-.store-modal__container__container[data-closing] .store-modal__container__close-button {
-  animation: none;
+/* Fixed "Cart" toggle replacing the cart modal's close button (which is
+   display:none'd in fontdue-theme). fontdueCart mounts it on the overlay —
+   fixed and untransformed — directly over the nav cart button (JS copies the
+   button's rect), so the label holds still while the panel slides beneath it,
+   mirroring the catalog submenu. No enter/exit fade: it's visible for the
+   drawer's whole lifetime and hands off seamlessly to the real nav button
+   when the overlay is removed. */
+.poi-cart-toggle {
+  position: fixed;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--ink-black);
+  cursor: pointer;
+  transition: opacity 0.12s;
 }
+.poi-cart-toggle:hover { opacity: 0.6; }
+/* Scripted hover: set at mount when the cursor is already over the nav button
+   (:hover doesn't apply to inserted elements until the next mouse move), and
+   at close start when pointer-events: none would drop a live :hover. */
+.poi-cart-toggle--hover { opacity: 0.6; }
 
 .cart-anim--entering .store-modal__container__cart-button   { transition-delay: 100ms; }
 .cart-anim--entering .store-modal__index-item__button:nth-child(1) { transition-delay: 80ms; }
