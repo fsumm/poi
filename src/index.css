@@ -1719,10 +1719,15 @@ body[data-page-phase=entering] .footer {
 
 /* ─── Cart modal animations ──────────────────────────────────────────────── */
 
+/* Held states snap (transition: none): the hold attribute/class can land one
+   style-recalc AFTER an element first computes at opacity 1, and without the
+   snap that 1 → 0 change would run through the enter transition's staggered
+   delays — flashing the element fully visible for the delay's duration. */
 .cart-anim--loading .store-modal__container__back-button,
 .cart-anim--loading .store-modal__container__cart-button,
 .cart-anim--loading .store-modal__index-item__button {
   opacity: 0;
+  transition: none;
 }
 
 /* ── Enter ── */
@@ -1807,9 +1812,13 @@ body[data-page-phase=entering] .footer {
 
 /* ── Cart page transitions (index → product → cart → checkout) ── */
 
+/* transition: none — see the held-state snap note on the cart-anim--loading
+   rule: without it a late-landing 'loading' attribute fades 1 → 0 through the
+   staggered enter delays, flashing the fresh page's content. */
 [data-cart-page=loading] .store-modal__page__body > *,
 [data-cart-page=loading] .store-modal__page__sticky-footer {
   opacity: 0;
+  transition: none;
 }
 
 /* Enabled sections fade to full opacity. Disabled sections are excluded here so

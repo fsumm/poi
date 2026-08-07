@@ -57,12 +57,15 @@ export default function TrialModal({ open, onClose }) {
     }
   }, [open])
 
-  // Release the content fade once the slide-in has finished; reset on reopen.
+  // Release the content fade as soon as the held (opacity 0) state has
+  // painted — the fade then plays while the panel is still sliding in,
+  // matching the cart modal. Reset on reopen.
   useEffect(() => {
     if (!open) return
     setEntered(false)
-    const t = setTimeout(() => setEntered(true), 300)
-    return () => clearTimeout(t)
+    let r2
+    const r1 = requestAnimationFrame(() => { r2 = requestAnimationFrame(() => setEntered(true)) })
+    return () => { cancelAnimationFrame(r1); cancelAnimationFrame(r2) }
   }, [open])
 
   // Blur the page behind the modal (the .nav::after layer, same as the cart

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { waitUntilReady, waitForPending, hasFontduePending } from '../animUtils.js'
+import { waitUntilReady, waitForPending, hasFontduePending, raf2 } from '../animUtils.js'
 import { setupCartOverlay } from '../fontdueCart.js'
 
 // Hold the enter animation until fontdue's font specimens have swapped from
@@ -115,6 +115,21 @@ function setupNavExit(overlay) {
   }, true)
 }
 
+// React Suspense mounts a navigated-to page's real subtree with display: none
+// while the fallback shows, then reveals it by clearing the inline style — no
+// new node appears at reveal. Wait for that reveal, otherwise the enter fade
+// plays to completion while the page is invisible and the reveal shows
+// finished items with no animation.
+function waitForVisible(el) {
+  return new Promise(resolve => {
+    if (el.style.display !== 'none') return resolve()
+    const obs = new MutationObserver(() => {
+      if (el.style.display !== 'none') { obs.disconnect(); resolve() }
+    })
+    obs.observe(el, { attributes: true, attributeFilter: ['style'] })
+  })
+}
+
 async function animatePage(container) {
   if (!container || container.dataset.cartPage) return
   container.dataset.cartPage = 'loading'
@@ -123,6 +138,12 @@ async function animatePage(container) {
   if (overlay) delete overlay.dataset.cartExit
 
   await waitForCartReady(container)
+
+  if (!container.isConnected) return
+  await waitForVisible(container)
+  // Let the revealed page paint a frame at the held opacity 0 first — flipping
+  // in the same frame as the reveal would skip the transition entirely
+  await raf2()
 
   if (!container.isConnected) return
   // Don't clobber an exit that started while this page was still settling

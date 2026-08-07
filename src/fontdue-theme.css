@@ -1140,9 +1140,13 @@ input:checked + .checkbox__icon {
   background: transparent;
 }
 
-/* Remove sticky/fixed from both cart modal footers — let them flow naturally */
+/* Remove sticky/fixed from both cart modal footers — let them flow naturally
+   at the end of the page content. margin-top: 0 kills fontdue's margin-top:
+   auto, which would otherwise push "Add to cart" to the panel's bottom edge
+   inside the flex-stretched page column whenever the content is short. */
 .store-modal__container__container .store-modal__page__sticky-footer {
   position: static;
+  margin-top: 0;
 }
 .store-modal__container__container .store-modal__cart__buttons {
   position: static;
