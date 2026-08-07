@@ -261,7 +261,10 @@ button:disabled { cursor: default; }
   -webkit-backdrop-filter: blur(var(--overlay-blur));
   backdrop-filter: blur(var(--overlay-blur));
   opacity: 0;
-  transition: opacity 0.25s ease-out;
+  /* The z-index delay keeps the layer raised above the nav (see the drawer
+     rule below) for the whole fade-out — without it the drop to -2 is instant
+     and the nav's share of the tint vanishes a beat before the rest. */
+  transition: opacity 0.25s ease-out, z-index 0s 0.25s;
 }
 
 /* Triggers: open Catalog submenu, the fontdue cart modal (flagged on <body>
@@ -272,6 +275,18 @@ button:disabled { cursor: default; }
 body[data-fontdue-store-modal='open'] .nav::after,
 body[data-trial-modal='open'] .nav::after {
   opacity: 1;
+}
+
+/* While a drawer modal is open the blur covers the nav bar too: raised above
+   the white header strip (-1) and every nav child (max z-index 50), so the
+   header blurs along with the page. The Catalog submenu trigger keeps the
+   base -2, where the header stays crisp behind the open submenu. Raising is
+   immediate (no z delay) so open fades in as one layer; the base rule's
+   delayed z drop makes close fade out as one layer too. */
+body[data-fontdue-store-modal='open'] .nav::after,
+body[data-trial-modal='open'] .nav::after {
+  z-index: 60;
+  transition: opacity 0.25s ease-out, z-index 0s;
 }
 
 /* Non-interactive box that holds the bar height and centers the logo; the link
@@ -353,13 +368,13 @@ body[data-trial-modal='open'] .nav::after {
    collapses fully to 0 when closed. Counted in scrollHeight → --submenu-h. */
 .nav-submenu::after {
   content: '';
-  flex: 0 0 26px;
+  flex: 0 0 36px;
 }
 
 /* Target kept close to the real content height (items + spacer) so the
    ease-out curve plays out over the full slide rather than finishing early. */
 .nav-item--submenu-open .nav-submenu {
-  max-height: 170px;
+  max-height: 180px;
   pointer-events: auto;
 }
 
