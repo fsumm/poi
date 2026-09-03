@@ -145,8 +145,8 @@ html[data-resizing] *::after {
   /* Blur applied to the page content behind an open Catalog submenu or an
      open cart/trial modal (the .nav::after layer — blur plus a light gray
      tint, see --overlay-tint). */
-  --overlay-blur: 18px;
-  --overlay-tint: rgba(186, 186, 185, 0.25);
+  --overlay-blur: 0px;
+  --overlay-tint: rgba(150, 150, 148, 0.25);
   /* Frosted-glass tokens — used by the mobile buy bar and the trial modal.
      (The main nav and cart modal are opaque white; the page behind them gets
      the --overlay-blur treatment above instead.)
