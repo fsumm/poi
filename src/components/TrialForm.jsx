@@ -11,7 +11,14 @@ const MUTATION = `
   }
 `
 
-export default function TrialForm() {
+/**
+ * The trial request form, shared by the /trials page and the trial modal.
+ *
+ * `heading` draws the "Trials" label above the copy. The modal needs it — it
+ * has no other title — while the /trials page carries its own page head, where
+ * a second "Trials" would just repeat the H1.
+ */
+export default function TrialForm({ heading = true }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [eulaAgreed, setEulaAgreed] = useState(false)
@@ -61,7 +68,7 @@ export default function TrialForm() {
         </p>
       ) : (
         <form onSubmit={handleSubmit}>
-          <div className="page-section-label">Trials</div>
+          {heading && <h2 className="page-section-label">Trials</h2>}
           <p className="page-text">
             Trial fonts include the complete character set and all OpenType
             features. Intended for client pitches, personal projects, and student work.

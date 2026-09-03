@@ -1,19 +1,10 @@
 import { useParams, Navigate } from 'react-router-dom'
-import { Suspense, Component, useMemo, useState } from 'react'
-import FrameImage from '../components/FrameImage.jsx'
-
-const fontImages = {
-  aeronaut: 'aeronaut001.jpg',
-  carbonic: 'carbonic001.jpg',
-  orbiter: 'orbiter001.jpg',
-  diode: 'diode001.jpg',
-}
+import { Suspense, Component, useState } from 'react'
 import BuyButton from 'fontdue-js/BuyButton'
 import GlyphOverview from '../components/GlyphOverview.jsx'
 import TypeTester from '../components/TypeTester.jsx'
 import TrialModal from '../components/TrialModal.jsx'
 import { getFontById } from '../data/fonts.js'
-import { makeOverlay } from '../overlayText.js'
 import { useFitText } from '../useFitText.js'
 
 const SPECIMEN_TRACKING = -0.04 // -4% letter-spacing, expressed in em
@@ -44,8 +35,6 @@ export default function FontDetail() {
 
   const ff = fontFamily(fontId)
 
-  // Hooks must run unconditionally (before the early return below)
-  const overlay = useMemo(() => (font ? makeOverlay(font) : null), [fontId])
   const [specimenRef, specimenTextRef, specimenReady] = useFitText({
     text: font?.displayName ?? '',
     family: ff,
@@ -58,12 +47,6 @@ export default function FontDetail() {
     <div className="font-detail">
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="font-detail-header">
-        {fontImages[fontId] && (
-          <FrameImage file={fontImages[fontId]} className="font-detail-img" eager>
-            <span className="catalog-card-text" style={overlay.style}>{overlay.text}</span>
-          </FrameImage>
-        )}
-
         <div
           className="font-detail-specimen"
           ref={specimenRef}
@@ -80,6 +63,11 @@ export default function FontDetail() {
           </span>
         </div>
 
+        {/* Full-width rule under the name. A real element rather than a border
+            on the specimen, which has to stay six columns wide because it is
+            the fit container useFitText measures the name against. */}
+        <hr className="font-detail-rule" />
+
         <p className="font-detail-description">{font.description}</p>
       </div>
 
@@ -88,11 +76,16 @@ export default function FontDetail() {
           tracking, line height, autofit) resets on navigation rather than
           persisting from the previously viewed font. */}
       <div className="fontdue-section">
-        <TypeTester
-          key={fontId}
-          collectionSlug={font.fontdueSlug}
-          collectionId={font.fontdueCollectionId}
-        />
+        <h2 className="section-heading">Type tester</h2>
+        {/* The rule lives on this wrapper rather than on the tester itself so
+            it is drawn while the tester is still loading its webfonts. */}
+        <div className="section-body">
+          <TypeTester
+            key={fontId}
+            collectionSlug={font.fontdueSlug}
+            collectionId={font.fontdueCollectionId}
+          />
+        </div>
       </div>
 
       {/* ── Glyph overview (custom) ──────────────────────────────── */}

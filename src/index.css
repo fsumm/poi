@@ -128,8 +128,10 @@ html[data-resizing] *::after {
   --radius-ui: 6px;
   --max-w: 1700px;
   --pad: 20px;
-  --gap: 20px;
-  --nav-h: 84px;
+  /* Column gutter. The outer page margin (--pad) stays at 20px; only the
+     gutters between the 12 columns narrow. */
+  --gap: 10px;
+  --nav-h: 80px;
   /* Height of the open Catalog submenu panel; 0 when closed. Grows the
      header's white backdrop so it covers the overlaid panel. */
   --submenu-h: 0px;
@@ -155,6 +157,44 @@ html[data-resizing] *::after {
   --font-ui: 'POI Orbiter', system-ui, -apple-system, sans-serif;
   --font-size-sm: 12px;
   --font-size-lg: 16px;
+
+  /* ── Type scale (H1–H5) ────────────────────────────────────────────────
+     Straight from the named text styles in the Figma file. The design is drawn
+     at a 1700px frame, so each step is expressed as clamp(floor, vw, figma):
+     the vw term is the Figma px divided by 1700, which makes the step land on
+     its exact drawn size at the 1700px max width and scale down proportionally
+     below it. Line heights are the drawn px converted to unitless ratios so
+     they ride the fluid size, and tracking — which Figma states in percent —
+     converts straight to em.
+
+     H1 is the only step at weight 550; the rest are 600. */
+  --h1-size: clamp(48px, 8.94vw, 152px);   /* 152 / 1700 */
+  --h1-weight: 550;
+  --h1-line: 0.947368;                     /* 144 / 152 */
+  --h1-tracking: -0.06em;
+
+  --h2-size: clamp(34px, 5.41vw, 92px);    /* 92 / 1700 */
+  --h2-weight: 600;
+  --h2-line: 0.934783;                     /* 86 / 92 */
+  --h2-tracking: -0.045em;
+
+  --h3-size: clamp(22px, 2.82vw, 48px);    /* 48 / 1700 */
+  --h3-weight: 600;
+  --h3-line: 1.020833;                     /* 49 / 48 */
+  --h3-tracking: -0.04em;
+
+  --h4-size: clamp(18px, 1.41vw, 24px);    /* 24 / 1700 */
+  --h4-weight: 600;
+  --h4-line: 1.166667;                     /* 28 / 24 */
+  --h4-tracking: -0.03em;
+
+  --h5-size: 16px;
+  --h5-weight: 600;
+  --h5-line: 1.25;                         /* 20 / 16 */
+  --h5-tracking: -0.01em;
+
+  /* Hairline used between every band on the editorial pages. Black, 1px. */
+  --rule: 1px solid var(--ink-black);
   --padding-sm: 6px 14px;
   --padding-lg: 8px 20px;
 }
@@ -181,6 +221,68 @@ button, input {
 
 button { cursor: pointer; }
 button:disabled { cursor: default; }
+
+/* ─── Headings (H1–H5) ───────────────────────────────────────────────────
+   The element selectors carry the scale so semantic markup is styled by
+   default; the matching .h1–.h5 classes let a block borrow a step without
+   changing its level in the document outline (e.g. a card title that is an
+   <h3> for screen readers but reads at the H4 step).
+
+   Margins are deliberately zeroed — vertical rhythm belongs to the page
+   section that owns the heading, not to the heading itself, so the same step
+   can sit tight under an eyebrow label on one page and open a section on
+   another. `font-variation-settings` is set alongside `font-weight` because
+   the UI face (POI Orbiter) is a variable font: without it Safari renders the
+   nearest named instance instead of interpolating. */
+
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4,
+h5, .h5 {
+  font-family: var(--font-ui);
+  margin: 0;
+}
+
+h1, .h1 {
+  font-size: var(--h1-size);
+  font-weight: var(--h1-weight);
+  font-variation-settings: 'wght' var(--h1-weight);
+  line-height: var(--h1-line);
+  letter-spacing: var(--h1-tracking);
+}
+
+h2, .h2 {
+  font-size: var(--h2-size);
+  font-weight: var(--h2-weight);
+  font-variation-settings: 'wght' var(--h2-weight);
+  line-height: var(--h2-line);
+  letter-spacing: var(--h2-tracking);
+}
+
+h3, .h3 {
+  font-size: var(--h3-size);
+  font-weight: var(--h3-weight);
+  font-variation-settings: 'wght' var(--h3-weight);
+  line-height: var(--h3-line);
+  letter-spacing: var(--h3-tracking);
+}
+
+h4, .h4 {
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  font-variation-settings: 'wght' var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+}
+
+h5, .h5 {
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
+}
 
 /* ─── Layout ─────────────────────────────────────────────────────────────── */
 
@@ -211,13 +313,16 @@ button:disabled { cursor: default; }
 /* ─── Nav ────────────────────────────────────────────────────────────────── */
 
 .nav {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: var(--gap);
-  /* Bar items keep their 84px-tall centered boxes via per-item heights below;
-     the open Catalog submenu is absolutely positioned, so the bar itself never
-     grows. */
-  align-items: start;
+  /* Flex, not the 12-column grid: the design sets the label row a fixed 90px
+     after the logo rather than on a column, and the labels are pills whose
+     widths come from their text. Cart is pushed to the far edge with an auto
+     margin. (Below 580px the mobile block re-declares this as a 4-column grid,
+     where the dropdown panel does need to line up with the page columns.) */
+  display: flex;
+  gap: 0;
+  /* Bar items keep their 120px-tall centered boxes via per-item heights below;
+     the open submenu is absolutely positioned, so the bar itself never grows. */
+  align-items: flex-start;
   /* padding-top reserves the status-bar strip so the bar content always sits
      below the notch (both at rest and when stuck); the white backdrop fills
      that strip. min-height grows to keep the bar a full 84px below the inset. */
@@ -293,7 +398,11 @@ body[data-trial-modal='open'] .nav::after {
    inside is natural size, so the clickable area is just the glyph (matching the
    other nav items, whose hit area is only their text). */
 .nav-logo {
-  grid-column: 1;
+  /* Fixed 114px cell (plus the 20px page gutter) puts the first label's pill
+     at 134px from the viewport edge, as drawn. A fixed width rather than the
+     glyph's own: the ⌘ measures differently before the webfont lands, which
+     would otherwise shift the whole label row on load. */
+  flex: 0 0 114px;
   height: var(--nav-h);
   display: flex;
   align-items: center;
@@ -302,34 +411,45 @@ body[data-trial-modal='open'] .nav::after {
 
 .nav-logo-link {
   line-height: 1;
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  letter-spacing: var(--h5-tracking);
 }
 
 .nav-links {
-  grid-column: 3 / 7;
-  display: grid;
-  grid-template-columns: subgrid;
+  display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
-  align-items: start;
+  align-items: flex-start;
 }
 
-/* Each top-level link sits in its own 84px-tall centered box (the bar row),
-   so the Catalog item can extend below it without dragging the others down. */
+/* Each top-level link sits in its own 120px-tall centered box (the bar row),
+   so an open submenu can extend below it without dragging the others down. */
 .nav-links > li {
   height: var(--nav-h);
   display: flex;
   align-items: center;
 }
 
+/* Labels are pill buttons: transparent at rest (the design draws them on the
+   white page background), filling on hover. The 16px/10px padding is what sets
+   the 32px optical gap between adjacent labels, so the pills sit flush against
+   each other with no list gap. */
 .nav-link {
-  font-weight: 600;
-  transition: opacity 0.12s;
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  transition: background 0.12s;
 }
 
-.nav-link:hover { opacity: 0.6; }
-
-.nav-link.active { }
+.nav-link:hover { background: var(--gray-1); }
 
 /* --submenu-h (the open submenu's real rendered height) is published on <body>
    from JS when the menu opens; the header's white backdrop (.nav::before)
@@ -347,7 +467,9 @@ body[data-trial-modal='open'] .nav::after {
 .nav-submenu {
   list-style: none;
   margin: 0;
-  padding: 0;
+  /* Indent by the pill's own padding so the names align with the bar label's
+     text rather than with the pill's (invisible) left edge. */
+  padding: 0 0 0 16px;
   /* Out of flow, directly below the Catalog item's 84px bar box. The absolute
      box shrink-wraps to the widest (nowrap) item name, so the wider-than-column
      names never size the grid column or shove the other nav items around. */
@@ -374,7 +496,7 @@ body[data-trial-modal='open'] .nav::after {
 /* Target kept close to the real content height (items + spacer) so the
    ease-out curve plays out over the full slide rather than finishing early. */
 .nav-item--submenu-open .nav-submenu {
-  max-height: 180px;
+  max-height: 320px;
   pointer-events: auto;
 }
 
@@ -397,14 +519,25 @@ body[data-trial-modal='open'] .nav::after {
 .nav-item--submenu-open .nav-submenu > li:nth-child(4) { transition-delay: 0.24s; }
 
 .nav-sublink {
-  font-weight: 600;
-  font-size: var(--font-size-lg);
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
+  padding: 0;
 }
 
+/* The submenu panel is a plain list, not pills — the pill padding would push
+   the names out of alignment with the bar label above them. */
+.nav-sublink:hover { background: none; opacity: 0.6; }
+
 .nav-cart {
-  grid-column: 12;
-  justify-self: end;
-  font-weight: 600;
+  margin-left: auto;
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
   transition: opacity 0.12s;
   height: var(--nav-h);
   display: flex;
@@ -418,7 +551,6 @@ body[data-trial-modal='open'] .nav::after {
   border: none;
   padding: 0;
   font: inherit;
-  font-weight: 600;
   cursor: pointer;
   color: inherit;
 }
@@ -426,31 +558,45 @@ body[data-trial-modal='open'] .nav::after {
 /* ─── Footer ─────────────────────────────────────────────────────────────── */
 
 .footer {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: var(--gap);
-  align-items: center;
-  height: var(--nav-h);
-  padding: var(--pad);
+  display: block;
+  padding-top: 0;
+  padding-bottom: 20px;
 }
 
-.footer-brand {
-  grid-column: 1 / 3;
-  font-weight: 600;
+/* The wordmark is set to the full content width, exactly like the landing
+   masthead — the two are the same fitted object at different sizes. */
+.footer-wordmark {
+  margin-bottom: 4px;
+}
+
+/* One row beneath it: the copyright at the content's left edge, the links
+   pushed to its right edge. */
+.footer-bottom {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap);
 }
 
 .footer-links {
-  grid-column: 3 / 7;
-  display: grid;
-  grid-template-columns: subgrid;
+  display: flex;
+  gap: 36px;
   list-style: none;
-  margin: 0;
+  /* auto left margin pushes the row to the content's right edge, leaving the
+     copyright at the left. */
+  margin: 0 0 0 auto;
   padding: 0;
-  align-items: center;
+}
+
+.footer-copy,
+.footer-link {
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
 }
 
 .footer-link {
-  font-weight: 600;
   transition: opacity 0.12s;
 }
 
@@ -458,92 +604,34 @@ body[data-trial-modal='open'] .nav::after {
 
 .footer-link--instagram:hover { cursor: alias; }
 
-.footer-copy {
-  grid-column: 11 / 13;
-  justify-self: end;
-  font-weight: 600;
+/* ── Wordmark (landing masthead + footer) ──────────────────────────────────
+   Full content width; the headline is sized and offset to fit by JS
+   (see useFitText). overflow:hidden clips the trailing side bearing so the
+   ink sits flush against both content edges. */
+.wordmark {
+  overflow: hidden;
 }
 
-/* ─── Catalog ────────────────────────────────────────────────────────────── */
-
-.catalog-page {
-  padding: 0;
-  padding-bottom: 80px;
-}
-
-.catalog-hero {
-  /* Full content width; the headline is sized/offset to fit by JS */
-  margin-bottom: 12px;
-  overflow: hidden; /* clip the trailing advance/side-bearing whitespace */
-}
-
-.catalog-hero-text {
+.wordmark-text {
+  display: block;
   margin: 0;
   font-family: var(--font-ui);
-  font-weight: 400;
-  font-variation-settings: 'wght' 400;
-  letter-spacing: -0.0615em;
+  font-weight: 500;
+  font-variation-settings: 'wght' 500;
+  letter-spacing: -0.0655em;
   line-height: 0.9;
   white-space: nowrap;
 }
 
-.catalog-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  column-gap: var(--gap);
-  row-gap: 30px;
-}
+/* Framed images have no hover treatment: the cursor-following perspective tilt
+   that used to run here (useTilt) is gone from every image frame in the
+   refreshed design. useTilt itself stays in the codebase — the store-modal
+   buttons still use it. */
 
-.catalog-card {
-  display: block;
-  color: inherit;
-}
-
-/* Base (12-col) placement — clustered editorially across the grid */
-.catalog-grid > *:nth-child(1) { grid-column: 1 / 5;  grid-row: 1; } /* Aeronaut, landscape */
-.catalog-grid > *:nth-child(2) { grid-column: 7 / 9;  grid-row: 1; } /* Carbonic, portrait  */
-.catalog-grid > *:nth-child(3) { grid-column: 5 / 7;  grid-row: 2; } /* Orbiter,  portrait  */
-.catalog-grid > *:nth-child(4) { grid-column: 9 / 13; grid-row: 2; } /* Diode,    portrait  */
-
-.catalog-card-img {
-  background: var(--gray-2);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  width: 100%;
-  border-radius: var(--radius-ui);
-  overflow: hidden;
-  position: relative;
-  /* Query container so the overlay text can size to the image width (cqi) */
-  container-type: inline-size;
-}
-
-/* The cursor-following perspective tilt shared by every framed image is driven
-   entirely from JS (see useTilt): a rAF loop eases the inline `transform`. A CSS
-   `transition` is deliberately NOT used — restarting one per mousemove is what
-   makes Safari jitter — and neither is `will-change` (it paint-flashes on the
-   per-hover layer promotion; see useTilt). */
-
-/* Centered random-glyph overlay; font family/style set inline per card.
-   `filter` carries a slight permanent blur which the intro animation
-   amplifies and resolves back down to (see page-anim rules). */
-.catalog-card-text {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: yellow;
-  font-size: 6cqb;
-  line-height: 1;
-  white-space: nowrap;
-  pointer-events: none;
-  filter: blur(0px);
-}
-
-/* The actual responsive <img> (rendered by <FrameImage>). Covers the frame
-   like the old background did. */
+/* The frame's fill (rendered by <FrameImage>). While the refreshed design runs
+   on placeholders this is a flat gray panel rather than a photograph; it stays
+   a real element so the page-transition blur-in still has a target, and so
+   restoring imagery is a swap inside FrameImage with no CSS churn. */
 .frame-img {
   position: absolute;
   inset: 0;
@@ -552,16 +640,282 @@ body[data-trial-modal='open'] .nav::after {
   object-fit: cover;
   object-position: center;
   display: block;
+  background: var(--gray-2);
 }
 
-.catalog-card-img { height: 360px; }
-.catalog-card-img.landscape { height: 360px; }
-.catalog-card-img.portrait  { height: 360px; }
+/* ─── Editorial pages (landing / about / license) ─────────────────────────
+   The three redesigned pages are all the same object: a stack of bands, each
+   opened by a 1px black rule that runs the full content width, holding a
+   12-column row underneath. The recurring row shape across all three is a
+   large statement in columns 1–6 with up to two 3-column side columns at 7–9
+   and 10–12, so those spans are named once here rather than per page.
 
-.catalog-card-name {
-  margin-top: 8px;
-  font-weight: 600;
+   Band rhythm comes from the Figma frames: ~28px from the rule down to the
+   first baseline, and a deep gap below the content before the next rule. */
+
+.doc {
+  padding-bottom: 40px;
 }
+
+.band {
+  border-top: var(--rule);
+  padding-top: 28px;
+  padding-bottom: 180px;
+}
+
+/* The masthead band sits above the first rule and owns its own spacing. */
+.band--open {
+  border-top: none;
+  padding-top: 0;
+  padding-bottom: 15px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+
+.col-main  { grid-column: 1 / 7; }
+.col-a     { grid-column: 7 / 10; }
+.col-b     { grid-column: 10 / 13; }
+/* Right half — body copy that sits opposite a statement in columns 1–6. */
+.col-right { grid-column: 7 / 13; }
+/* Quarters — the About information row runs four 3-column blocks. */
+.col-q1 { grid-column: 1 / 4; }
+.col-q2 { grid-column: 4 / 7; }
+.col-q3 { grid-column: 7 / 10; }
+.col-q4 { grid-column: 10 / 13; }
+
+/* The large statement that opens most bands. */
+.statement {
+  font-size: var(--h2-size);
+  font-weight: var(--h2-weight);
+  font-variation-settings: 'wght' var(--h2-weight);
+  line-height: var(--h2-line);
+  letter-spacing: var(--h2-tracking);
+  margin: 0;
+}
+
+/* Body copy at the H3 step — the reading size on these pages, well above the
+   16px UI text the rest of the site uses. */
+.body-lg {
+  font-size: var(--h3-size);
+  font-weight: var(--h3-weight);
+  font-variation-settings: 'wght' var(--h3-weight);
+  line-height: var(--h3-line);
+  letter-spacing: var(--h3-tracking);
+  margin: 0;
+}
+
+/* ── Label + muted list ────────────────────────────────────────────────────
+   Capabilities, Sectors, Office, All inquiries, and the four Process blocks
+   all share one shape: an ink-black H4 label with everything beneath it in
+   gray-4. Used for both single-line lists and running prose. */
+
+.list-block {
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  font-variation-settings: 'wght' var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+}
+
+.list-block dt {
+  margin: 0;
+  color: var(--ink-black);
+}
+
+.list-block dd {
+  margin: 0;
+  color: var(--gray-4);
+}
+
+/* ── Arrow links ───────────────────────────────────────────────────────── */
+
+.arrow-link {
+  display: inline-block;
+  color: var(--ink-black);
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  font-variation-settings: 'wght' var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+  transition: color 0.12s;
+}
+
+.arrow-link:hover { color: var(--gray-4); }
+
+.arrow-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+/* ── Media placeholders ────────────────────────────────────────────────────
+   Aspect ratios are the drawn pixel dimensions, so every frame keeps its
+   proportion as the 12-column grid narrows. Fills come from <FrameImage>. */
+
+.media {
+  background: var(--gray-2);
+  border-radius: var(--radius-ui);
+  overflow: hidden;
+  position: relative;
+}
+
+.media--hero  { aspect-ratio: 1660 / 758; }  /* landing hero, cols 1–12 */
+.media--wide  { aspect-ratio: 1660 / 500; }  /* about, cols 1–12 */
+/* The three catalog frames are all drawn 540px tall in the 1660px content
+   width. Their height is therefore derived from the grid's own width (via a
+   container query) rather than from each frame's aspect ratio: the drawn
+   widths (820 / 400) are no longer the rendered column widths now that the
+   gutter is 10px, so per-frame ratios resolve to different heights — and no
+   fixed pair of ratios can match at every viewport, since a 6-column span and
+   a 3-column span do not stay in a constant ratio as the columns scale under
+   a fixed gutter. */
+.catalog-grid {
+  container-type: inline-size;
+  padding-top: 30px; /* air under the "Commercial typefaces" heading */
+}
+
+.catalog-grid .media {
+  height: 32.53cqw; /* 540 / 1660 of the content width */
+}
+.media--work  { aspect-ratio: 400 / 270; }   /* work grid, 3 columns each */
+
+/* Caption under a media frame. Carries a gray descriptor after the ink-black
+   subject ("Pratt Institute Custom Font"). */
+.caption {
+  margin-top: 11px;
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
+}
+
+/* A caption with a label opposite it: subject at the content's left edge, the
+   label flush to its right edge. Flex rather than grid columns so the label
+   lands on the content edge itself, not on the last column's start. */
+.caption--split {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+
+.caption-note { color: var(--gray-4); }
+
+/* ── Get in touch ──────────────────────────────────────────────────────────
+   Closing band on all three pages: the invitation in ink over the address in
+   gray-4, both at the H2 step. */
+.contact-block {
+  font-size: var(--h2-size);
+  font-weight: var(--h2-weight);
+  font-variation-settings: 'wght' var(--h2-weight);
+  line-height: var(--h2-line);
+  letter-spacing: var(--h2-tracking);
+  margin: 0;
+}
+
+.contact-block a { color: var(--gray-4); transition: opacity 0.12s; }
+.contact-block a:hover { opacity: 0.6; }
+
+/* ── Work / catalog grids ──────────────────────────────────────────────── */
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--gap);
+  margin-top: 130px;
+}
+
+.work-grid > * { grid-column: span 3; }
+
+/* The newsletter and trials forms deliberately keep the site's existing
+   16px control treatment — the oversized controls in the Figma frame were a
+   placeholder. Only the width is set here, so the form sits in the band's
+   left half rather than running the full content width. */
+.form-error {
+  color: #dd0000;
+  margin-bottom: 12px;
+}
+
+/* .form-field's 150% width is tuned for the two-column body it was built in.
+   Inside a band column that resolves far too wide, so pin it to the width it
+   used to render at. Scoped to .doc, leaving /contact's original layout alone. */
+.doc .form-field {
+  width: 400px;
+  max-width: 100%;
+}
+
+/* ── Band details ──────────────────────────────────────────────────────── */
+
+/* A heading that closes its band instead of opening the next one — it sits
+   below the band's content and introduces the row after the rule. Used for
+   "Information" on About and "Frequently asked questions" on License. */
+.band-outro {
+  margin-top: 200px;
+}
+
+/* Such a band ends on the heading, so it drops the deep bottom gap and sits
+   close to the rule the heading is introducing. */
+.band:has(> .band-outro) {
+  padding-bottom: 30px;
+}
+
+/* Secondary matter under a band's body copy: a contact list or arrow links. */
+.band-actions {
+  margin-top: 60px;
+}
+
+/* FAQ rows carry a rule each but sit close together, so they get a much
+   shallower bottom than a full band. */
+.band--tight {
+  padding-bottom: 30px;
+}
+
+/* The last row closes the FAQ, so it opens the gap to the next band's rule. */
+.faq-row--end {
+  padding-bottom: 200px;
+}
+
+/* Question in gray, answer in ink — the inverse of .list-block, where the
+   label leads in ink. */
+.faq {
+  grid-column: span 3;
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
+}
+
+.faq dt { margin: 0; color: var(--gray-4); }
+.faq dd { margin: 0; color: var(--ink-black); }
+
+/* Process: two-up in the right half, with a rule between the rows that spans
+   only that half (as drawn) rather than the full content width. */
+.process-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px var(--gap);
+}
+
+.process-grid > *:nth-child(n + 3) {
+  border-top: var(--rule);
+  padding-top: 28px;
+}
+
+/* The landing page's closing copy and links sit under the catalog grid. */
+.catalog-note    { margin-top: 90px; }
+.catalog-actions { margin-top: 50px; }
+
+.about-feature { margin-top: 130px; }
+
+/* Media frames on the landing page sit inside .catalog-card links, which must
+   not inherit the card colour treatment from the old grid. */
+.catalog-card { display: block; color: inherit; }
 
 /* ─── Font detail ────────────────────────────────────────────────────────── */
 
@@ -609,60 +963,56 @@ body[data-trial-modal='open'] .nav::after {
   grid-row: 1;
   display: grid;
   grid-template-columns: subgrid;
+  /* start, not the default stretch: the name's box must end just under its own
+     ink so the rule below sits tight to it, rather than growing to the row. */
+  align-items: start;
   margin-bottom: 0;
 }
 
-.font-detail-img {
-  grid-column: 1 / 5;
-  background: var(--gray-2);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  height: 360px;
-  border-radius: var(--radius-ui);
-  overflow: hidden;
-  position: relative;
-  /* Query container so the overlay glyphs size like the catalog cards */
-  container-type: inline-size;
-}
-
-/* Font-name specimen: spans the 4 columns to the right of the image, sized by
-   JS (useFitText) so the ink is flush with both column edges. Its baseline is
-   parked on the bottom of the image (360px) via the inline translateY. */
+/* Font-name specimen: columns 1–6, sized by JS (useFitText) so the ink sits
+   flush with both edges of the span, over a rule. */
 .font-detail-specimen {
-  grid-column: 5 / 9;
+  grid-column: 1 / 7;
   grid-row: 1;
-  position: relative;
-  /* Box is 30px taller than the image so the clip region leaves room for
-     descenders below the baseline; the negative margin pulls that 30px back
-     out of the grid flow so the row stays 360px and the description doesn't move. */
-  height: 390px;
-  margin-bottom: -30px;
-  /* Clip the text like the landing-page headline (.catalog-hero) does: the
-     JS refit trails a resize by a few frames, so without this the transiently
-     oversized name spills over the content below/right during a drag. */
+  /* Clip like the landing masthead: the JS refit trails a resize by a few
+     frames, so without this the transiently oversized name spills right. */
   overflow: hidden;
 }
 
 .font-detail-specimen-text {
-  position: absolute;
-  left: 0;
-  right: 0;
-  /* 30px clears the box's extra descender room so the baseline still lands on
-     the image bottom (see .font-detail-specimen). */
-  bottom: 30px;
   display: block;
   line-height: 1;
   letter-spacing: -0.04em;
   white-space: nowrap;
-  transform: translateY(var(--baseline-shift, 0px));
+  /* line-height:1 ends the box on the baseline, so this is the whole gap
+     between the name and the rule beneath it — and it doubles as the descender
+     room the clip above would otherwise crop. Set in em so it tracks the
+     fitted size. The deepest of the four names drops 0.0167em below the
+     baseline (measured by rasterising each one), so this clears them ~5x over. */
+  padding-bottom: 0.086em;
+}
+
+.font-detail-rule {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  border: 0;
+  border-top: var(--rule);
+  margin: 0;
 }
 
 .font-detail-description {
-  grid-column: 5 / 9;
-  font-weight: 600;
-  margin-bottom: 20px;
-  margin-top: 30px;
+  grid-column: 7 / 13;
+  grid-row: 3;
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  font-variation-settings: 'wght' var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+  margin: 0;
+  padding-top: 20px;
+  /* Closes out the header block — the description is its last row, so this is
+     the gap down to the type tester section below. */
+  padding-bottom: 100px;
 }
 
 .font-detail-actions {
@@ -835,9 +1185,6 @@ body[data-trial-modal='open'] .nav::after {
 .page-grid-img {
   grid-column: 1 / 3;
   background: var(--gray-2);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   height: 360px;
   border-radius: var(--radius-ui);
   overflow: hidden;
@@ -849,8 +1196,11 @@ body[data-trial-modal='open'] .nav::after {
 }
 
 .page-section-label {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
   margin-bottom: 20px;
 }
 
@@ -879,11 +1229,34 @@ body[data-trial-modal='open'] .nav::after {
   grid-column: 1 / 7;
 }
 
-.legal-heading {
-  font-size: var(--font-size-lg);
+/* Eyebrow above the document title, naming the section it belongs to. */
+.legal-eyebrow {
+  margin-bottom: 12px;
+}
+
+/* Document title (EULA / Privacy). H2 rather than H1: these are reference
+   documents that sit below the site's page titles in the hierarchy, and the
+   H1 step would swamp a wall of 12px legal body copy. */
+.legal-title {
+  margin: 0 0 4px;
+}
+
+/* The date/version line directly under the title */
+.legal-meta {
+  font-size: var(--font-size-sm);
   font-weight: 600;
-  line-height: 22px;
-  color: #171716;
+  line-height: 16px;
+  color: var(--gray-5);
+  margin-bottom: 32px;
+}
+
+.legal-heading {
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  font-variation-settings: 'wght' var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+  color: var(--ink-black);
   margin-top: 32px;
   margin-bottom: 12px;
 }
@@ -1094,6 +1467,21 @@ body[data-trial-modal='open'] .nav::after {
   margin-bottom: 64px;
 }
 
+/* Section label sitting above its rule, at the H5 step. */
+.section-heading {
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
+  margin: 0 0 12px;
+}
+
+.section-body {
+  border-top: var(--rule);
+  padding-top: 24px;
+}
+
 .fontdue-loading {
   height: 200px;
 }
@@ -1103,7 +1491,7 @@ body[data-trial-modal='open'] .nav::after {
 .glyph-overview {
   grid-column: 1 / -1;
   padding-top: 48px;
-  margin-bottom: 64px;
+  margin-bottom: 200px;
 }
 
 .glyph-overview__body {
@@ -1192,12 +1580,33 @@ body[data-trial-modal='open'] .nav::after {
 
 .glyph-overview__group {
   break-inside: avoid;
-  margin-bottom: calc((100cqi - 140px) / 12 - 15px);
+  /* Pitch of one glyph cell. The two flex columns split the container minus
+     their gap, and each grid's -3px side margins widen it by 6px before it is
+     divided into 6 cells — so a cell is ((100cqi - gap) / 2 + 6px) / 6. */
+  --glyph-cell: calc((100cqi - var(--gap)) / 12 + 1px);
+  /* Everything a group adds around its grid, measured rather than assumed:
+     the name is 33px (1px rule + 12px padding + one 20px line), its 12px
+     bottom margin collapses with the grid's -3px top margin to 9px, and the
+     grid's -3px bottom margin trims 3px off the end — 33 + 9 - 3 = 39px.
+     (Assumes a single-line group name; all of them are far shorter than the
+     column, and a wrapped one would add a 20px line and shift the phase.) */
+  --glyph-group-head: 39px;
+  /* Pad each group out to leave exactly one cell of air below it, head
+     included. That makes a group's total height a whole number of cell
+     pitches, so the cell rows in the two columns stay in phase however many
+     groups precede them in each — the old fixed margin left ~6px of drift per
+     group, which knocked the columns out of alignment further down the page. */
+  margin-bottom: max(0px, calc(var(--glyph-cell) - var(--glyph-group-head)));
 }
 
 .glyph-overview__group-name {
-  font-weight: 600;
-  line-height: 20px;
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
+  border-top: var(--rule);
+  padding-top: 12px;
   margin-bottom: 12px;
 }
 
@@ -1238,35 +1647,12 @@ body[data-trial-modal='open'] .nav::after {
   user-select: none;
   padding: 3px;
   /* Skip rendering (layout/paint/composite) for cells that are off-screen, so a
-     fast scroll doesn't pay to run the reveal transition on the hundreds of
-     cells animating in the off-screen parts of the (large) reveal band. The
-     placeholder size only applies to cells that have never rendered; `auto` then
-     remembers each cell's real (square) size once it has. */
+     fast scroll doesn't pay to lay out the hundreds of cells in the off-screen
+     parts of this (large) grid. The placeholder size only applies to cells that
+     have never rendered; `auto` then remembers each cell's real (square) size
+     once it has. */
   content-visibility: auto;
   contain-intrinsic-size: auto 40px;
-  /* Scroll-reveal: scaled to nothing until the cell enters the active band, then
-     scales up; scales back out when it leaves (data-revealed toggled by the
-     IntersectionObserver in useReveal, so it's reversible on scroll up/down).
-     Plain opacity + 2D scale — no 3D transform — so resting cells hold no GPU
-     compositing layer (a resting 3D transform on all ~490 cells is what made
-     scrolling lag). transition-delay is set per-cell inline (random 0–200ms). */
-  opacity: 0;
-  transform: scale(0);
-  transition: opacity 0.4s cubic-bezier(0, 1, 0.3, 1),
-              transform 0.4s cubic-bezier(0, 1, 0.3, 1);
-}
-
-.glyph-overview__cell[data-revealed] {
-  opacity: 1;
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .glyph-overview__cell {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
 }
 
 .glyph-overview__cell > span {
@@ -1307,40 +1693,6 @@ body[data-trial-modal='open'] .nav::after {
 }
 
 /* ─── About extras ───────────────────────────────────────────────────────── */
-
-.about-secondary {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: var(--gap);
-  align-items: start;
-  margin-bottom: 64px;
-}
-
-.about-secondary-img {
-  grid-column: 1 / 3;
-  background: var(--gray-2);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  height: 360px;
-  border-radius: var(--radius-ui);
-  overflow: hidden;
-  position: relative;
-}
-
-.about-secondary-body {
-  grid-column: 3 / 5;
-}
-
-.about-secondary-label {
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.about-secondary-text {
-  font-weight: 600;
-  margin-bottom: 16px;
-}
 
 .about-caption {
   margin-top: 12px;
@@ -1396,7 +1748,8 @@ body[data-trial-modal='open'] .nav::after {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px 0;
+  border-top: var(--rule);
+  padding: 24px 0 12px;
 }
 
 .tt-toolbar-row {
@@ -1601,9 +1954,7 @@ body[data-trial-modal='open'] .nav::after {
 /* The selector chain is: .page-anim > [page-root] > [section] */
 
 /* ── Idle: new page snaps invisible before enter transition starts ── */
-.page-anim--idle > *:not(.catalog-page) > *,
-.page-anim--idle .catalog-hero,
-.page-anim--idle .catalog-grid > * {
+.page-anim--idle > * > * {
   opacity: 0;
 }
 
@@ -1614,27 +1965,13 @@ body[data-trial-modal='open'] .nav::after {
   transition: filter 3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.page-anim .catalog-card-text {
-  transition: filter 3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 .page-anim--idle .frame-img {
   filter: blur(8px);
   transition: none;
 }
 
-/* Overlay text starts heavily blurred, resolves to its resting slight blur */
-.page-anim--idle .catalog-card-text {
-  filter: blur(14px);
-  transition: none;
-}
-
-.page-anim--entering .catalog-card-text {
-  filter: blur(0px);
-}
-
 /* ── Enter: transition 0 → 1, staggered per child ── */
-.page-anim--entering > *:not(.catalog-page) > * {
+.page-anim--entering > * > * {
   opacity: 1;
   transition: opacity 0.4s linear;
 }
@@ -1643,57 +1980,34 @@ body[data-trial-modal='open'] .nav::after {
   filter: blur(0px);
 }
 
-/* Catalog card images need explicit delays to match their parent card's stagger */
-.page-anim--entering .catalog-grid > *:nth-child(1) .frame-img,
-.page-anim--entering .catalog-grid > *:nth-child(1) .catalog-card-text { transition-delay: 0ms; }
-.page-anim--entering .catalog-grid > *:nth-child(2) .frame-img,
-.page-anim--entering .catalog-grid > *:nth-child(2) .catalog-card-text { transition-delay: 150ms; }
-.page-anim--entering .catalog-grid > *:nth-child(3) .frame-img,
-.page-anim--entering .catalog-grid > *:nth-child(3) .catalog-card-text { transition-delay: 300ms; }
-.page-anim--entering .catalog-grid > *:nth-child(4) .frame-img,
-.page-anim--entering .catalog-grid > *:nth-child(4) .catalog-card-text { transition-delay: 450ms; }
+/* Catalog frames need explicit delays to match their parent card's stagger */
+.page-anim--entering .catalog-grid > *:nth-child(1) .frame-img { transition-delay: 0ms; }
+.page-anim--entering .catalog-grid > *:nth-child(2) .frame-img { transition-delay: 150ms; }
+.page-anim--entering .catalog-grid > *:nth-child(3) .frame-img { transition-delay: 300ms; }
 
-.page-anim--entering > *:not(.catalog-page) > *:nth-child(1)  { transition-delay: 0ms; }
-.page-anim--entering > *:not(.catalog-page) > *:nth-child(2)  { transition-delay: 150ms; }
-.page-anim--entering > *:not(.catalog-page) > *:nth-child(3)  { transition-delay: 300ms; }
-.page-anim--entering > *:not(.catalog-page) > *:nth-child(4)  { transition-delay: 450ms; }
-.page-anim--entering > *:not(.catalog-page) > *:nth-child(5)  { transition-delay: 600ms; }
-.page-anim--entering > *:not(.catalog-page) > *:nth-child(6)  { transition-delay: 750ms; }
-
-.page-anim--entering .catalog-hero,
-.page-anim--entering .catalog-grid > * {
-  opacity: 1;
-  transition: opacity 0.4s linear;
-}
-
-.page-anim--entering .catalog-grid > *:nth-child(1) { transition-delay: 0ms; }
-.page-anim--entering .catalog-grid > *:nth-child(2) { transition-delay: 150ms; }
-.page-anim--entering .catalog-grid > *:nth-child(3) { transition-delay: 300ms; }
-.page-anim--entering .catalog-grid > *:nth-child(4) { transition-delay: 450ms; }
+.page-anim--entering > * > *:nth-child(1)  { transition-delay: 0ms; }
+.page-anim--entering > * > *:nth-child(2)  { transition-delay: 150ms; }
+.page-anim--entering > * > *:nth-child(3)  { transition-delay: 300ms; }
+.page-anim--entering > * > *:nth-child(4)  { transition-delay: 450ms; }
+.page-anim--entering > * > *:nth-child(5)  { transition-delay: 600ms; }
+.page-anim--entering > * > *:nth-child(6)  { transition-delay: 750ms; }
+.page-anim--entering > * > *:nth-child(7)  { transition-delay: 900ms; }
+.page-anim--entering > * > *:nth-child(8)  { transition-delay: 1050ms; }
 
 /* ── Exit: transition 1 → 0, staggered per child ── */
-.page-anim--exiting > *:not(.catalog-page) > * {
+.page-anim--exiting > * > * {
   opacity: 0;
   transition: opacity 0.3s linear;
 }
 
-.page-anim--exiting > *:not(.catalog-page) > *:nth-child(1)  { transition-delay: 0ms; }
-.page-anim--exiting > *:not(.catalog-page) > *:nth-child(2)  { transition-delay: 40ms; }
-.page-anim--exiting > *:not(.catalog-page) > *:nth-child(3)  { transition-delay: 80ms; }
-.page-anim--exiting > *:not(.catalog-page) > *:nth-child(4)  { transition-delay: 120ms; }
-.page-anim--exiting > *:not(.catalog-page) > *:nth-child(5)  { transition-delay: 160ms; }
-.page-anim--exiting > *:not(.catalog-page) > *:nth-child(6)  { transition-delay: 200ms; }
-
-.page-anim--exiting .catalog-hero,
-.page-anim--exiting .catalog-grid > * {
-  opacity: 0;
-  transition: opacity 0.3s linear;
-}
-
-.page-anim--exiting .catalog-grid > *:nth-child(1) { transition-delay: 0ms; }
-.page-anim--exiting .catalog-grid > *:nth-child(2) { transition-delay: 40ms; }
-.page-anim--exiting .catalog-grid > *:nth-child(3) { transition-delay: 80ms; }
-.page-anim--exiting .catalog-grid > *:nth-child(4) { transition-delay: 120ms; }
+.page-anim--exiting > * > *:nth-child(1)  { transition-delay: 0ms; }
+.page-anim--exiting > * > *:nth-child(2)  { transition-delay: 40ms; }
+.page-anim--exiting > * > *:nth-child(3)  { transition-delay: 80ms; }
+.page-anim--exiting > * > *:nth-child(4)  { transition-delay: 120ms; }
+.page-anim--exiting > * > *:nth-child(5)  { transition-delay: 160ms; }
+.page-anim--exiting > * > *:nth-child(6)  { transition-delay: 200ms; }
+.page-anim--exiting > * > *:nth-child(7)  { transition-delay: 240ms; }
+.page-anim--exiting > * > *:nth-child(8)  { transition-delay: 280ms; }
 
 /* ─── Footer page transition ──────────────────────────────────────────────── */
 /* Mirrors the page-anim phase via data-page-phase on body (set by
@@ -1890,28 +2204,41 @@ body[data-page-phase=entering] .footer {
    Three 4-col "thirds" reflow into a 2-up arrangement.
    ───────────────────────────────────────────────────────────────────────── */
 @media (max-width: 1140px) {
-  .nav,
-  .footer,
-  .catalog-grid,
+  .row,
+  .work-grid,
   .font-detail,
   .page-grid,
   .legal-page,
-  .glyph-overview__body,
-  .about-secondary {
+  .glyph-overview__body {
     grid-template-columns: repeat(8, 1fr);
   }
 
-  /* Nav / footer — push the right-edge items to the new last columns */
-  .nav-cart   { grid-column: 8; }
-  .footer-copy { grid-column: 7 / 9; }
+  /* ── Editorial bands → 8 columns ──
+     The statement keeps the left half; the two side columns stack into the
+     right half rather than shrinking to a third of it. */
+  .col-main  { grid-column: 1 / 5; }
+  .col-right { grid-column: 5 / 9; }
+  .col-a     { grid-column: 5 / 7; }
+  .col-b     { grid-column: 7 / 9; }
 
-  /* Catalog — landscape full-third on row 1, portraits reflow */
-  .catalog-grid > *:nth-child(1) { grid-column: 1 / 5; grid-row: 1; } /* Aeronaut */
-  .catalog-grid > *:nth-child(2) { grid-column: 5 / 7; grid-row: 1; } /* Carbonic */
-  .catalog-grid > *:nth-child(3) { grid-column: 3 / 5; grid-row: 2; } /* Orbiter  */
-  .catalog-grid > *:nth-child(4) { grid-column: 5 / 9; grid-row: 2; } /* Diode    */
+  /* The information row halves: two blocks per line instead of four. */
+  .col-q1 { grid-column: 1 / 3; }
+  .col-q2 { grid-column: 3 / 5; }
+  .col-q3 { grid-column: 5 / 7; }
+  .col-q4 { grid-column: 7 / 9; }
 
-  /* Font detail — img + meta stay side by side (4 + 4). Keep the buy actions
+  .work-grid > *,
+  .faq { grid-column: span 2; }
+
+  /* Bands lose some of their desktop air as the page narrows. */
+  .band { padding-bottom: 120px; }
+  .band-outro { margin-top: 140px; }
+
+  /* Header keeps the name/description split, halved to 4 + 4 columns. */
+  .font-detail-specimen   { grid-column: 1 / 5; }
+  .font-detail-description { grid-column: 5 / 9; }
+
+  /* Keep the buy actions
      stickied to the top-right like desktop; with only 8 columns they pin to
      the right edge of the grid (cols 1–8) instead of the desktop 9–12. The
      rest (position:sticky, top, grid-row:1, justify-self:end) is inherited. */
@@ -1928,14 +2255,54 @@ body[data-page-phase=entering] .footer {
    ───────────────────────────────────────────────────────────────────────── */
 @media (max-width: 580px) {
   .nav,
-  .footer,
-  .catalog-grid,
+  .row,
+  .work-grid,
   .font-detail,
   .page-grid,
   .legal-page,
-  .glyph-overview__body,
-  .about-secondary {
+  .glyph-overview__body {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* ── Editorial bands → single column ──
+     Every span goes full width and stacks; the statement/body pairing becomes
+     a heading above its copy. */
+  .col-main,
+  .col-right,
+  .col-a,
+  .col-b,
+  .col-q1,
+  .col-q2,
+  .col-q3,
+  .col-q4 { grid-column: 1 / -1; }
+
+  .row { row-gap: 28px; }
+
+  .work-grid > *,
+  .faq { grid-column: 1 / -1; }
+
+  .work-grid { row-gap: 40px; margin-top: 60px; }
+
+  .band { padding-top: 20px; padding-bottom: 70px; }
+  .band-outro { margin-top: 70px; }
+  .band-actions { margin-top: 32px; }
+  .catalog-note { margin-top: 48px; }
+  .catalog-actions { margin-top: 28px; }
+  .about-feature { margin-top: 60px; }
+  .arrow-row { gap: 24px; }
+
+  /* Process stacks; the mid-row rule would land between arbitrary blocks. */
+  .process-grid { grid-template-columns: 1fr; gap: 28px; }
+  .process-grid > *:nth-child(n + 3) { border-top: none; padding-top: 0; }
+
+  /* The catalog frames stack full width here, so they already share a width
+     and don't need the side-by-side shared height — which, measured against
+     the now-narrow grid, would squash them to a third of their proportion.
+     Hand them back a ratio, levelled at the wider crop so the tall frames
+     don't run off the bottom of the screen. */
+  .catalog-grid .media {
+    height: auto;
+    aspect-ratio: 820 / 540;
   }
 
   /* Legal docs — text fills all 4 mobile columns */
@@ -1944,8 +2311,15 @@ body[data-page-phase=entering] .footer {
   /* ── Nav → 4-col grid: logo in col 1, "Menu" aligned to col 2, Cart far right.
      (Grid, not flex, so Menu lines up with the column-2 submenu items.) ── */
   .nav { display: grid; align-items: center; }
+  .nav-logo { grid-column: 1; }
   .nav-toggle { display: inline-block; grid-column: 2; justify-self: start; }
-  .nav-cart { grid-column: 4; justify-self: end; }
+  .nav-cart { grid-column: 4; justify-self: end; margin-left: 0; }
+  /* The desktop 90px label offset and the pills' padding both belong to the
+     bar; the mobile dropdown stacks flush to the page gutter instead. */
+  .nav-links { margin-left: 0; }
+  .nav-link { padding: 0; }
+  .nav-link:hover { background: none; opacity: 0.6; }
+  .nav-submenu { padding-left: 0; }
 
   /* The dropdown panel IS the nav's background on mobile: it starts at the
      very top and covers the nav-bar strip (its padding-top) plus the revealed
@@ -1978,7 +2352,7 @@ body[data-page-phase=entering] .footer {
       padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .nav--open .nav-links {
-    max-height: calc(320px + var(--safe-top)); /* snug above the four links so the slide fills its duration */
+    max-height: calc(360px + var(--safe-top)); /* snug above the three links so the slide fills its duration */
     padding-bottom: 16px;
     /* Quick intro, with a gentle ease-out curve */
     transition:
@@ -2030,53 +2404,33 @@ body[data-page-phase=entering] .footer {
     grid-column: 2 / -1;
     padding: 10px 0;
   }
-  .nav-sublink { font-size: var(--font-size-lg); }
+
 
   /* Target close to the real content height so the slide isn't cut short */
-  .nav-item--submenu-open .nav-submenu { max-height: 220px; }
+  .nav-item--submenu-open .nav-submenu { max-height: 320px; }
 
   /* Grow the dropdown so the expanded submenu isn't clipped by nav-links */
-  .nav--open .nav-links:has(.nav-item--submenu-open) { max-height: calc(560px + var(--safe-top)); }
+  .nav--open .nav-links:has(.nav-item--submenu-open) { max-height: calc(700px + var(--safe-top)); }
 
-  /* ── Footer → stack ── */
-  .footer {
-    height: auto;
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding-top: 24px;
-    padding-bottom: 24px;
-  }
-  .footer-brand,
-  .footer-copy { grid-column: 1; justify-self: start; }
-  .footer-links {
-    grid-column: 1;
-    grid-template-columns: 1fr 1fr;
+  /* ── Footer → copyright above a wrapping link row ── */
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 8px;
   }
-
-  /* ── Catalog → every card full width, stacked ──
-     nth-child(n) matches all cards and ties the ≤1140 placement specificity,
-     so this wins on source order. */
-  .catalog-grid > *:nth-child(n) { grid-column: 1 / -1; grid-row: auto; }
+  .footer-copy { flex: none; }
+  .footer-links { flex-wrap: wrap; gap: 20px; }
 
   /* ── Font detail → stacked header ── */
   .font-detail-header { grid-template-columns: 1fr; }
-  .font-detail-img        { grid-column: 1 / -1; }
-  .font-detail-description { grid-column: 1 / -1; }
 
-  /* Specimen flows full-width below the image in normal flow — the desktop
-     baseline-on-image-bottom pinning (absolute + fixed height) doesn't apply
-     when the image is stacked above it. The fit still sizes it to full width. */
   .font-detail-specimen {
     grid-column: 1 / -1;
     grid-row: auto;
-    height: auto;
-    margin-top: 16px;
-    margin-bottom: 0; /* drop the desktop descender-room negative margin */
   }
-  .font-detail-specimen-text {
-    position: static;
-    transform: none;
+
+  .font-detail-description {
+    grid-column: 1 / -1;
   }
 
   /* Buy actions → frosted bar stickied to the viewport bottom while
@@ -2127,6 +2481,12 @@ body[data-page-phase=entering] .footer {
     grid-column: 1 / -1;
     /* Stack the two flex columns into one so all groups read top-to-bottom */
     flex-direction: column;
+  }
+
+  /* One column here, so there is no cross-column phase to hold — and the cell
+     pitch formula above assumes the two-column split. Plain spacing instead. */
+  .glyph-overview__group {
+    margin-bottom: 40px;
   }
 
   /* ── Type tester controls → stack ── */

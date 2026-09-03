@@ -2,11 +2,10 @@ export default function Privacy() {
   return (
     <div className="page legal-page">
       <div className="legal-body">
-        <h1 className="legal-heading">Privacy Policy V 1.000</h1>
-        <p className="legal-text">Last Updated 06/22/2026</p>
-        <p className="legal-text">Copyright 2026 Place of Interest Type Foundry</p>
-        <p className="legal-text">
-          <a href="https://poi.tf/" target="_blank" rel="noopener noreferrer">poi.tf</a>
+        <h1 className="legal-title h2">Privacy Policy</h1>
+        <p className="legal-meta">
+          Version 1.000 · Last updated 06/22/2026 · Copyright 2026 Place of
+          Interest Type Foundry · <a href="https://poi.tf/" target="_blank" rel="noopener noreferrer">poi.tf</a>
         </p>
 
         <h2 className="legal-heading">Introduction</h2>

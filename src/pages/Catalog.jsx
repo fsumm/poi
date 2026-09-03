@@ -1,71 +1,123 @@
-import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { fonts } from '../data/fonts.js'
-import { makeOverlays } from '../overlayText.js'
-import { useFitText } from '../useFitText.js'
+import { getFontById } from '../data/fonts.js'
 import FrameImage from '../components/FrameImage.jsx'
+import Wordmark from '../components/Wordmark.jsx'
 
-const HERO_TEXT = 'Place of Interest'
-const HERO_FAMILY = 'POI Orbiter'
-const HERO_TRACKING = -0.0615 // -6.15% letter-spacing, expressed in em
+// The landing page leads with a single release rather than the full catalog:
+// Orbiter takes the full-width hero, and the three remaining families run
+// beneath "Commercial typefaces" — one at six columns, two at three.
+const HERO_FONT = 'orbiter'
+const GRID_FONTS = ['aeronaut', 'carbonic', 'diode']
 
-function CatalogHero() {
-  const [containerRef, textRef, ready] = useFitText({ text: HERO_TEXT, family: HERO_FAMILY, tracking: HERO_TRACKING })
-  return (
-    <div className="catalog-hero" ref={containerRef} data-anim-pending={ready ? undefined : ''}>
-      <h1
-        className="catalog-hero-text"
-        ref={textRef}
-        style={{ visibility: ready ? undefined : 'hidden' }}
-      >
-        {HERO_TEXT}
-      </h1>
-    </div>
-  )
-}
+// Selected work. Placeholder frames for now; each is an ink-black subject with
+// a gray descriptor after it.
+const WORK = [
+  { subject: 'Pratt Institute', note: 'Custom Font' },
+  { subject: 'Miniware', note: 'Custom Logomark' },
+  { subject: 'Siempre Agencia', note: 'Fonts in Use' },
+  { subject: 'OOO', note: 'Custom Motionmark' },
+]
+
+const CAPABILITIES = ['Logos', 'Wordmarks', 'Custom Fonts', 'Modifications']
+const SECTORS = ['Arts & Culture', 'Higher Education', 'Science', 'Technology', 'Finance', 'Sustainability']
 
 export default function Catalog() {
-  const [aeronaut, carbonic, orbiter, diode] = fonts
-
-  // Generate the random glyphs + random style once per mount so they stay
-  // stable across the re-renders the hero autofit triggers. Keyed by font id,
-  // with a distinct letter per image (no repeats across the grid).
-  const overlays = useMemo(() => makeOverlays(fonts), [])
+  const hero = getFontById(HERO_FONT)
+  const [lead, ...rest] = GRID_FONTS.map(getFontById)
 
   return (
-    <div className="catalog-page">
-      <CatalogHero />
-      <div className="catalog-grid">
-        {/* Placement lives in CSS (.catalog-grid > nth-child) so the
-            responsive breakpoints can remap each card. */}
-        <Link to="/catalog/aeronaut" className="catalog-card">
-          <FrameImage file="aeronaut001.jpg" className="catalog-card-img landscape" eager>
-            <span className="catalog-card-text" style={overlays.aeronaut.style}>{overlays.aeronaut.text}</span>
-          </FrameImage>
-          <div className="catalog-card-name">{aeronaut.displayName}</div>
-        </Link>
-
-        <Link to="/catalog/carbonic" className="catalog-card">
-          <FrameImage file="carbonic001.jpg" className="catalog-card-img portrait" eager>
-            <span className="catalog-card-text" style={overlays.carbonic.style}>{overlays.carbonic.text}</span>
-          </FrameImage>
-          <div className="catalog-card-name">{carbonic.displayName}</div>
-        </Link>
-
-        <Link to="/catalog/orbiter" className="catalog-card">
-          <FrameImage file="orbiter001.jpg" className="catalog-card-img portrait">
-            <span className="catalog-card-text" style={overlays.orbiter.style}>{overlays.orbiter.text}</span>
-          </FrameImage>
-          <div className="catalog-card-name">{orbiter.displayName}</div>
-        </Link>
-
-        <Link to="/catalog/diode" className="catalog-card">
-          <FrameImage file="diode001.jpg" className="catalog-card-img portrait">
-            <span className="catalog-card-text" style={overlays.diode.style}>{overlays.diode.text}</span>
-          </FrameImage>
-          <div className="catalog-card-name">{diode.displayName}</div>
-        </Link>
+    <div className="doc">
+      {/* ── Masthead ─────────────────────────────────────────────────── */}
+      <div className="band band--open">
+        <Wordmark as="h1" />
       </div>
+
+      {/* ── Release ──────────────────────────────────────────────────── */}
+      <section className="band">
+        <Link to={`/catalog/${HERO_FONT}`}>
+          <FrameImage className="media media--hero" />
+          <div className="caption caption--split">
+            <span>{hero.displayName}</span>
+            <span>New Release</span>
+          </div>
+        </Link>
+      </section>
+
+      {/* ── Studio ───────────────────────────────────────────────────── */}
+      <section className="band row">
+        <h2 className="statement col-main">Independent type designed in Brooklyn, NY.</h2>
+        <dl className="list-block col-a">
+          <dt>Capabilities</dt>
+          {CAPABILITIES.map(item => <dd key={item}>{item}</dd>)}
+        </dl>
+        <div className="col-b">
+          <Link to="/about" className="arrow-link">About the studio →</Link>
+        </div>
+      </section>
+
+      {/* ── Catalog ──────────────────────────────────────────────────── */}
+      <section className="band">
+        <h2 className="body-lg">Commercial typefaces</h2>
+
+        <div className="row catalog-grid">
+          <Link to={`/catalog/${lead.id}`} className="catalog-card col-main">
+            <FrameImage className="media media--large" />
+            <div className="caption">{lead.displayName}</div>
+          </Link>
+
+          {rest.map((font, i) => (
+            <Link key={font.id} to={`/catalog/${font.id}`} className={`catalog-card ${i === 0 ? 'col-a' : 'col-b'}`}>
+              <FrameImage className="media media--tall" />
+              <div className="caption">{font.displayName}</div>
+            </Link>
+          ))}
+        </div>
+
+        <div className="row">
+          <p className="body-lg catalog-note col-main">
+            Fonts designed for contemporary use. Enjoy straightforward licensing
+            and free trials across the entire catalog.
+          </p>
+        </div>
+        <div className="arrow-row catalog-actions">
+          <Link to="/trials" className="arrow-link">Download trial fonts →</Link>
+          <Link to="/license" className="arrow-link">License overview →</Link>
+        </div>
+      </section>
+
+      {/* ── Clients ──────────────────────────────────────────────────── */}
+      <section className="band">
+        <div className="row">
+          <h2 className="statement col-main">Trusted by designers and brands worldwide.</h2>
+          <dl className="list-block col-a">
+            <dt>Sectors</dt>
+            {SECTORS.map(item => <dd key={item}>{item}</dd>)}
+          </dl>
+          <dl className="list-block col-b">
+            <dt>All inquiries</dt>
+            <dd><a href="mailto:hello@poi.tf">hello@poi.tf</a></dd>
+          </dl>
+        </div>
+
+        <div className="work-grid">
+          {WORK.map(item => (
+            <div key={item.subject}>
+              <FrameImage className="media media--work" />
+              <div className="caption">
+                {item.subject} <span className="caption-note">{item.note}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Contact ──────────────────────────────────────────────────── */}
+      <section className="band">
+        <p className="contact-block">
+          Get in touch<br />
+          <a href="mailto:hello@poi.tf">hello@poi.tf</a>
+        </p>
+      </section>
     </div>
   )
 }

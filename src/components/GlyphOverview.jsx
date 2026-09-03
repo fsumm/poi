@@ -1,38 +1,19 @@
 import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react'
-import { useReveal } from '../useReveal.js'
 
 const STORE_URL = 'https://store.poi.tf'
 
-// A single glyph grid cell. Adds the cursor-following perspective tilt (rotation
-// only — `scale: 1` leaves the existing hover scale-down on the inner span
-// untouched) on top of the hover/select behaviour.
-//
-// The tilt rides on an inner `__cell-tilt` wrapper, NOT the cell itself, and
-// that wrapper is `pointer-events: none`. The cell stays flat so its hit-test
-// box keeps tiling perfectly with its neighbours — transforming the cell would
-// rotate its pointer region too and break the seamless cell-to-cell hover. The
-// span (which CSS scales on hover) nests inside the wrapper, so tilt and scale
-// live on different elements and never clash.
+// A single glyph grid cell. The hover/select treatment is pure CSS on the inner
+// span; the cell itself stays untransformed so its hit-test box keeps tiling
+// exactly with its neighbours and hovering reads as one continuous surface.
 //
 // memo()'d so a hover (which calls setHovered for the live preview, re-rendering
-// the whole overview) doesn't re-render all ~490 cells — that reconcile was
-// occasionally dropping a frame mid tilt-animation. All props are referentially
-// stable across hovers (the callbacks are useCallback'd in the parent), so memo
-// skips every cell whose selected flag hasn't flipped.
+// the whole overview) doesn't re-render all ~490 cells. All props are
+// referentially stable across hovers (the callbacks are useCallback'd in the
+// parent), so memo skips every cell whose selected flag hasn't flipped.
 const GlyphCell = memo(function GlyphCell({ char, fontFamily, fontVariationSettings, fontFeatureSettings, selected, onHover, onLeave, onSelect }) {
-  // Scroll-reveal: the cell scales in as it enters the active band and back out
-  // as it leaves (data-revealed is toggled on the element by the
-  // IntersectionObserver in useReveal — no per-cell re-render). The hover
-  // scale-down lives on the inner span via CSS.
-  const cellRef = useReveal()
-  // Random 0–200ms delay per cell so they don't all reveal in lockstep. Stable
-  // for the cell's lifetime (lazy initial state runs once).
-  const [revealDelay] = useState(() => Math.random() * 200)
   return (
     <div
-      ref={cellRef}
       className={`glyph-overview__cell${selected ? ' selected' : ''}`}
-      style={{ transitionDelay: `${revealDelay}ms` }}
       onMouseEnter={() => onHover(char, fontFeatureSettings)}
       onMouseLeave={onLeave}
       onClick={() => onSelect({ char, fontFamily, fontVariationSettings, fontFeatureSettings })}

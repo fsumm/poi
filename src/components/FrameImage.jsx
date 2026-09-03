@@ -1,49 +1,32 @@
-import { imgProps } from '../data/images.js'
-import { useTilt } from '../useTilt.js'
-
 /**
- * A framed, cover-cropped responsive image.
+ * A framed image slot.
  *
- * Renders the existing frame wrapper (`className` carries the frame's layout
- * class, e.g. "catalog-card-img portrait") with:
- *   - a tiny inline LQIP painted as the wrapper background so something shows
- *     instantly while the real image streams in / lazy-loads;
- *   - an <img> whose srcSet uses density (x) descriptors keyed off the frame's
- *     fixed height, so the browser fetches the resolution that fits the display
- *     density (Retina picks the 2×/3× candidate) — selection is height-based,
- *     independent of the card's width;
- *   - native lazy loading by default (eager only for above-the-fold heroes);
- *   - a cursor-following perspective tilt on hover (see useTilt — smoothed in a
- *     rAF loop, no CSS transition, so it stays smooth in Safari as well).
+ * In the refreshed design every image frame renders as a flat gray placeholder:
+ * the wrapper keeps its layout class (e.g. "catalog-card-img portrait"), its
+ * radius, and its inline-size container context — so the catalog's overlay
+ * glyphs still size themselves to the frame — but paints --gray-2 instead of a
+ * photograph.
  *
- * The blur-in intro animation targets `.frame-img` (see index.css).
+ * The fill is a real `.frame-img` element rather than a background on the
+ * wrapper so the page-transition blur-in still has a target to animate (see the
+ * .page-anim rules in index.css).
  *
- * @param {string} file   /img filename, e.g. "about001.jpg"
- * @param {boolean} eager load immediately instead of lazily (use for LCP images)
+ * There is deliberately no hover treatment here: the cursor-following
+ * perspective tilt that framed images used to carry (useTilt) has been removed.
+ * useTilt itself is still used by the store-modal buttons.
+ *
+ * `file` and `eager` are accepted and ignored while placeholders are in place.
+ * Keeping them in the signature leaves every call site and the /img responsive
+ * pipeline (scripts/gen-images.mjs → data/images.js) untouched, so restoring
+ * photography is a change to this component alone.
+ *
+ * @param {string} file   /img filename, e.g. "about001.jpg" (currently unused)
+ * @param {boolean} eager load immediately instead of lazily (currently unused)
  */
 export default function FrameImage({ file, className, eager = false, children }) {
-  const { src, srcSet, width, height, placeholder } = imgProps(file)
-  const tilt = useTilt()
   return (
-    <div
-      ref={tilt.ref}
-      className={className}
-      style={{ backgroundImage: `url(${placeholder})` }}
-      onMouseEnter={tilt.onMouseEnter}
-      onMouseMove={tilt.onMouseMove}
-      onMouseLeave={tilt.onMouseLeave}
-    >
-      <img
-        className="frame-img"
-        src={src}
-        srcSet={srcSet}
-        width={width}
-        height={height}
-        alt=""
-        loading={eager ? 'eager' : 'lazy'}
-        decoding="async"
-        {...(eager ? { fetchpriority: 'high' } : null)}
-      />
+    <div className={className}>
+      <div className="frame-img" />
       {children}
     </div>
   )

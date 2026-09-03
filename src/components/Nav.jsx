@@ -3,63 +3,113 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { fonts } from '../data/fonts.js'
 import { openCart } from '../fontdueCart.js'
 
+// The three top-level sections, each with its own submenu. `to` is where the
+// label itself navigates on desktop; `isActive` decides when the label is
+// highlighted, since a section stays current across all of its sub-pages
+// (Catalog covers "/" and every font detail page, License covers the overview,
+// trials and the EULA).
+const MENUS = [
+  {
+    id: 'catalog',
+    label: 'Catalog',
+    to: '/',
+    isActive: (p) => p === '/' || p.startsWith('/catalog'),
+    // The catalog submenu is still the font list, generated from the data.
+    items: fonts.map((font) => ({ to: `/catalog/${font.id}`, label: font.displayName })),
+  },
+  {
+    id: 'about',
+    label: 'About',
+    to: '/about',
+    isActive: (p) => p === '/about' || p === '/newsletter',
+    items: [
+      { to: '/about', label: 'Studio' },
+      { to: '/newsletter', label: 'Newsletter' },
+    ],
+  },
+  {
+    id: 'license',
+    label: 'License',
+    to: '/license',
+    isActive: (p) => p === '/license' || p === '/trials' || p === '/eula',
+    items: [
+      { to: '/license', label: 'Overview' },
+      { to: '/trials', label: 'Trials' },
+      { to: '/eula', label: 'EULA' },
+    ],
+  },
+]
+
 export default function Nav() {
   const location = useLocation()
-  // Catalog now lives at "/", with font detail pages under "/catalog/:id".
-  // Highlight the Catalog label on the home page and any font detail page.
-  const catalogActive = location.pathname === '/' || location.pathname.startsWith('/catalog')
   const [menuOpen, setMenuOpen] = useState(false)
-  const [catalogOpen, setCatalogOpen] = useState(false)
+  // id of the section whose submenu is open, or null. At most one is ever open.
+  const [openId, setOpenId] = useState(null)
   const navRef = useRef(null)
+  // Whether a submenu was already open on the previous commit — drives whether
+  // the backdrop animates up from 0 or eases across from the outgoing panel's
+  // height (see the measurement effect below).
+  const wasOpenRef = useRef(false)
+  // Points at the *open* submenu's <ul> (the closed ones don't claim the ref),
+  // so the measurement and hover-band effects below always read the right panel.
   const submenuRef = useRef(null)
   const close = () => {
     setMenuOpen(false)
-    setCatalogOpen(false)
+    setOpenId(null)
   }
 
-  // Desktop (no hamburger, >580px): the submenu opens on hover of the Catalog
+  // Desktop (no hamburger, >580px): a submenu opens on hover of its top-level
   // item and the label click navigates like a normal link. Mobile keeps the
   // tap-to-toggle behavior (tapping the label opens/closes the submenu rather
   // than navigating). Closes on outside click or Escape.
   const isDesktop = () => window.matchMedia('(min-width: 581px)').matches
-  const onCatalogClick = (e) => {
+  const onLabelClick = (id) => (e) => {
     if (isDesktop()) {
       close()
       return
     }
     e.preventDefault()
-    setCatalogOpen(v => !v)
+    setOpenId((cur) => (cur === id ? null : id))
   }
-  const onCatalogEnter = () => { if (isDesktop()) setCatalogOpen(true) }
+  const onItemEnter = (id) => () => { if (isDesktop()) setOpenId(id) }
 
   // While open on desktop, the panel behaves as a full-width band: moving the
   // cursor left/right of the item names keeps it open; it only closes when the
-  // cursor leaves vertically — up into the nav bar (unless it's over the
-  // Catalog item itself) or down into the page content. Tracked via document
-  // mousemove because mouseleave on the (narrow) Catalog item would also fire
-  // on horizontal exits.
+  // cursor leaves vertically — up into the nav bar or down into the page
+  // content. Tracked via document mousemove because mouseleave on the (narrow)
+  // nav item would also fire on horizontal exits.
   useEffect(() => {
-    if (!catalogOpen || !isDesktop()) return
+    if (!openId || !isDesktop()) return
     const onMove = (e) => {
       const sub = submenuRef.current
       if (!sub) return
-      if (sub.closest('.nav-item--has-submenu')?.contains(e.target)) return
+      // Bail while the cursor is over ANY top-level item that owns a submenu,
+      // not just the open one's. Sliding sideways from one label to the next
+      // puts the cursor in the bar, above the open panel — which reads as
+      // "left vertically" and would close the menu. Because the browser fires
+      // the sibling's mouseover *before* this mousemove, that close would land
+      // in the same React batch as the sibling's onMouseEnter and win, so the
+      // next menu would never open. Bailing here hands the switch off to that
+      // item's own mouseenter instead.
+      if (e.target instanceof Element && e.target.closest('.nav-item--has-submenu')) return
       const band = sub.getBoundingClientRect() // live panel box; top = bar bottom
       if (e.clientY >= band.top && e.clientY <= band.bottom) return
-      setCatalogOpen(false)
+      setOpenId(null)
     }
     document.addEventListener('mousemove', onMove)
     return () => document.removeEventListener('mousemove', onMove)
-  }, [catalogOpen])
+  }, [openId])
 
   // Publish the open submenu's *actual* height as --submenu-h on <body> so the
   // nav's white backdrop can grow by exactly the panel's height (the submenu
   // is absolutely positioned and overlays the page content). Measured (not a
   // fixed guess) so the backdrop matches the real content height rather than
-  // the max-height cap. 0 when closed.
+  // the max-height cap — which matters more now that the three sections have
+  // different item counts. 0 when closed.
   useEffect(() => {
-    if (!catalogOpen || !submenuRef.current) {
+    if (!openId || !submenuRef.current) {
       document.body.style.removeProperty('--submenu-h')
+      wasOpenRef.current = false
       return
     }
     const el = submenuRef.current
@@ -86,7 +136,10 @@ export default function Nav() {
       }
       document.body.style.setProperty('--submenu-h', `${measure()}px`)
     }
-    publish(true)
+    // Flush through 0 only when opening from closed; switching between menus
+    // eases from the outgoing height straight to the new one.
+    publish(!wasOpenRef.current)
+    wasOpenRef.current = true
     // If a webfont is still loading, the first measure used fallback metrics;
     // re-measure once fonts settle and ease to the corrected value (no flush).
     let cancelled = false
@@ -95,21 +148,21 @@ export default function Nav() {
       cancelled = true
       document.body.style.removeProperty('--submenu-h')
     }
-  }, [catalogOpen])
+  }, [openId])
 
   useEffect(() => {
-    if (!catalogOpen) return
+    if (!openId) return
     const onDocPointer = (e) => {
-      if (navRef.current && !navRef.current.contains(e.target)) setCatalogOpen(false)
+      if (navRef.current && !navRef.current.contains(e.target)) setOpenId(null)
     }
-    const onKey = (e) => { if (e.key === 'Escape') setCatalogOpen(false) }
+    const onKey = (e) => { if (e.key === 'Escape') setOpenId(null) }
     document.addEventListener('mousedown', onDocPointer)
     document.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('mousedown', onDocPointer)
       document.removeEventListener('keydown', onKey)
     }
-  }, [catalogOpen])
+  }, [openId])
 
   return (
     <nav ref={navRef} className={`nav${menuOpen ? ' nav--open' : ''}`}>
@@ -127,24 +180,37 @@ export default function Nav() {
         Menu
       </button>
       <ul className="nav-links">
-        <li
-          className={`nav-item nav-item--has-submenu${catalogOpen ? ' nav-item--submenu-open' : ''}`}
-          onMouseEnter={onCatalogEnter}
-        >
-          <NavLink to="/" onClick={onCatalogClick} aria-haspopup="true" aria-expanded={catalogOpen} className={'nav-link' + (catalogActive ? ' active' : '')}>Catalog</NavLink>
-          <ul className="nav-submenu" ref={submenuRef}>
-            {fonts.map(font => (
-              <li key={font.id}>
-                <NavLink to={`/catalog/${font.id}`} onClick={close} className={({ isActive }) => 'nav-link nav-sublink' + (isActive ? ' active' : '')}>
-                  {font.displayName}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </li>
-        <li><NavLink to="/contact" onClick={close} className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>Contact</NavLink></li>
-        <li><NavLink to="/about" onClick={close} className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>About</NavLink></li>
-        <li><NavLink to="/trials" onClick={close} className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>Trials</NavLink></li>
+        {MENUS.map((menu) => {
+          const open = openId === menu.id
+          return (
+            <li
+              key={menu.id}
+              className={`nav-item nav-item--has-submenu${open ? ' nav-item--submenu-open' : ''}`}
+              onMouseEnter={onItemEnter(menu.id)}
+            >
+              <NavLink
+                to={menu.to}
+                onClick={onLabelClick(menu.id)}
+                aria-haspopup="true"
+                aria-expanded={open}
+                className={'nav-link' + (menu.isActive(location.pathname) ? ' active' : '')}
+              >
+                {menu.label}
+              </NavLink>
+              {/* Only the open panel claims the ref — the measurement and
+                  hover-band effects above read exactly one element. */}
+              <ul className="nav-submenu" ref={open ? submenuRef : null}>
+                {menu.items.map((item) => (
+                  <li key={item.to}>
+                    <NavLink to={item.to} onClick={close} end className={({ isActive }) => 'nav-link nav-sublink' + (isActive ? ' active' : '')}>
+                      {item.label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          )
+        })}
       </ul>
       <div className="nav-cart">
         <button className="nav-cart-btn" onClick={openCart}>Cart</button>

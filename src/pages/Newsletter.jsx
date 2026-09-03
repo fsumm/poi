@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import FrameImage from '../components/FrameImage.jsx'
 
 const STORE_URL = 'https://store.poi.tf'
 
@@ -50,15 +49,19 @@ export default function Newsletter() {
   }
 
   return (
-    <div className="page">
-      <div className="page-grid">
-        <FrameImage file="newsletter001.jpg" className="page-grid-img" eager />
-        <div className="page-grid-body">
+    <div className="doc">
+      {/* Statement, then the form below the rule — the same band structure as
+          the landing, about and license pages. */}
+      <div className="band band--open row">
+        <h1 className="statement col-main">Hear about updates and new releases.</h1>
+      </div>
+
+      <section className="band row">
+        <div className="col-main">
           {submitted ? (
             <p className="page-text">You're subscribed. Thanks!</p>
           ) : (
             <form onSubmit={handleSubmit}>
-              <div className="page-section-label">Newsletter</div>
               <p className="page-text">Stay informed on new releases and updates.</p>
 
               <input
@@ -85,7 +88,7 @@ export default function Newsletter() {
                 Subscribe
               </label>
 
-              {error && <p className="page-text" style={{ color: 'red' }}>{error}</p>}
+              {error && <p className="form-error">{error}</p>}
 
               <div className="form-actions">
                 <button
@@ -99,7 +102,7 @@ export default function Newsletter() {
             </form>
           )}
         </div>
-      </div>
+      </section>
     </div>
   )
 }

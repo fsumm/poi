@@ -15,6 +15,7 @@ import Contact from './pages/Contact.jsx'
 import Newsletter from './pages/Newsletter.jsx'
 import Trials from './pages/Trials.jsx'
 import License from './pages/License.jsx'
+import Eula from './pages/Eula.jsx'
 import Privacy from './pages/Privacy.jsx'
 
 const STORE_URL = 'https://store.poi.tf'
@@ -70,7 +71,8 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/newsletter" element={<Newsletter />} />
             <Route path="/trials" element={<Trials />} />
-            <Route path="/eula" element={<License />} />
+            <Route path="/license" element={<License />} />
+            <Route path="/eula" element={<Eula />} />
             <Route path="/privacy" element={<Privacy />} />
           </AnimatedRoutes>
         </main>
