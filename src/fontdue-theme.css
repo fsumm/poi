@@ -477,23 +477,44 @@ input:checked + .checkbox__icon {
   font-style: normal !important;
 }
 
-/* Back button — gray pill, hide arrow */
+/* Back button — plain H5 text with a typed arrow, not a pill. fontdue's own
+   ArrowLeft icon stays hidden; the glyph reads with the rest of the type the
+   way the site's .arrow-link does. */
 .store-modal__container__container .store-modal__container__back-button .icon {
   display: none;
 }
 .store-modal__container__container .store-modal__container__back-button {
-  background: var(--gray-6);
+  background: none;
   border: none;
-  border-radius: 100px;
-  padding: 10px 16px;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  border-radius: 0;
+  padding: 0;
+  font-family: var(--font-ui);
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
   color: #ffffff;
+  text-align: left;
   cursor: pointer;
-  transition: background 120ms;
+  transition: color 120ms;
+}
+.store-modal__container__container .store-modal__container__back-button::before {
+  content: '← ';
 }
 .store-modal__container__container .store-modal__container__back-button:hover {
-  background: var(--gray-5);
+  color: var(--gray-4);
+}
+
+/* On the checkout page fontdue labels the back button "Cart", which collides
+   with the fixed Cart toggle on the right. The label is a bare text node, so
+   it's collapsed to zero and replaced wholesale. */
+[data-route=checkout] .store-modal__container__container .store-modal__container__back-button {
+  font-size: 0;
+}
+[data-route=checkout] .store-modal__container__container .store-modal__container__back-button::before {
+  content: '← Order summary';
+  font-size: var(--h5-size);
 }
 
 /* Override wide-screen expansion back to our narrow cap */
@@ -685,10 +706,9 @@ input:checked + .checkbox__icon {
 .store-modal__container__container .cart-item__license__delete-button .icon {
   font-size: var(--font-size-sm);
   position: absolute;
-  bottom: calc(100% + 10px);
-  /* Left-aligned to the button rather than centred on it: these sit against
-     the panel's left margin, and a centred chip would hang off the edge. */
-  left: 0;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
   padding: 8px 16px;
   border-radius: 8px;
   background: var(--gray-1);
@@ -707,8 +727,7 @@ input:checked + .checkbox__icon {
   content: '';
   position: absolute;
   top: 100%;
-  /* Points at the button's centre, which the chip no longer sits over. */
-  left: 10px;
+  left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
   border-top-color: var(--gray-1);
@@ -1551,26 +1570,29 @@ input:checked + .checkbox__icon {
   display: none;
 }
 .store-modal__container__container .store-modal__container__cart-button {
-  background: var(--gray-6);
+  background: none;
   color: #fff;
   border: none;
-  border-radius: 100px;
-  padding: 10px 16px;
+  border-radius: 0;
+  padding: 0;
+  text-align: left;
   cursor: pointer;
-  transition: background 120ms;
+  transition: color 120ms;
 }
-.store-modal__container__container .store-modal__container__cart-button:hover {
-  background: var(--yellow);
-  color: var(--ink-black);
-}
+.store-modal__container__container .store-modal__container__cart-button:hover,
 .store-modal__container__container .store-modal__container__cart-button:hover::before {
-  color: var(--ink-black);
+  color: var(--gray-4);
 }
 .store-modal__container__container .store-modal__container__cart-button::before {
-  content: 'Review order';
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  content: 'Review order →';
+  font-family: var(--font-ui);
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
   color: #fff;
+  transition: color 120ms;
 }
 /* While the panel slides in it sweeps under a stationary cursor, which would
    latch :hover on whatever passes beneath it — the cart button, and the catalog

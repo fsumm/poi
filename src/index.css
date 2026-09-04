@@ -2069,17 +2069,20 @@ body[data-page-phase=entering] .footer {
 }
 
 /* ── Enter ── */
-.cart-anim--entering .store-modal__container__cart-button,
 .cart-anim--entering .store-modal__index-item__button {
   opacity: 1;
   transition: opacity 0.4s linear;
 }
+.cart-anim--entering .store-modal__container__cart-button {
+  opacity: 1;
+  transition: opacity 0.4s linear, color 120ms;
+}
 
-/* Back button: opacity delay per-property so the background hover (120ms,
-   defined on the rest style) isn't delayed along with it */
+/* Back button: opacity delay per-property so the color hover (120ms, defined
+   on the rest style) isn't delayed along with it */
 .cart-anim--entering .store-modal__container__back-button {
   opacity: 1;
-  transition: opacity 0.4s linear 100ms, background 120ms;
+  transition: opacity 0.4s linear 100ms, color 120ms;
 }
 
 /* (Used by the trial modal's close-button intro fade in fontdue-theme.css) */
