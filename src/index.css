@@ -119,6 +119,11 @@ html[data-resizing] *::after {
   --gray-3: #babab9;
   --gray-4: #a6a6a4;
   --gray-5: #686866;
+  /* Gray 6 / 7 are the dark-surface steps — they only read against Ink Black,
+     and today only the cart drawer uses them (secondary pills / filled
+     fields). */
+  --gray-6: #474745;
+  --gray-7: #2b2b29;
   --ink-black: #171716;
   --poi-blue: #2e5bff;
   --yellow: #e9ff15;
@@ -841,10 +846,11 @@ body[data-trial-modal='open'] .nav::after {
   margin-bottom: 12px;
 }
 
-/* .form-field's 150% width is tuned for the two-column body it was built in.
-   Inside a band column that resolves far too wide, so pin it to the width it
-   used to render at. Scoped to .doc, leaving /contact's original layout alone. */
-.doc .form-field {
+/* .form-field-label's 150% width is tuned for the two-column body it was built
+   in. Inside a band column that resolves far too wide, so pin it to the width
+   it used to render at. Scoped to .doc, leaving /contact's original layout
+   alone. */
+.doc .form-field-label {
   width: 400px;
   max-width: 100%;
 }
@@ -1372,22 +1378,44 @@ body[data-trial-modal='open'] .nav::after {
 /* Inputs span 3 grid columns while the text above stays at the body's 2.
    The body is 2 cols (2u + gap); 3 cols is (3u + 2·gap), which relative to
    the body width works out to 1.5·body + 0.5·gap — exact at any viewport. */
-.form-field {
+/* The label wraps its input, so it carries the 3-column width the field used
+   to hold on its own. Same underlined field as the cart drawer, in the light
+   palette: Ink Black label, Gray 3 placeholder, Gray 3 rule. */
+.form-field-label {
   display: block;
   width: calc(150% + var(--gap) / 2);
-  padding: 10px 14px;
-  border-radius: var(--radius-pill);
-  background: var(--gray-1);
+  font-size: var(--font-size-lg);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: var(--h5-tracking);
+  color: var(--ink-black);
+  margin-bottom: 18px;
+}
+
+.form-field {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 0 0 15px;
   border: none;
-  font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--gray-3);
+  border-radius: 0;
+  background: none;
+  font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
   font-weight: 600;
   color: var(--ink-black);
   outline: none;
-  margin-bottom: 8px;
+  transition: border-color 120ms;
 }
 
 .form-field::placeholder {
-  color: var(--gray-5);
+  color: var(--gray-3);
+  opacity: 1;
+}
+
+.form-field:focus {
+  border-bottom-color: var(--ink-black);
 }
 
 .form-toggle {
@@ -2083,7 +2111,8 @@ body[data-page-phase=entering] .footer {
   font-size: var(--font-size-lg);
   font-weight: 600;
   line-height: normal;
-  color: var(--ink-black);
+  /* White: the toggle sits over the drawer, which is now Ink Black. */
+  color: #ffffff;
   cursor: pointer;
   transition: opacity 0.12s;
 }
@@ -2468,7 +2497,7 @@ body[data-page-phase=entering] .footer {
   .page-grid-img  { grid-column: 1 / -1; }
   .page-grid-body { grid-column: 1 / -1; }
   /* Body is full-width here, so inputs fill it rather than overflowing 150% */
-  .form-field { width: 100%; }
+  .form-field-label { width: 100%; }
 
   /* ── About secondary → stacked, full-width image ── */
   .about-secondary-img  { grid-column: 1 / -1; }

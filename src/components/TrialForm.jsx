@@ -74,24 +74,30 @@ export default function TrialForm({ heading = true }) {
             features. Intended for client pitches, personal projects, and student work.
           </p>
 
-          <input
-            className="form-field"
-            type="text"
-            placeholder="Your name"
-            autoComplete="name"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            required
-          />
-          <input
-            className="form-field"
-            type="email"
-            placeholder="Your email"
-            autoComplete="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
+          <label className="form-field-label">
+            Name
+            <input
+              className="form-field"
+              type="text"
+              placeholder="Your name"
+              autoComplete="name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              required
+            />
+          </label>
+          <label className="form-field-label">
+            Email
+            <input
+              className="form-field"
+              type="email"
+              placeholder="Your email"
+              autoComplete="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
+          </label>
 
           <div className="form-eula-row">
             <label className="form-toggle" onClick={() => setEulaAgreed(v => !v)}>

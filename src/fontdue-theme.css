@@ -11,6 +11,8 @@
   --gray-3: #babab9;
   --gray-4: #a6a6a4;
   --gray-5: #686866;
+  --gray-6: #474745;
+  --gray-7: #2b2b29;
   --ink-black: #171716;
   --poi-blue: #2e5bff;
   --yellow: #e9ff15;
@@ -335,9 +337,12 @@ input:checked + .checkbox__icon {
   max-width: calc((min(100vw, var(--max-w)) - 2 * var(--pad) - 11 * var(--gap)) / 3 + 3 * var(--gap) + var(--pad) + var(--gap));
   right: max(0px, (100vw - var(--max-w)) / 2);
   font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-lg);
   font-weight: 600;
-  /* Transparent: the white background is a separate fixed layer on the overlay
+  /* Ink Black drawer: every child inherits white, and the handful of muted
+     items (placeholders, secondary prices) opt down to --gray-5. */
+  color: #ffffff;
+  /* Transparent: the Ink Black background is a separate fixed layer on the overlay
      (see .store-modal__container__overlay::before). It can't live here — this is
      the scroll container, and a background here would scroll/re-rasterize with
      the page subtree fontdue swaps on every route change. It also can't be a
@@ -351,7 +356,7 @@ input:checked + .checkbox__icon {
   --font-family__bold: 'POI Orbiter', system-ui, -apple-system, sans-serif;
 }
 
-/* Drawer background: an opaque white viewport-fixed layer painted behind the
+/* Drawer background: an opaque Ink Black viewport-fixed layer painted behind the
    transparent panel. It lives on the overlay — which is fixed, untransformed
    and never scrolls — so it stays put under scrolling content AND sits outside
    the swapping panel subtree, so Safari never re-rasterizes it on a page
@@ -373,21 +378,96 @@ input:checked + .checkbox__icon {
   right: var(--cart-gutter);
   width: var(--cart-panel-w);
   pointer-events: none;
-  background-color: #fff;
+  background-color: var(--ink-black);
   animation: slideIn 300ms forwards;
 }
-/* Slide the white layer out in sync when the panel is closing */
+/* Slide the drawer layer out in sync when the panel is closing */
 .store-modal__container__overlay:has(.store-modal__container__container[data-closing])::before {
   animation: poi-slide-out 280ms ease-in forwards;
 }
 
-/* Override merchant-injected font-weight: 400 on specific elements */
-.store-modal__container__container .store-modal__family__title,
-.store-modal__container__container .store-modal__license-selection__title,
-.store-modal__container__container .store-modal__order-variable-selection__title,
+/* Titles with no counterpart in the design: the nav title is replaced by the
+   fixed "Cart" toggle, "Contact information" by the section heading below, and
+   "Licensee information (your client)" is not drawn at all. */
 .store-modal__container__container .store-modal__cart__checkout-section-title,
 .store-modal__container__container .store-modal__container__title {
   display: none;
+}
+
+/* ── Section headings ────────────────────────────────────────────────────────
+   The drawer now runs on the same H1–H5 scale as the rest of the site (see the
+   type scale in index.css): section headings are H3, the family/line-item rows
+   H4, and everything else H5. The scale is fluid off the 1700px page frame and
+   the drawer is a fixed slice of that frame, so a step lands at its drawn size
+   here at exactly the width it was drawn at.
+
+   Two headings have no element to hang on — the cart's "Order summary" and
+   "Contact" — so they're set as ::before content, the same trick the nav's
+   "Review order" button already uses. */
+.store-modal__container__container .store-modal__licensee-is-billing-identity__title,
+.store-modal__container__container .store-modal__license-selection__title,
+.store-modal__container__container .store-modal__order-variable-selection__title,
+.store-modal__container__container .store-modal__family__title,
+.store-modal__container__container .store-modal__cart__items::before,
+.store-modal__container__container .store-modal__cart__checkout-section[data-editing]::before {
+  display: block;
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--h3-size);
+  font-weight: var(--h3-weight);
+  font-variation-settings: 'wght' var(--h3-weight);
+  line-height: var(--h3-line);
+  letter-spacing: var(--h3-tracking);
+  color: #ffffff;
+  text-align: left;
+  padding: 0 0 16px;
+  margin: 0 0 20px;
+  border-bottom: 1px solid #ffffff;
+}
+.store-modal__container__container .store-modal__cart__items::before {
+  content: 'Order summary';
+}
+.store-modal__container__container .store-modal__cart__checkout-section[data-editing]::before {
+  content: 'Contact';
+}
+
+/* Submitted contact: the values read at H4 with the "Change" pill pulled up
+   beside them, under a full-width heading rule. */
+.store-modal__container__container .store-modal__cart__checkout-section[data-editing=false] {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  column-gap: 20px;
+}
+.store-modal__container__container .store-modal__cart__checkout-section[data-editing=false]::before {
+  grid-column: 1 / -1;
+}
+.store-modal__container__container .store-modal__cart__checkout-section[data-editing=false] > div {
+  font-family: var(--font-ui);
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  font-variation-settings: 'wght' var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+  color: #ffffff;
+}
+
+/* Sub-heading rows inside "Select fonts" ("POI Orbiter Family", "…VF") — H4
+   with the same rule beneath. */
+.store-modal__container__container .store-modal__family__family-button[data-clickable=false]
+  .store-modal__family-button__name,
+.store-modal__container__container .store-modal__family__family-button[data-clickable=false]
+  .store-modal__family-button__name span {
+  font-size: var(--h4-size);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+  color: #ffffff;
+  /* These are headings, not specimens: fontdue sets the family's own face and
+     weight 400 inline on the span, so the UI face has to be forced back on. */
+  font-family: var(--font-ui) !important;
+  font-weight: var(--h4-weight) !important;
+  font-variation-settings: 'wght' var(--h4-weight) !important;
+  font-style: normal !important;
 }
 
 /* Back button — gray pill, hide arrow */
@@ -395,18 +475,18 @@ input:checked + .checkbox__icon {
   display: none;
 }
 .store-modal__container__container .store-modal__container__back-button {
-  background: var(--gray-1);
+  background: var(--gray-6);
   border: none;
   border-radius: 100px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--ink-black);
+  color: #ffffff;
   cursor: pointer;
   transition: background 120ms;
 }
 .store-modal__container__container .store-modal__container__back-button:hover {
-  background: var(--gray-2);
+  background: var(--gray-5);
 }
 
 /* Override wide-screen expansion back to our narrow cap */
@@ -428,7 +508,7 @@ input:checked + .checkbox__icon {
   margin-bottom: 20px;
 }
 .store-modal__container__container .empty-cart__container .button {
-  background: var(--ink-black);
+  background: var(--gray-6);
   color: #ffffff;
   border: none;
   border-radius: 999px;
@@ -448,10 +528,35 @@ input:checked + .checkbox__icon {
 @media (min-width: 900px) {
   .store-modal__cart__container { display: block; }
   .store-modal__cart__review { display: block; position: static; padding-right: 0; }
-  .store-modal__cart__checkout { padding-left: 0; border-left: none; margin-top: 40px; }
+  .store-modal__cart__checkout { padding-left: 0; border-left: none; }
   .store-modal__cart__totals { grid-column: 1 / span 2; }
   .store-modal__cart__items { display: block; }
 }
+
+/* Cart column order and rhythm — unconditional, since the panel is the same
+   narrow column at every viewport width and fontdue's own breakpoints only
+   describe the two-up desktop layout it never gets here.
+   Reorder to the design: items → totals → coupon → share (fontdue emits the
+   totals last), with the review column as a flex stack. */
+.store-modal__container__container .store-modal__cart__review {
+  display: flex;
+  flex-direction: column;
+  /* fontdue's grid gap would land between every block; the spacing below is set
+     per block instead, since the totals must butt straight up against the last
+     line item (its border-top is that item's closing rule). */
+  gap: 0;
+}
+/* fontdue sizes these for its own two-up grid, so as flex items they'd shrink
+   to their content and the section rules would stop short of the panel. */
+.store-modal__container__container .store-modal__cart__review > * {
+  width: 100%;
+  max-width: none;
+}
+.store-modal__container__container .store-modal__cart__totals { order: 1; margin-top: 0; }
+.store-modal__container__container .store-modal__cart__coupon-code-input { order: 2; margin-top: 22px; }
+.store-modal__container__container .store-modal__cart__share { order: 3; }
+.store-modal__container__container .store-modal__cart__items { margin-top: 56px; }
+.store-modal__container__container .store-modal__cart__checkout { margin-top: 56px; }
 
 /* Force cart items to simple 1fr auto grid at all widths — prevents subgrid at 1200px+ */
 @media (min-width: 1200px) {
@@ -464,7 +569,7 @@ input:checked + .checkbox__icon {
     padding-bottom: 0;
   }
   .store-modal__container__container .cart-item + .cart-item {
-    border-top: 1.5px solid var(--gray-2);
+    border-top: 1px solid #ffffff;
   }
   .store-modal__container__container .cart-item__name {
     margin-top: 20px;
@@ -497,6 +602,51 @@ input:checked + .checkbox__icon {
   padding-bottom: 0px;
 }
 
+/* Line items read at H4, split white (name, price, total) / Gray 5 (the
+   subtotal and the tax placeholder), with a white hairline between rows —
+   the divider is repeated outside the 1200px block so it holds at every width. */
+.store-modal__container__container .cart-item + .cart-item {
+  border-top: 1px solid #ffffff;
+}
+.store-modal__container__container .cart-item {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.store-modal__container__container .cart-item__name,
+.store-modal__container__container .cart-item__price,
+.store-modal__container__container .cart__price-block__label,
+.store-modal__container__container .cart__price-block__price {
+  font-family: var(--font-ui);
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  font-variation-settings: 'wght' var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+  color: #ffffff;
+}
+.store-modal__container__container .cart-item__license-name {
+  font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
+  color: #ffffff;
+  /* fontdue's 20px trailing margin doubled the space under every line item. */
+  margin-bottom: 0;
+}
+
+/* Totals: one hairline per row, closed off under the total. The margin is
+   fontdue's; with it the label sat 20px off-centre between its two rules. */
+.store-modal__container__container .cart__price-block {
+  border-top: 1px solid #ffffff;
+  padding: 20px 0;
+  margin: 0;
+}
+.store-modal__container__container .cart__price-block[data-line=total] {
+  border-bottom: 1px solid #ffffff;
+}
+.store-modal__container__container .cart__price-block[data-line=subtotal] .cart__price-block__price,
+.store-modal__container__container .cart__price-block__placeholder {
+  color: var(--gray-5);
+}
+
 /* Cart item license delete button — radio circle style, red */
 .store-modal__container__container .cart-item__license__delete-button .icon {
   display: none;
@@ -524,8 +674,10 @@ input:checked + .checkbox__icon {
   box-sizing: border-box;
   transition: background 150ms;
 }
+/* Hover fills the white centre with Gray 4 — on Ink Black the light-theme
+   "fill it dark" hover would just read as an empty circle. */
 .store-modal__container__container .cart-item__license__delete-button:hover::before {
-  background: var(--ink-black);
+  background: var(--gray-4);
 }
 
 /* Close button: hidden — replaced by the fixed "Cart" toggle (.poi-cart-toggle,
@@ -543,7 +695,7 @@ input:checked + .checkbox__icon {
   align-items: center;
   position: sticky;
   top: 0;
-  background: #fff;
+  background: var(--ink-black);
   z-index: 10;
 }
 @media (min-width: 900px) {
@@ -586,7 +738,7 @@ input:checked + .checkbox__icon {
 /* Footer */
 .store-modal__container__container .store-modal__container__footer {
   padding: var(--pad);
-  border-top: 1px solid var(--gray-2);
+  border-top: 1px solid #ffffff;
 }
 
 /* Page body spacing */
@@ -594,81 +746,73 @@ input:checked + .checkbox__icon {
   padding: 0;
 }
 .store-modal__container__container .store-modal__page__body > * + * {
-  margin-top: 24px;
+  margin-top: 56px;
 }
 
-/* Section label caps */
+/* fontdue wraps each title's text in a <div><p> — reset those so the heading
+   step set on the <h3> is what actually renders. */
 .store-modal__container__container .store-modal__licensee-is-billing-identity__title p,
+.store-modal__container__container .store-modal__license-selection__title p,
 .store-modal__container__container .store-modal__order-variable-selection__title p,
-.store-modal__container__container .store-modal__license-selection__title p {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--ink-black);
-  margin-bottom: 10px;
+.store-modal__container__container .store-modal__family__title p {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  margin: 0;
 }
 
 /* ── "License these fonts for" checkbox-style toggles (Yourself / Your client) ── */
 
+/* The design draws these as a row of pills rather than a radio list, so the
+   options sit side by side and the bullet is dropped. */
 .store-modal__container__container .store-modal__licensee-is-billing-identity__buttons {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  gap: 10px;
   flex-wrap: wrap;
+}
+.store-modal__container__container .store-modal__licensee-is-billing-identity__option {
+  flex: 0 0 auto;
 }
 
 .store-modal__container__container .store-modal__licensee-is-billing-identity__option
   .store-modal__order-variable-selection__button {
-  background: none;
-  color: var(--ink-black);
+  background: var(--gray-6);
+  color: #ffffff;
   border: none;
-  border-radius: 0;
-  padding: 4px 0;
-  font-size: var(--font-size-sm);
+  border-radius: 100px;
+  padding: 10px 16px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
+  letter-spacing: var(--h5-tracking);
   width: auto;
   display: inline-flex;
   align-items: center;
-  transition: none;
+  transition: background 120ms;
 }
-/* Circle bullet via ::before on the icon-pair */
 .store-modal__container__container .store-modal__licensee-is-billing-identity__option
   .store-modal__order-variable-selection__button
   .store-modal__order-variable-selection__icon-pair {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
+/* Selection reads as a filled blue pill; hover lifts the rest to Gray 5. */
 .store-modal__container__container .store-modal__licensee-is-billing-identity__option
-  .store-modal__order-variable-selection__button
-  .store-modal__order-variable-selection__icon-pair::before {
-  content: '';
-  display: inline-flex;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 6px solid var(--gray-2);
-  background: #fff;
-  box-sizing: border-box;
-  transition: border-color 150ms, background 150ms;
-}
-.store-modal__container__container .store-modal__licensee-is-billing-identity__option
-  .store-modal__order-variable-selection__button:hover
-  .store-modal__order-variable-selection__icon-pair::before {
+  .store-modal__order-variable-selection__button:hover:not([data-selected=true]) {
   background: var(--gray-5);
 }
 .store-modal__container__container .store-modal__licensee-is-billing-identity__option
-  .store-modal__order-variable-selection__button[data-selected=true]
-  .store-modal__order-variable-selection__icon-pair::before {
-  border-color: var(--poi-blue);
-  background: #fff;
+  .store-modal__order-variable-selection__button[data-selected=true] {
+  background: var(--poi-blue);
+  color: #ffffff;
 }
 
 /* ── "Configure your order" rows ─────────────────────────────────────────────── */
 
-/* Select-type rows (Company size): strip tile off button, move styling to dropdown */
+/* Select-type rows (Company size): label above, underlined field below —
+   spaced like the other form fields in the drawer. */
 .store-modal__container__container [data-variable-type=select] {
-  margin-bottom: 6px;
+  margin-bottom: 18px;
 }
 .store-modal__container__container [data-variable-type=select]
   .store-modal__order-variable-selection__button {
@@ -677,40 +821,74 @@ input:checked + .checkbox__icon {
   border-radius: 0;
   padding: 0;
   width: 100%;
-  color: var(--ink-black);
+  color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
-  font-size: var(--font-size-sm);
+  /* The label sits above the field and carries its own margin. */
+  gap: 0;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   transition: none;
 }
 .store-modal__container__container [data-variable-type=select]
   .store-modal__order-variable-selection__button:hover {
   background: none;
-  color: var(--ink-black);
+  color: #ffffff;
 }
+/* "Company size" reads as a field label, matching the text inputs and the
+   Stripe address fields. */
+.store-modal__container__container [data-variable-type=select]
+  .store-modal__order-variable-selection__label {
+  font-size: var(--font-size-lg);
+  line-height: 1.25;
+  letter-spacing: var(--h5-tracking);
+  font-weight: 600;
+  color: var(--gray-4);
+  margin-bottom: 6px;
+  text-align: left;
+}
+/* fontdue paints the label's border with its own selected accent once a value
+   is picked; the label is plain text here, so drop the border outright. */
+.store-modal__container__container [data-variable-type=select]
+  .store-modal__order-variable-selection__button[data-selected=true]:not(:disabled)
+  .store-modal__order-variable-selection__label {
+  border: none;
+}
+/* Underlined field, same as every other input in the drawer. The placeholder
+   ("Select an option") stays at Gray 5 and comes up to white once a size is
+   picked. */
 .store-modal__container__container [data-variable-type=select]
   .store-modal__order-variable-selection__select-label {
   width: 100%;
-  background: var(--gray-1);
-  border-radius: 20px;
-  padding: 10px 14px;
-  color: var(--ink-black);
+  background: none;
+  border-bottom: 1px solid var(--gray-6);
+  border-radius: 0;
+  padding: 0 0 15px;
+  color: var(--gray-5);
+  font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  transition: background 120ms;
+  transition: border-color 120ms, color 120ms;
   cursor: pointer;
 }
 .store-modal__container__container [data-variable-type=select]
+  .store-modal__order-variable-selection__button[data-selected=true]
+  .store-modal__order-variable-selection__select-label {
+  color: #ffffff;
+}
+.store-modal__container__container [data-variable-type=select]
   .store-modal__order-variable-selection__select-label:hover {
-  background: var(--gray-2);
+  border-bottom-color: #ffffff;
 }
 .store-modal__container__container [data-variable-type=select]
   .store-modal__order-variable-selection__select-label .icon {
   display: none;
+}
+.store-modal__container__container .store-modal__order-variable-selection__select {
+  opacity: 0;
 }
 
 /* Checkbox-type rows (non-profit): no tile styling */
@@ -724,8 +902,10 @@ input:checked + .checkbox__icon {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
   font-weight: 600;
+  color: #ffffff;
   transition: none;
 }
 .store-modal__container__container [data-variable-type=boolean]
@@ -735,7 +915,7 @@ input:checked + .checkbox__icon {
 .store-modal__container__container [data-variable-type=boolean]
   .store-modal__order-variable-selection__button[data-selected=true]:not(:disabled) {
   background: none;
-  color: var(--ink-black);
+  color: #ffffff;
 }
 
 /* Hide the square SVG checkbox icons */
@@ -756,14 +936,16 @@ input:checked + .checkbox__icon {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 6px solid var(--gray-2);
+  border: 6px solid var(--gray-5);
   background: #fff;
   box-sizing: border-box;
   transition: border-color 150ms, background 150ms;
 }
+/* On Ink Black the ring is the only thing that can carry the hover — filling
+   the white centre (the light-theme behaviour) would read as switched off. */
 [data-variable-type=boolean] .store-modal__order-variable-selection__button:hover:not([data-selected=true])
   .store-modal__order-variable-selection__label::before {
-  background: var(--gray-5);
+  border-color: var(--gray-4);
 }
 [data-variable-type=boolean] .store-modal__order-variable-selection__button[data-selected=true]
   .store-modal__order-variable-selection__label::before {
@@ -781,11 +963,12 @@ input:checked + .checkbox__icon {
 }
 .store-modal__container__container .store-modal__license-selection__license-button {
   background: none;
-  color: var(--ink-black);
+  color: #ffffff;
   border: none;
   border-radius: 0;
   padding: 4px 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -795,12 +978,12 @@ input:checked + .checkbox__icon {
 }
 .store-modal__container__container .store-modal__license-selection__license-button:hover:not(:disabled) {
   background: none;
-  color: var(--ink-black);
+  color: #ffffff;
   border-color: transparent;
 }
 .store-modal__container__container .store-modal__license-selection__license-button[data-selected=true]:not(:disabled) {
   background: none;
-  color: var(--ink-black);
+  color: #ffffff;
   border-color: transparent;
 }
 .store-modal__container__container .store-modal__license-selection__icon-pair .icon {
@@ -825,14 +1008,14 @@ input:checked + .checkbox__icon {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 6px solid var(--gray-2);
+  border: 6px solid var(--gray-5);
   background: #fff;
   box-sizing: border-box;
   transition: border-color 150ms, background 150ms;
 }
 .store-modal__container__container .store-modal__license-selection__license-button:hover:not([data-selected=true])
   .store-modal__license-selection__icon-pair::before {
-  background: var(--gray-5);
+  border-color: var(--gray-4);
 }
 .store-modal__container__container .store-modal__license-selection__license-button[data-selected=true]
   .store-modal__license-selection__icon-pair::before {
@@ -840,74 +1023,116 @@ input:checked + .checkbox__icon {
   background: #fff;
 }
 
+/* Note under the license options ("Email hello@poi.tf for companies larger…") */
+.store-modal__container__container .store-modal__license-selection__description {
+  font-size: var(--font-size-sm);
+  color: var(--gray-5);
+}
+.store-modal__container__container .store-modal__license-selection__description a {
+  color: var(--gray-5);
+  text-decoration: underline;
+}
+
 /* ── Font selector tiles (style/family/bundle buttons) ───────────────────────── */
 
+/* One style per row, full panel width — the paired two-up grid wrapped the
+   longer style names. */
 .store-modal__container__container .store-modal__family__group {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-.store-modal__container__container .store-modal__family__group .store-modal__family__style-button:only-child {
-  grid-column: 1 / -1;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 .store-modal__container__container .store-modal__family__bundle-button,
 .store-modal__container__container .store-modal__family__family-button[data-clickable=false] {
   grid-column: 1 / -1;
 }
 
-.store-modal__container__container .store-modal__family__style-button {
-  background: var(--gray-1);
-  color: var(--ink-black);
-  border: none;
-  border-radius: var(--radius-ui);
-  box-shadow: none;
-  margin: 0;
-  padding: 14px 16px;
-}
 .store-modal__container__container .store-modal__family__style-button,
 .store-modal__container__container .store-modal__family__family-button[data-clickable=true],
 .store-modal__container__container .store-modal__family__bundle-button {
-  background: var(--gray-1);
-  color: var(--ink-black);
+  background: var(--gray-7);
+  color: #ffffff;
   border: none;
   border-radius: var(--radius-ui);
   box-shadow: none;
   margin: 0;
-  padding: 14px 16px;
+  padding: 14px 20px;
 }
+/* The collection / VF tiles are two-line and sit on a taller box than the
+   single-line style rows. */
+.store-modal__container__container .store-modal__family__family-button[data-clickable=true],
+.store-modal__container__container .store-modal__family__bundle-button {
+  padding: 20px;
+}
+/* Not a tile — this is the "POI Orbiter Family" / "…VF" sub-heading that opens
+   each group, so it gets the same rule the section headings carry. */
 .store-modal__container__container .store-modal__family__family-button[data-clickable=false] {
   background: none;
-  color: var(--ink-black);
+  color: #ffffff;
   border: none;
   border-radius: 0;
   box-shadow: none;
-  margin: 0;
-  padding: 4px 0;
+  margin: 0 0 20px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid #ffffff;
 }
 .store-modal__container__container .store-modal__family__style-button[data-selected=false][data-clickable=true]:hover:not(:disabled),
 .store-modal__container__container .store-modal__family__family-button[data-selected=false][data-clickable=true]:hover:not(:disabled),
 .store-modal__container__container .store-modal__family__bundle-button[data-selected=false][data-clickable=true]:hover:not(:disabled) {
-  background: var(--gray-2);
-  color: var(--ink-black);
+  background: var(--gray-6);
+  color: #ffffff;
 }
+/* Selected inverts to the page's white — the one light surface in the drawer,
+   exactly as drawn. */
 .store-modal__container__container .store-modal__family__style-button[data-selected=true]:not(:disabled),
 .store-modal__container__container .store-modal__family__family-button[data-selected=true]:not(:disabled),
 .store-modal__container__container .store-modal__family__bundle-button[data-selected=true]:not(:disabled) {
-  background: var(--ink-black);
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--ink-black);
 }
-.store-modal__container__container .store-modal__family__family-button[data-clickable=false] .store-modal__family-button__name,
 .store-modal__container__container .store-modal__family__bundle-button .store-modal__family-button__name {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-lg);
 }
 .store-modal__container__container .store-modal__family__family-button[data-clickable=false] .store-modal__family-button__label,
 .store-modal__container__container .store-modal__family__bundle-button .store-modal__family-button__label {
   display: none;
 }
 
-/* "Aa" specimen size in tiles */
+/* Tile interior: name across the top, style count and price on the row below. */
+.store-modal__container__container .store-modal__family__family-button .store-modal__family-button__container,
+.store-modal__container__container .store-modal__family__bundle-button .store-modal__family-button__container {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 8px;
+  width: 100%;
+  text-align: left;
+}
 .store-modal__container__container .store-modal__family-button__name {
-  font-size: 24px;
+  grid-column: 1 / -1;
+}
+.store-modal__container__container .store-modal__family-button__price {
+  grid-column: 2;
+  text-align: right;
+}
+
+/* Family / collection tile name — H4 */
+.store-modal__container__container .store-modal__family-button__name {
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+}
+.store-modal__container__container .store-modal__family-button__label,
+.store-modal__container__container .store-modal__family-button__price,
+.store-modal__container__container .store-modal__style-button__style-name,
+.store-modal__container__container .store-modal__style-button__price {
+  font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
+}
+/* "Aa" specimen inside a style tile */
+.store-modal__container__container .store-modal__style-button__feature-glyphs {
+  font-size: var(--h4-size);
+  line-height: var(--h4-line);
 }
 
 /* Section spacing */
@@ -915,14 +1140,9 @@ input:checked + .checkbox__icon {
   margin-bottom: 24px;
 }
 .store-modal__container__container .store-modal__family__container {
-  gap: 6px;
+  gap: 8px;
 }
-.store-modal__container__container .store-modal__family__title {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--ink-black);
-  margin-bottom: 10px;
-}
+
 
 /* ── Checkout / add-to-cart action button ────────────────────────────────────── */
 .store-modal__container__container .store-modal__cart__buttons {
@@ -951,9 +1171,9 @@ input:checked + .checkbox__icon {
   margin-left: auto;
 }
 .store-modal__container__container .store-modal__cart__checkout-section .store-modal__cart__button:disabled {
-  background: var(--gray-2);
+  background: var(--gray-7);
   color: var(--gray-5);
-  border-color: var(--gray-2);
+  border-color: var(--gray-7);
   cursor: default;
   opacity: 1;
 }
@@ -964,17 +1184,17 @@ input:checked + .checkbox__icon {
 
 /* Cart edit button — pill */
 .store-modal__container__container .store-modal__cart__edit-button {
-  background: var(--gray-1);
-  color: var(--ink-black);
+  background: var(--gray-6);
+  color: #ffffff;
   border: none;
-  border-radius: 20px;
-  padding: 10px 14px;
+  border-radius: 100px;
+  padding: 10px 16px;
   font-size: var(--font-size-sm);
   font-weight: 600;
   transition: background 120ms;
 }
 .store-modal__container__container .store-modal__cart__edit-button:hover {
-  background: var(--gray-2);
+  background: var(--gray-5);
 }
 
 /* Hide the family button checked indicator */
@@ -985,19 +1205,21 @@ input:checked + .checkbox__icon {
 /* Coupon code and share cart toggle buttons */
 .store-modal__container__container .cart-additions__expand-button,
 .store-modal__container__container .cart__share__share-button {
-  background: var(--gray-1);
-  color: var(--ink-black);
+  background: var(--gray-6);
+  color: #ffffff;
   border: none;
-  border-radius: 20px;
-  padding: 10px 14px;
+  border-radius: 100px;
+  padding: 10px 16px;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  width: inherit;
+  /* Hug the label — fontdue's `width: inherit` stretched Share cart to the
+     full panel while the coupon toggle beside it stayed a pill. */
+  width: fit-content;
   transition: background 120ms;
 }
 .store-modal__container__container .cart-additions__expand-button:hover,
 .store-modal__container__container .cart__share__share-button:hover {
-  background: var(--gray-2);
+  background: var(--gray-5);
 }
 
 /* Coupon input + Apply button */
@@ -1005,11 +1227,11 @@ input:checked + .checkbox__icon {
   gap: 6px;
 }
 .store-modal__container__container .cart-additions__field {
-  background: var(--gray-1);
-  color: var(--ink-black);
+  background: var(--gray-7);
+  color: #ffffff;
   border: none;
-  border-radius: 20px;
-  padding: 10px 14px;
+  border-radius: 100px;
+  padding: 10px 16px;
   font-family: 'POI Orbiter', system-ui, sans-serif;
   font-size: var(--font-size-sm);
   flex: 1;
@@ -1018,17 +1240,17 @@ input:checked + .checkbox__icon {
   outline: none;
 }
 .store-modal__container__container .cart-additions__button {
-  background: var(--gray-1);
-  color: var(--ink-black);
+  background: var(--gray-6);
+  color: #ffffff;
   border: none;
-  border-radius: 20px;
-  padding: 10px 14px;
+  border-radius: 100px;
+  padding: 10px 16px;
   font-size: var(--font-size-sm);
   font-weight: 600;
   transition: background 120ms;
 }
 .store-modal__container__container .cart-additions__button:hover {
-  background: var(--gray-2);
+  background: var(--gray-5);
 }
 
 /* Share URL input + Copy + PDF buttons */
@@ -1039,11 +1261,11 @@ input:checked + .checkbox__icon {
   width: fit-content;
 }
 .store-modal__container__container .cart__share-url-input {
-  background: var(--gray-1);
-  color: var(--ink-black);
+  background: var(--gray-7);
+  color: #ffffff;
   border: none;
-  border-radius: 20px;
-  padding: 10px 14px;
+  border-radius: 100px;
+  padding: 10px 16px;
   font-family: 'POI Orbiter', system-ui, sans-serif;
   font-size: var(--font-size-sm);
   flex: 1;
@@ -1053,11 +1275,11 @@ input:checked + .checkbox__icon {
 }
 .store-modal__container__container .cart__share__copy-button,
 .store-modal__container__container .cart__share__pdf-button {
-  background: var(--gray-1);
-  color: var(--ink-black);
+  background: var(--gray-6);
+  color: #ffffff;
   border: none;
-  border-radius: 20px;
-  padding: 10px 14px;
+  border-radius: 100px;
+  padding: 10px 16px;
   font-size: var(--font-size-sm);
   font-weight: 600;
   transition: background 120ms;
@@ -1065,33 +1287,47 @@ input:checked + .checkbox__icon {
 }
 .store-modal__container__container .cart__share__copy-button:hover,
 .store-modal__container__container .cart__share__pdf-button:hover {
-  background: var(--gray-2);
+  background: var(--gray-5);
 }
 
-/* Contact info text inputs (Name, Email) */
-.store-modal__container__container .text-field__label-wrapper,
-.store-modal__container__container .text-field__label {
-  color: var(--ink-black);
+/* Text fields (contact + the client licensee form). Underlined rather than
+   filled: a Gray 4 label above, a transparent field, and a Gray 6 rule under
+   it. The label carries the field name, so the placeholder is suppressed
+   rather than doubling it. The Stripe address element in the same form is
+   given a matching look through STRIPE_APPEARANCE in App.jsx — it renders in
+   a cross-origin iframe, so no rule here can reach it. */
+.store-modal__container__container .text-field__label-wrapper {
+  display: block;
+  font-size: var(--font-size-lg);
+  line-height: 1.25;
+  letter-spacing: var(--h5-tracking);
+  color: var(--gray-4);
 }
 .store-modal__container__container .text-field__input-wrapper {
   margin-top: 6px;
 }
 .store-modal__container__container .checkout-modal__section {
-  margin-bottom: 10px;
+  margin-bottom: 18px;
 }
 .store-modal__container__container .text-field__input {
-  background: var(--gray-1);
+  background: none;
   border: none;
-  border-radius: 20px;
-  padding: 10px 14px;
+  border-bottom: 1px solid var(--gray-6);
+  border-radius: 0;
+  padding: 0 0 15px;
   font-family: 'POI Orbiter', system-ui, sans-serif;
-  font-size: var(--font-size-sm);
-  color: var(--ink-black);
+  font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
+  color: #ffffff;
   width: 100%;
+}
+.store-modal__container__container .text-field__input::placeholder {
+  color: transparent;
 }
 .store-modal__container__container .text-field__input:focus {
   outline: none;
   box-shadow: none;
+  border-bottom-color: #ffffff;
 }
 
 /* ── Select dropdown ─────────────────────────────────────────────────────────── */
@@ -1100,18 +1336,74 @@ input:checked + .checkbox__icon {
   font-family: 'POI Orbiter', system-ui, -apple-system, sans-serif;
 }
 
-/* ── Collection index items (All collections view) ───────────────────────────── */
+/* ── Collection index items (All collections view) ─────────────────────────────
+   Tiles are gone: each collection is a full-bleed row between white hairlines,
+   with an oversized specimen at left. The specimen tracks the same fluid ratio
+   as the heading scale (89px on the 1700px frame the design is drawn at). */
 .store-modal__container__container .store-modal__index-item__button {
   border: none;
-  padding: 14px 16px;
-  border-radius: var(--radius-ui);
-  background: var(--gray-1);
+  border-bottom: 1px solid #ffffff;
+  padding: 32px 0;
+  border-radius: 0;
+  background: none;
+  color: #ffffff;
+  width: 100%;
   margin-top: 0;
-  margin-bottom: 12px;
+  margin-bottom: 0;
+  /* Own the row layout outright: fontdue hands the button a `subgrid`, which
+     only resolves while its parent happens to be a grid — below 580px the
+     parent is a block and the specimen collapsed onto the name. The specimen
+     column tracks the design's 140px-at-1700 gutter. */
+  display: grid;
+  grid-template-columns: clamp(84px, 8.24vw, 140px) 1fr;
+  align-items: center;
+  text-align: left;
 }
-
+/* fontdue drops this wrapper out of the layout above 580px but not below it,
+   which put the whole row into one grid cell on mobile. */
+.store-modal__container__container .store-modal__index-item__text-container {
+  display: contents;
+}
+.store-modal__container__container .store-modal__index-item__aa {
+  grid-area: 1 / 1;
+}
+.store-modal__container__container .store-modal__index-item__description {
+  grid-area: 1 / 2;
+}
+.store-modal__container__container .store-modal__index-item__button:first-child {
+  border-top: 1px solid #ffffff;
+}
+/* No tile left to tint, so the row's text dims the way the site's nav links
+   do. The dim is on the contents, not the button, so the hairline holds. */
 .store-modal__container__container .store-modal__index-item__button:hover {
-  background: var(--gray-2);
+  background: none;
+}
+.store-modal__container__container .store-modal__index-item__aa,
+.store-modal__container__container .store-modal__index-item__description {
+  transition: opacity 120ms;
+}
+.store-modal__container__container .store-modal__index-item__button:hover .store-modal__index-item__aa,
+.store-modal__container__container .store-modal__index-item__button:hover .store-modal__index-item__description {
+  opacity: 0.6;
+}
+.store-modal__container__container .store-modal__index-item__aa {
+  font-size: clamp(48px, 5.24vw, 89px);
+  line-height: 0.5;
+}
+.store-modal__container__container .store-modal__index-item__name,
+.store-modal__container__container .store-modal__index-item__label {
+  font-family: var(--font-ui);
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  font-variation-settings: 'wght' var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+}
+.store-modal__container__container .store-modal__index-item__name {
+  color: #ffffff;
+}
+.store-modal__container__container .store-modal__index-item__label {
+  color: var(--gray-5);
 }
 
 .store-modal__container__container .store-modal__index-item__buy {
@@ -1183,7 +1475,7 @@ input:checked + .checkbox__icon {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 6px solid var(--gray-2);
+  border: 6px solid var(--gray-5);
   background: #fff;
   box-sizing: border-box;
   transition: border-color 150ms, background 150ms;
@@ -1194,8 +1486,8 @@ input:checked + .checkbox__icon {
 }
 /* Override merchant-injected hover — apply correct circle hover on full row */
 .store-modal__container__container .checkout-modal__checkbox-field:hover .checkbox input:not(:checked) {
-  border-color: var(--gray-2);
-  background: var(--gray-5);
+  border-color: var(--gray-4);
+  background: #fff;
 }
 .store-modal__container__container .checkbox__icon,
 .store-modal__container__container .checkbox:hover .checkbox__icon {
@@ -1209,11 +1501,11 @@ input:checked + .checkbox__icon {
   display: none;
 }
 .store-modal__container__container .store-modal__container__cart-button {
-  background: var(--ink-black);
+  background: var(--gray-6);
   color: #fff;
   border: none;
   border-radius: 100px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   cursor: pointer;
   transition: background 120ms;
 }
@@ -1264,7 +1556,7 @@ body[data-fontdue-store-modal=open] {
   border: none;
 }
 .store-modal__container__container .store-modal__product-summary__add-to-cart-button:disabled {
-  background: var(--gray-2);
+  background: var(--gray-7);
   color: var(--gray-5);
   opacity: 1;
   cursor: default;
@@ -1275,10 +1567,13 @@ body[data-fontdue-store-modal=open] {
 }
 
 .store-modal__container__container .store-modal__product-summary__selection-text {
-  background: white;
-  border-radius: 999px;
-  padding: 8px 14px;
-  line-height: 1;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  color: #ffffff;
+  font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
+  line-height: 1.25;
 }
 
 .store-modal__container__container .store-modal__style-button__checked {
@@ -1449,7 +1744,7 @@ body[data-page-phase=exiting] .trial-modal__overlay::before {
 
 /* The form fields are sized to 150% for the narrow 2-col Trials page grid;
    inside the drawer they should be narrower than the panel. */
-.trial-modal__body .form-field {
+.trial-modal__body .form-field-label {
   width: 75%;
 }
 

@@ -64,24 +64,30 @@ export default function Newsletter() {
             <form onSubmit={handleSubmit}>
               <p className="page-text">Stay informed on new releases and updates.</p>
 
-              <input
-                className="form-field"
-                type="text"
-                placeholder="Your name"
-                autoComplete="name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-              />
-              <input
-                className="form-field"
-                type="email"
-                placeholder="Your email"
-                autoComplete="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-              />
+              <label className="form-field-label">
+                Name
+                <input
+                  className="form-field"
+                  type="text"
+                  placeholder="Your name"
+                  autoComplete="name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  required
+                />
+              </label>
+              <label className="form-field-label">
+                Email
+                <input
+                  className="form-field"
+                  type="email"
+                  placeholder="Your email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                />
+              </label>
 
               <label className="form-toggle" onClick={() => setOptIn(v => !v)}>
                 <span className={`form-toggle-dot${optIn ? ' checked' : ''}`} />
