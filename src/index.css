@@ -2489,14 +2489,26 @@ body[data-page-phase=entering] .footer {
   /* Grow the dropdown so the expanded submenu isn't clipped by nav-links */
   .nav--open .nav-links:has(.nav-item--submenu-open) { max-height: calc(700px + var(--safe-top)); }
 
-  /* ── Footer → copyright above a wrapping link row ── */
+  /* The open dropdown is itself the overlay here, so the page behind it gets
+     the same tint a submenu triggers on desktop — the base rule only keys off
+     an open submenu, which left the bare menu with no dimming at all. Scoped
+     to this breakpoint because .nav--open is the hamburger's state. */
+  .nav--open::after {
+    opacity: 1;
+  }
+
+  /* ── Footer → copyright and links share one left-aligned row ── */
   .footer-bottom {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    gap: 20px;
   }
   .footer-copy { flex: none; }
-  .footer-links { flex-wrap: wrap; gap: 20px; }
+  .footer-links {
+    flex-wrap: wrap;
+    gap: 20px;
+    /* Drop the desktop auto margin so the links follow the copyright instead
+       of being pushed to the content's right edge. */
+    margin-left: 0;
+  }
 
   /* ── Font detail → stacked header ── */
   .font-detail-header { grid-template-columns: 1fr; }
@@ -2564,6 +2576,13 @@ body[data-page-phase=entering] .footer {
      pitch formula above assumes the two-column split. Plain spacing instead. */
   .glyph-overview__group {
     margin-bottom: 40px;
+  }
+
+  /* Stacked, the style pills sit directly on the first category with only the
+     grid's row gap between them. Open that seam to the same 40px the groups
+     keep between themselves (30px here plus the 10px row gap). */
+  .glyph-overview__preview-col {
+    margin-bottom: 30px;
   }
 
   /* ── Type tester controls → stack ── */

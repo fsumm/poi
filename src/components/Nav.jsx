@@ -150,19 +150,27 @@ export default function Nav() {
     }
   }, [openId])
 
+  // Dismiss on outside press or Escape. This runs for the mobile dropdown as
+  // well as an open submenu, and closes BOTH — dismissing the submenu while
+  // leaving the menu itself open reads as the gesture having failed. touchstart
+  // alongside mousedown so a tap dismisses on contact rather than waiting for
+  // the browser's synthesised mouse event; close() is idempotent, so the pair
+  // firing for one tap is harmless.
   useEffect(() => {
-    if (!openId) return
+    if (!menuOpen && !openId) return
     const onDocPointer = (e) => {
-      if (navRef.current && !navRef.current.contains(e.target)) setOpenId(null)
+      if (navRef.current && !navRef.current.contains(e.target)) close()
     }
-    const onKey = (e) => { if (e.key === 'Escape') setOpenId(null) }
+    const onKey = (e) => { if (e.key === 'Escape') close() }
     document.addEventListener('mousedown', onDocPointer)
+    document.addEventListener('touchstart', onDocPointer)
     document.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('mousedown', onDocPointer)
+      document.removeEventListener('touchstart', onDocPointer)
       document.removeEventListener('keydown', onKey)
     }
-  }, [openId])
+  }, [menuOpen, openId])
 
   return (
     <nav ref={navRef} className={`nav${menuOpen ? ' nav--open' : ''}`}>
