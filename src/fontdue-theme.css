@@ -1683,7 +1683,7 @@ body[data-fontdue-store-modal=open] {
   right: var(--cart-gutter);
   width: var(--cart-panel-w);
   pointer-events: none;
-  background-color: #fff;
+  background-color: var(--yellow);
   animation: slideIn 300ms forwards;
 }
 .trial-modal__overlay:has(.trial-modal__panel[data-closing])::before {
@@ -1750,7 +1750,7 @@ body[data-page-phase=exiting] .trial-modal__overlay::before {
   margin-bottom: 20px;
   position: sticky;
   top: 0;
-  background: #fff;
+  background: var(--yellow);
   z-index: 10;
 }
 
@@ -1805,6 +1805,48 @@ body[data-page-phase=exiting] .trial-modal__overlay::before {
 .trial-modal__body .trial-form__text,
 .trial-modal__body .form-field-label {
   width: 100%;
+}
+
+/* ── Yellow-ground palette ──
+   Only this drawer runs on Yellow; the /trials page keeps the light palette,
+   so every rule below is scoped to the modal body. Several of them restate a
+   :hover or :focus that index.css sets at the same specificity — without the
+   scoped copy the plain-state override would win on source order and kill the
+   interaction. */
+
+/* Input rules sit at Gray 5 against the Yellow, still Ink Black on focus. */
+.trial-modal__body .form-field {
+  border-bottom-color: var(--gray-5);
+}
+.trial-modal__body .form-field:focus {
+  border-bottom-color: var(--ink-black);
+}
+
+/* "View EULA" — white pill, Gray 1 on hover. */
+.trial-modal__body .pill-link {
+  background: #ffffff;
+  color: var(--ink-black);
+}
+.trial-modal__body .pill-link:hover {
+  background: var(--gray-1);
+  color: var(--ink-black);
+}
+
+/* Toggle dials: Gray 4 ring, Gray 7 fill on hover. The checked ring stays
+   POI Blue, so the plain-state rule excludes it. */
+.trial-modal__body .form-toggle-dot:not(.checked) {
+  border-color: var(--gray-4);
+}
+.trial-modal__body .form-toggle:hover .form-toggle-dot:not(.checked) {
+  background: var(--gray-7);
+}
+
+/* "Download trial fonts" — unchanged at rest; hover goes Blue rather than
+   Yellow, which would vanish into the panel. White label rather than the
+   light theme's Ink Black: on POI Blue that only reaches ~3.3:1. */
+.trial-modal__body .btn:not(:disabled):hover {
+  background: var(--poi-blue);
+  color: #ffffff;
 }
 
 /* ── Enter fade ── */
