@@ -408,6 +408,7 @@ input:checked + .checkbox__icon {
 .store-modal__container__container .store-modal__license-selection__title,
 .store-modal__container__container .store-modal__order-variable-selection__title,
 .store-modal__container__container .store-modal__family__title,
+.store-modal__container__container .empty-cart__message,
 .store-modal__container__container .store-modal__cart__items::before,
 .store-modal__container__container .store-modal__cart__checkout-section[data-editing]::before {
   display: block;
@@ -527,29 +528,32 @@ input:checked + .checkbox__icon {
 }
 
 /* Empty cart page */
+/* fontdue insets this block 40px vertically and our theme used to add --pad
+   horizontally; both are dropped so the message opens the page at exactly the
+   same spot a section heading does on every other route
+   (.store-modal__container__body already holds --pad). */
 .store-modal__container__container .empty-cart__container {
-  padding-left: var(--pad);
-  padding-right: var(--pad);
+  padding: 0;
 }
-.store-modal__container__container .empty-cart__message {
-  font-size: var(--font-size-lg);
-  margin-bottom: 20px;
-}
+/* "Continue shopping" — same Gray 6 pill as the drawer's other secondary
+   actions, at the H5 step. */
 .store-modal__container__container .empty-cart__container .button {
   background: var(--gray-6);
   color: #ffffff;
   border: none;
-  border-radius: 999px;
-  padding: 8px 16px;
-  font-family: 'POI Orbiter', system-ui, sans-serif;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  border-radius: 100px;
+  padding: 10px 16px;
+  font-family: var(--font-ui);
+  font-size: var(--h5-size);
+  font-weight: var(--h5-weight);
+  font-variation-settings: 'wght' var(--h5-weight);
+  line-height: var(--h5-line);
+  letter-spacing: var(--h5-tracking);
   cursor: pointer;
-  transition: background 120ms, color 120ms;
+  transition: background 120ms;
 }
 .store-modal__container__container .empty-cart__container .button:hover {
-  background: var(--yellow);
-  color: var(--ink-black);
+  background: var(--gray-5);
 }
 
 /* Collapse the side-by-side cart layout */
@@ -682,11 +686,13 @@ input:checked + .checkbox__icon {
 }
 
 /* Cart item license delete button — radio circle style, red */
+.store-modal__container__container .cart-item__license__delete-button .icon {
+  display: none;
+}
 .store-modal__container__container .cart-item__license {
   gap: 6px;
 }
 .store-modal__container__container .cart-item__license__delete-button {
-  position: relative;
   background: none;
   border: none;
   padding: 0;
@@ -694,50 +700,6 @@ input:checked + .checkbox__icon {
   height: 20px;
   flex-shrink: 0;
   cursor: pointer;
-}
-
-/* "Remove" tooltip on hover — the same chip the contact page hangs over the
-   email address (.copy-email-tip in index.css). fontdue gives us no element to
-   hang it on, so the button's own icon span is repurposed: its glyph is
-   dropped and the label and arrow come from its pseudo-elements. */
-.store-modal__container__container .cart-item__license__delete-button .icon svg {
-  display: none;
-}
-.store-modal__container__container .cart-item__license__delete-button .icon {
-  font-size: var(--font-size-sm);
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: var(--gray-1);
-  color: var(--ink-black);
-  font-weight: 600;
-  line-height: 1.25;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.12s;
-}
-.store-modal__container__container .cart-item__license__delete-button .icon::before {
-  content: 'Remove';
-}
-.store-modal__container__container .cart-item__license__delete-button .icon::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: var(--gray-1);
-}
-/* fontdue already flags the row while the delete button is hovered; keying off
-   that as well as :hover keeps the chip up through the re-render that flag
-   triggers. */
-.store-modal__container__container .cart-item__license__delete-button:hover .icon,
-.store-modal__container__container .cart-item__license[data-close-button-hovered=true] .icon {
-  opacity: 1;
 }
 .store-modal__container__container .cart-item__license__delete-button::before {
   content: '';
@@ -860,6 +822,7 @@ input:checked + .checkbox__icon {
   font-size: var(--font-size-lg);
   font-weight: 600;
   letter-spacing: var(--h5-tracking);
+  line-height: var(--h5-line);
   width: auto;
   display: inline-flex;
   align-items: center;
@@ -1218,14 +1181,20 @@ input:checked + .checkbox__icon {
   display: flex;
   justify-content: flex-end;
 }
+/* "Continue" / "Checkout" — same pill metrics as the Licensee buttons
+   (10px 16px at the H5 step), in POI Blue. */
 .store-modal__container__container .store-modal__cart__button {
   border-radius: 100px;
   font-weight: 600;
   background: var(--poi-blue);
   color: #ffffff;
-  border-color: var(--poi-blue);
-  padding: 8px 20px;
+  /* No border: fontdue's 1px would make this pill 2px taller than the
+     Licensee buttons, which carry none. */
+  border: none;
+  padding: 10px 16px;
   font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
+  line-height: var(--h5-line);
   width: auto;
 }
 .store-modal__container__container .store-modal__cart__button:hover:not(:disabled) {
@@ -1479,8 +1448,9 @@ input:checked + .checkbox__icon {
   background: var(--poi-blue);
   color: #ffffff;
   border-radius: 100px;
-  padding: 8px 20px;
+  padding: 10px 16px;
   font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
   font-weight: 600;
   white-space: nowrap;
   transition: background 120ms, color 120ms;
@@ -1610,13 +1580,15 @@ body[data-fontdue-store-modal=open] {
   overscroll-behavior: none;
 }
 
-/* Add-to-cart button — matches index buy button style */
+/* "Add to cart" — same pill metrics as the Licensee buttons. */
 .store-modal__container__container .store-modal__product-summary__add-to-cart-button {
   background: var(--poi-blue);
   color: #ffffff;
   border-radius: 100px;
-  padding: 8px 20px;
+  padding: 10px 16px;
   font-size: var(--font-size-lg);
+  letter-spacing: var(--h5-tracking);
+  line-height: var(--h5-line);
   font-weight: 600;
   border: none;
   width: auto;
