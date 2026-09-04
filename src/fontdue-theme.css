@@ -1780,16 +1780,31 @@ body[data-page-phase=exiting] .trial-modal__overlay::before {
   padding: 0 var(--pad) var(--pad);
 }
 
-/* Text above the form: wider type, constrained to half the panel width. */
-.trial-modal__body .page-text {
+/* "Trials" carries the same H3-plus-rule treatment as every cart modal
+   section heading; on the light panel the rule is Ink Black rather than white. */
+.trial-modal__body .page-section-label {
+  font-size: var(--h3-size);
+  font-weight: var(--h3-weight);
+  font-variation-settings: 'wght' var(--h3-weight);
+  line-height: var(--h3-line);
+  letter-spacing: var(--h3-tracking);
+  padding: 0 0 16px;
+  margin: 0 0 20px;
+  border-bottom: 1px solid var(--ink-black);
+}
+
+/* The post-submit message only (a direct child of the body) — the form's own
+   lead-in is .trial-form__text, sized at H4 in index.css. */
+.trial-modal__body > .page-text {
   max-width: 50%;
   font-size: var(--font-size-lg);
 }
 
-/* The form fields are sized to 150% for the narrow 2-col Trials page grid;
-   inside the drawer they should be narrower than the panel. */
+/* The lead-in and the fields span the panel; the drawer is already the
+   4-column measure the page grid gives them. */
+.trial-modal__body .trial-form__text,
 .trial-modal__body .form-field-label {
-  width: 75%;
+  width: 100%;
 }
 
 /* ── Enter fade ── */

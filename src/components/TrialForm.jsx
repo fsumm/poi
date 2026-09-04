@@ -67,9 +67,9 @@ export default function TrialForm({ heading = true }) {
           <a href={`${STORE_URL}/test-fonts/archive`}>Click here</a> if it didn't.
         </p>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form className="trial-form" onSubmit={handleSubmit}>
           {heading && <h2 className="page-section-label">Trials</h2>}
-          <p className="page-text">
+          <p className="page-text trial-form__text">
             Trial fonts include the complete character set and all OpenType
             features. Intended for client pitches, personal projects, and student work.
           </p>

@@ -846,12 +846,14 @@ body[data-trial-modal='open'] .nav::after {
   margin-bottom: 12px;
 }
 
-/* .form-field-label's 150% width is tuned for the two-column body it was built
-   in. Inside a band column that resolves far too wide, so pin it to the width
-   it used to render at. Scoped to .doc, leaving /contact's original layout
-   alone. */
-.doc .form-field-label {
-  width: 400px;
+/* The .doc forms (trials, newsletter) span 4 grid columns — both the inputs
+   and the trial form's lead-in. .col-main is 6 of the 12 columns, and 4 of
+   those columns work out to two-thirds of it less a third of a gutter — exact
+   at any viewport. .form-field-label's own 150% is tuned for the two-column
+   body it was built in, which resolves far too wide inside a band column. */
+.doc .form-field-label,
+.doc .trial-form__text {
+  width: calc(66.6667% - var(--gap) / 3);
   max-width: 100%;
 }
 
@@ -1215,6 +1217,15 @@ body[data-trial-modal='open'] .nav::after {
   margin-bottom: 24px;
 }
 
+/* The trial form's lead-in reads at the H4 step, on the page and in the modal. */
+.trial-form__text {
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  font-variation-settings: 'wght' var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
+}
+
 /* Legacy alias kept for backwards-compat */
 .page-img {
   background: var(--gray-2);
@@ -1476,7 +1487,7 @@ body[data-trial-modal='open'] .nav::after {
 }
 
 .form-actions {
-  margin-top: 8px;
+  margin-top: 18px;
 }
 
 /* ─── Fontdue sections ───────────────────────────────────────────────────── */
@@ -2239,6 +2250,12 @@ body[data-page-phase=entering] .footer {
   .legal-page,
   .glyph-overview__body {
     grid-template-columns: repeat(8, 1fr);
+  }
+
+  /* .col-main is itself 4 columns from here down, so the forms fill it. */
+  .doc .form-field-label,
+  .doc .trial-form__text {
+    width: 100%;
   }
 
   /* ── Editorial bands → 8 columns ──

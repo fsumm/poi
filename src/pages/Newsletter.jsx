@@ -62,8 +62,6 @@ export default function Newsletter() {
             <p className="page-text">You're subscribed. Thanks!</p>
           ) : (
             <form onSubmit={handleSubmit}>
-              <p className="page-text">Stay informed on new releases and updates.</p>
-
               <label className="form-field-label">
                 Name
                 <input
@@ -89,7 +87,7 @@ export default function Newsletter() {
 
               <label className="form-toggle" onClick={() => setOptIn(v => !v)}>
                 <span className={`form-toggle-dot${optIn ? ' checked' : ''}`} />
-                Subscribe
+                Subscribe to the newsletter
               </label>
 
               {error && <p className="form-error">{error}</p>}
