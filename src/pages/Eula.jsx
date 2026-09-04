@@ -2,7 +2,6 @@ export default function Eula() {
   return (
     <div className="page legal-page">
       <div className="legal-body">
-        <h2 className="legal-eyebrow h5">License</h2>
         <h1 className="legal-title h2">End User License Agreement</h1>
         <p className="legal-meta">
           Version 1.003 · Last updated 06/22/2026 · Copyright 2026 Place of
@@ -70,7 +69,7 @@ export default function Eula() {
 
         <h2 className="legal-heading">Trial License</h2>
         <p className="legal-text">
-          A Trail License permits you to use Trial versions of the Font Software ("Trial Font
+          A Trial License permits you to use Trial versions of the Font Software ("Trial Font
           Software") in OTF or TTF format for preview and evaluation purposes and for personal
           use. The Trial Font Software includes the full character set and features.
         </p>

@@ -507,6 +507,14 @@ input:checked + .checkbox__icon {
   color: var(--gray-4);
 }
 
+/* "Continue shopping" on the empty cart pushes history rather than popping it,
+   so the catalog index it lands on carries a back button pointing at the cart
+   the user just emptied. The index is the modal's top level and reaches this
+   state by no other route, so the control is hidden there. */
+[data-route=index] .store-modal__container__container .store-modal__container__back-button {
+  visibility: hidden;
+}
+
 /* On the checkout page fontdue labels the back button "Cart", which collides
    with the fixed Cart toggle on the right. The label is a bare text node, so
    it's collapsed to zero and replaced wholesale. */

@@ -25,6 +25,7 @@ const NAV_SELECTORS = [
   '.store-modal__container__cart-button',              // Items in cart
   '.store-modal__product-summary__add-to-cart-button', // Add to cart
   '.store-modal__cart__button',                        // Continue → checkout
+  '.empty-cart__container .button',                    // Continue shopping
 ].join(', ')
 
 // Fade the nav chrome (back button, title, items-in-cart) back in after a page

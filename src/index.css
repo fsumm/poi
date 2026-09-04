@@ -672,7 +672,13 @@ body[data-trial-modal='open'] .nav::after {
 .band--open {
   border-top: none;
   padding-top: 0;
-  padding-bottom: 15px;
+  padding-bottom: 30px;
+}
+
+/* The landing page's masthead is the wordmark — a decorative block rather than
+   a page title, so it sits tighter to the rule than the other pages' H1s. */
+.band--open:has(.wordmark) {
+  padding-bottom: 10px;
 }
 
 .row {
@@ -1238,7 +1244,7 @@ body[data-trial-modal='open'] .nav::after {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: var(--gap);
-  margin-bottom: 64px;
+  margin-bottom: 200px;
 }
 
 /* Text occupies 6 of the 12 desktop columns (and 6 of 8 on tablet). */
@@ -1246,16 +1252,26 @@ body[data-trial-modal='open'] .nav::after {
   grid-column: 1 / 7;
 }
 
-/* Eyebrow above the document title, naming the section it belongs to. */
-.legal-eyebrow {
-  margin-bottom: 12px;
-}
-
 /* Document title (EULA / Privacy). H2 rather than H1: these are reference
    documents that sit below the site's page titles in the hierarchy, and the
    H1 step would swamp a wall of 12px legal body copy. */
 .legal-title {
-  margin: 0 0 4px;
+  margin: 0 0 20px;
+}
+
+/* Rules under the document title and each section head span all 12 columns,
+   while the copy stays in .legal-body's 6. Drawn as a pseudo-element so the
+   markup keeps its single column: .legal-body is 6 of the grid's 12 columns
+   and starts at column 1, so the full width is twice its own plus the gutter
+   it swallows — landing exactly on the grid's right edge. */
+.legal-title::after,
+.legal-heading::after {
+  content: '';
+  display: block;
+  width: calc(200% + var(--gap));
+  height: 1px;
+  background: var(--ink-black);
+  margin-top: 16px;
 }
 
 /* The date/version line directly under the title */
@@ -1268,14 +1284,14 @@ body[data-trial-modal='open'] .nav::after {
 }
 
 .legal-heading {
-  font-size: var(--h4-size);
-  font-weight: var(--h4-weight);
-  font-variation-settings: 'wght' var(--h4-weight);
-  line-height: var(--h4-line);
-  letter-spacing: var(--h4-tracking);
+  font-size: var(--h3-size);
+  font-weight: var(--h3-weight);
+  font-variation-settings: 'wght' var(--h3-weight);
+  line-height: var(--h3-line);
+  letter-spacing: var(--h3-tracking);
   color: var(--ink-black);
-  margin-top: 32px;
-  margin-bottom: 12px;
+  margin-top: 80px;
+  margin-bottom: 20px;
 }
 
 .legal-heading:first-child {
@@ -1283,20 +1299,22 @@ body[data-trial-modal='open'] .nav::after {
 }
 
 .legal-text {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  line-height: 16px;
+  font-size: var(--h4-size);
+  font-weight: var(--h4-weight);
+  font-variation-settings: 'wght' var(--h4-weight);
+  line-height: var(--h4-line);
+  letter-spacing: var(--h4-tracking);
   color: #171716;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .legal-list {
-  margin-bottom: 12px;
-  padding-left: 18px;
+  margin-bottom: 20px;
+  padding-left: 24px;
 }
 
 .legal-list .legal-text {
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 /* ─── Buttons ────────────────────────────────────────────────────────────── */
@@ -2252,6 +2270,12 @@ body[data-page-phase=entering] .footer {
     grid-template-columns: repeat(8, 1fr);
   }
 
+  /* 8-column grid, .legal-body still 6 of them. */
+  .legal-title::after,
+  .legal-heading::after {
+    width: calc(133.3333% + var(--gap) / 3);
+  }
+
   /* .col-main is itself 4 columns from here down, so the forms fill it. */
   .doc .form-field-label,
   .doc .trial-form__text {
@@ -2275,8 +2299,10 @@ body[data-page-phase=entering] .footer {
   .work-grid > *,
   .faq { grid-column: span 2; }
 
-  /* Bands lose some of their desktop air as the page narrows. */
-  .band { padding-bottom: 120px; }
+  /* Bands lose some of their desktop air as the page narrows. The masthead
+     owns its spacing at every breakpoint, so it opts out (it sits earlier in
+     the file at equal specificity, and would otherwise lose on source order). */
+  .band:not(.band--open) { padding-bottom: 120px; }
   .band-outro { margin-top: 140px; }
 
   /* Header keeps the name/description split, halved to 4 + 4 columns. */
@@ -2309,6 +2335,12 @@ body[data-page-phase=entering] .footer {
     grid-template-columns: repeat(4, 1fr);
   }
 
+  /* .legal-body fills the 4-column row, so the rules match its own width. */
+  .legal-title::after,
+  .legal-heading::after {
+    width: 100%;
+  }
+
   /* ── Editorial bands → single column ──
      Every span goes full width and stacks; the statement/body pairing becomes
      a heading above its copy. */
@@ -2328,7 +2360,7 @@ body[data-page-phase=entering] .footer {
 
   .work-grid { row-gap: 40px; margin-top: 60px; }
 
-  .band { padding-top: 20px; padding-bottom: 70px; }
+  .band:not(.band--open) { padding-top: 20px; padding-bottom: 70px; }
   .band-outro { margin-top: 70px; }
   .band-actions { margin-top: 32px; }
   .catalog-note { margin-top: 48px; }
