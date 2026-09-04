@@ -69,7 +69,6 @@ export default function Newsletter() {
                 <input
                   className="form-field"
                   type="text"
-                  placeholder="Your name"
                   autoComplete="name"
                   value={name}
                   onChange={e => setName(e.target.value)}
@@ -81,7 +80,6 @@ export default function Newsletter() {
                 <input
                   className="form-field"
                   type="email"
-                  placeholder="Your email"
                   autoComplete="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}

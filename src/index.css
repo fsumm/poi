@@ -1337,8 +1337,8 @@ body[data-trial-modal='open'] .nav::after {
   left: 50%;
   padding: 8px 16px;
   border-radius: 8px;
-  background: var(--gray-2);
-  color: var(--gray-5);
+  background: var(--gray-1);
+  color: var(--ink-black);
   font-weight: 600;
   white-space: nowrap;
   opacity: 0;
@@ -1354,7 +1354,7 @@ body[data-trial-modal='open'] .nav::after {
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: var(--gray-2);
+  border-top-color: var(--gray-1);
   transition: border-top-color 0.12s;
 }
 
@@ -1380,7 +1380,8 @@ body[data-trial-modal='open'] .nav::after {
    the body width works out to 1.5·body + 0.5·gap — exact at any viewport. */
 /* The label wraps its input, so it carries the 3-column width the field used
    to hold on its own. Same underlined field as the cart drawer, in the light
-   palette: Ink Black label, Gray 3 placeholder, Gray 3 rule. */
+   palette: Ink Black label, Gray 3 rule. The label names the field, so the
+   inputs carry no placeholder. */
 .form-field-label {
   display: block;
   width: calc(150% + var(--gap) / 2);
@@ -1395,8 +1396,8 @@ body[data-trial-modal='open'] .nav::after {
 .form-field {
   display: block;
   width: 100%;
-  margin-top: 6px;
-  padding: 0 0 15px;
+  margin-top: 14px;
+  padding: 0 0 7px;
   border: none;
   border-bottom: 1px solid var(--gray-3);
   border-radius: 0;
@@ -1407,11 +1408,6 @@ body[data-trial-modal='open'] .nav::after {
   color: var(--ink-black);
   outline: none;
   transition: border-color 120ms;
-}
-
-.form-field::placeholder {
-  color: var(--gray-3);
-  opacity: 1;
 }
 
 .form-field:focus {

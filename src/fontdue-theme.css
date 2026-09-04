@@ -426,6 +426,10 @@ input:checked + .checkbox__icon {
 }
 .store-modal__container__container .store-modal__cart__items::before {
   content: 'Order summary';
+  /* This rule doubles as the first line item's top divider, so it butts
+     straight up against it — the item's own padding sets the gap, exactly as
+     it does for every divider below. */
+  margin-bottom: 0;
 }
 .store-modal__container__container .store-modal__cart__checkout-section[data-editing]::before {
   content: 'Contact';
@@ -438,6 +442,9 @@ input:checked + .checkbox__icon {
   grid-template-columns: 1fr auto;
   align-items: start;
   column-gap: 20px;
+  /* The section inherits a 20px gap from fontdue; as a grid that would stack on
+     top of the heading's own margin and open a double gap under the rule. */
+  row-gap: 0;
 }
 .store-modal__container__container .store-modal__cart__checkout-section[data-editing=false]::before {
   grid-column: 1 / -1;
@@ -572,7 +579,7 @@ input:checked + .checkbox__icon {
     border-top: 1px solid #ffffff;
   }
   .store-modal__container__container .cart-item__name {
-    margin-top: 20px;
+    margin-top: 0;
   }
   .store-modal__container__container .cart-item > div:has(> .cart-item__licenses) {
     grid-column: 1 / -1;
@@ -612,6 +619,12 @@ input:checked + .checkbox__icon {
   padding-top: 20px;
   padding-bottom: 20px;
 }
+/* fontdue opens the row with a 30px margin on the name to bait a baseline in
+   its own two-column layout; here it just doubled the gap above every item and
+   left the gap below looking tight by comparison. The row padding owns both. */
+.store-modal__container__container .cart-item__name {
+  margin-top: 0;
+}
 .store-modal__container__container .cart-item__name,
 .store-modal__container__container .cart-item__price,
 .store-modal__container__container .cart__price-block__label,
@@ -648,13 +661,11 @@ input:checked + .checkbox__icon {
 }
 
 /* Cart item license delete button — radio circle style, red */
-.store-modal__container__container .cart-item__license__delete-button .icon {
-  display: none;
-}
 .store-modal__container__container .cart-item__license {
   gap: 6px;
 }
 .store-modal__container__container .cart-item__license__delete-button {
+  position: relative;
   background: none;
   border: none;
   padding: 0;
@@ -662,6 +673,52 @@ input:checked + .checkbox__icon {
   height: 20px;
   flex-shrink: 0;
   cursor: pointer;
+}
+
+/* "Remove" tooltip on hover — the same chip the contact page hangs over the
+   email address (.copy-email-tip in index.css). fontdue gives us no element to
+   hang it on, so the button's own icon span is repurposed: its glyph is
+   dropped and the label and arrow come from its pseudo-elements. */
+.store-modal__container__container .cart-item__license__delete-button .icon svg {
+  display: none;
+}
+.store-modal__container__container .cart-item__license__delete-button .icon {
+  font-size: var(--font-size-sm);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  /* Left-aligned to the button rather than centred on it: these sit against
+     the panel's left margin, and a centred chip would hang off the edge. */
+  left: 0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--gray-1);
+  color: var(--ink-black);
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
+}
+.store-modal__container__container .cart-item__license__delete-button .icon::before {
+  content: 'Remove';
+}
+.store-modal__container__container .cart-item__license__delete-button .icon::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  /* Points at the button's centre, which the chip no longer sits over. */
+  left: 10px;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--gray-1);
+}
+/* fontdue already flags the row while the delete button is hovered; keying off
+   that as well as :hover keeps the chip up through the re-render that flag
+   triggers. */
+.store-modal__container__container .cart-item__license__delete-button:hover .icon,
+.store-modal__container__container .cart-item__license[data-close-button-hovered=true] .icon {
+  opacity: 1;
 }
 .store-modal__container__container .cart-item__license__delete-button::before {
   content: '';
@@ -674,10 +731,9 @@ input:checked + .checkbox__icon {
   box-sizing: border-box;
   transition: background 150ms;
 }
-/* Hover fills the white centre with Gray 4 — on Ink Black the light-theme
-   "fill it dark" hover would just read as an empty circle. */
+/* Hover fills the white centre with Gray 7; the ring holds its colour. */
 .store-modal__container__container .cart-item__license__delete-button:hover::before {
-  background: var(--gray-4);
+  background: var(--gray-7);
 }
 
 /* Close button: hidden — replaced by the fixed "Cart" toggle (.poi-cart-toggle,
@@ -845,7 +901,7 @@ input:checked + .checkbox__icon {
   letter-spacing: var(--h5-tracking);
   font-weight: 600;
   color: var(--gray-4);
-  margin-bottom: 6px;
+  margin-bottom: 14px;
   text-align: left;
 }
 /* fontdue paints the label's border with its own selected accent once a value
@@ -864,24 +920,19 @@ input:checked + .checkbox__icon {
   background: none;
   border-bottom: 1px solid var(--gray-6);
   border-radius: 0;
-  padding: 0 0 15px;
+  padding: 0 0 7px;
   color: var(--gray-5);
   font-size: var(--font-size-lg);
   letter-spacing: var(--h5-tracking);
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  transition: border-color 120ms, color 120ms;
   cursor: pointer;
 }
 .store-modal__container__container [data-variable-type=select]
   .store-modal__order-variable-selection__button[data-selected=true]
   .store-modal__order-variable-selection__select-label {
   color: #ffffff;
-}
-.store-modal__container__container [data-variable-type=select]
-  .store-modal__order-variable-selection__select-label:hover {
-  border-bottom-color: #ffffff;
 }
 .store-modal__container__container [data-variable-type=select]
   .store-modal__order-variable-selection__select-label .icon {
@@ -941,11 +992,10 @@ input:checked + .checkbox__icon {
   box-sizing: border-box;
   transition: border-color 150ms, background 150ms;
 }
-/* On Ink Black the ring is the only thing that can carry the hover — filling
-   the white centre (the light-theme behaviour) would read as switched off. */
+/* Hover fills the white centre with Gray 7; the Gray 5 ring doesn't move. */
 [data-variable-type=boolean] .store-modal__order-variable-selection__button:hover:not([data-selected=true])
   .store-modal__order-variable-selection__label::before {
-  border-color: var(--gray-4);
+  background: var(--gray-7);
 }
 [data-variable-type=boolean] .store-modal__order-variable-selection__button[data-selected=true]
   .store-modal__order-variable-selection__label::before {
@@ -1015,7 +1065,7 @@ input:checked + .checkbox__icon {
 }
 .store-modal__container__container .store-modal__license-selection__license-button:hover:not([data-selected=true])
   .store-modal__license-selection__icon-pair::before {
-  border-color: var(--gray-4);
+  background: var(--gray-7);
 }
 .store-modal__container__container .store-modal__license-selection__license-button[data-selected=true]
   .store-modal__license-selection__icon-pair::before {
@@ -1304,7 +1354,7 @@ input:checked + .checkbox__icon {
   color: var(--gray-4);
 }
 .store-modal__container__container .text-field__input-wrapper {
-  margin-top: 6px;
+  margin-top: 14px;
 }
 .store-modal__container__container .checkout-modal__section {
   margin-bottom: 18px;
@@ -1314,7 +1364,7 @@ input:checked + .checkbox__icon {
   border: none;
   border-bottom: 1px solid var(--gray-6);
   border-radius: 0;
-  padding: 0 0 15px;
+  padding: 0 0 7px;
   font-family: 'POI Orbiter', system-ui, sans-serif;
   font-size: var(--font-size-lg);
   letter-spacing: var(--h5-tracking);
@@ -1486,8 +1536,8 @@ input:checked + .checkbox__icon {
 }
 /* Override merchant-injected hover — apply correct circle hover on full row */
 .store-modal__container__container .checkout-modal__checkbox-field:hover .checkbox input:not(:checked) {
-  border-color: var(--gray-4);
-  background: #fff;
+  border-color: var(--gray-5);
+  background: var(--gray-7);
 }
 .store-modal__container__container .checkbox__icon,
 .store-modal__container__container .checkbox:hover .checkbox__icon {
