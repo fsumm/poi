@@ -386,6 +386,28 @@ input:checked + .checkbox__icon {
   animation: poi-slide-out 280ms ease-in forwards;
 }
 
+/* The strip under the iOS status bar (env(safe-area-inset-top), 0 everywhere
+   else — see --safe-top in index.css). It is painted separately from the
+   sliding ground above rather than relying on that layer's top edge, for two
+   reasons: the layer is transform-animated, and on iOS Safari a promoted fixed
+   layer does not reliably resolve its top against the safe area; and being
+   unanimated this is the drawer's colour the instant it opens instead of at the
+   end of the slide. Zero-height wherever there is no inset, so it costs nothing
+   off iOS. */
+.store-modal__container__overlay::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: var(--cart-gutter);
+  width: var(--cart-panel-w);
+  height: var(--safe-top);
+  background-color: var(--ink-black);
+  pointer-events: none;
+}
+.store-modal__container__overlay:has(.store-modal__container__container[data-closing])::after {
+  animation: poi-slide-out 280ms ease-in forwards;
+}
+
 /* Titles with no counterpart in the design: the nav title is replaced by the
    fixed "Cart" toggle, "Contact information" by the section heading below, and
    "Licensee information (your client)" is not drawn at all. */
@@ -1728,6 +1750,22 @@ body[data-fontdue-store-modal=open] {
   animation: slideIn 300ms forwards;
 }
 .trial-modal__overlay:has(.trial-modal__panel[data-closing])::before {
+  animation: poi-slide-out 280ms ease-in forwards;
+}
+
+/* Status-bar strip — see the cart drawer's ::after for why this is separate
+   from the sliding ground. */
+.trial-modal__overlay::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: var(--cart-gutter);
+  width: var(--cart-panel-w);
+  height: var(--safe-top);
+  background-color: var(--yellow);
+  pointer-events: none;
+}
+.trial-modal__overlay:has(.trial-modal__panel[data-closing])::after {
   animation: poi-slide-out 280ms ease-in forwards;
 }
 
