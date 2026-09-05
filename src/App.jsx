@@ -28,10 +28,18 @@ const STRIPE_APPEARANCE = {
   theme: 'flat',
   variables: {
     borderRadius: '6px',
-    fontFamily: "'POI Orbiter', system-ui, -apple-system, sans-serif",
-    fontWeightNormal: '600',
-    fontWeightMedium: '600',
-    fontWeightBold: '600',
+    // Fontdue is what actually loads a face into the iframe: it turns the
+    // store's UI Font setting into a Stripe CustomFontSource named
+    // `cssFamily + " " + name` — "POI Orbiter SemiBold" — so the family has to
+    // be spelled that way here or it resolves to nothing. It registers that one
+    // face at weight 400 (hardcoded in StripeProvider, which never reads the
+    // separate uiFontStyleBold slot), so the weights stay at 400: asking for
+    // 600 would synthesise bold on top of an already-semibold face.
+    fontFamily: "'POI Orbiter SemiBold', system-ui, -apple-system, sans-serif",
+    fontWeightLight: '400',
+    fontWeightNormal: '400',
+    fontWeightMedium: '400',
+    fontWeightBold: '400',
     colorBackground: '#2b2b29',
     colorText: '#ffffff',
     colorTextPlaceholder: 'transparent',

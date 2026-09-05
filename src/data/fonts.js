@@ -5,7 +5,7 @@ export const fonts = [
     displayName: '⌘ Aeronaut',
     styles: 1,
     variable: false,
-    description: 'This geometric sans, inspired by cursive practice sheets, brings warmth and whimsy to a genre that historically lacks it. Arrows, originally intended to guide the student\'s hand, draw parallels to aerodynamics, the typeface\'s namesake. Best suited for expressive messaging, Aeronaut includes 12 stylistic sets, giving you full creative control.',
+    description: 'This geometric sans, inspired by cursive practice sheets, brings warmth to a genre that historically lacks it. Instructional arrows, originally intended to guide the student\'s hand, draw parallels to aerodynamics, the typeface\'s namesake. Best suited for expressive messaging, POI Aeronaut includes 12 stylistic sets, giving you full creative control.',
     weights: [
       { label: 'POI Aeronaut Regular', name: 'Regular', weight: 400, style: 'normal' },
     ],
@@ -80,7 +80,7 @@ export const fonts = [
     displayName: '⌘ Diode',
     styles: 9,
     variable: true,
-    description: 'Comprised of two separate pixel designs working in lockstep, this expressive typeface mirrors the look of low-res LED displays, typically found on public transportation. Built with two legibility extremes, each piece can be customized to suit your needs. Experimental at its core, POI Diode excels in expressive applications.',
+    description: 'Comprised of two pixel shapes working in lockstep, this expressive typeface captures the spirit of low-res LED displays, like those found on public transportation. Each end of the weight axis pushes POI Diode to the extremes of legibility. Experimental at its core, use POI Diode for when you need to stand out.',
     weights: [
       { label: 'POI Diode Thin', name: 'Thin', weight: 100, style: 'normal' },
       { label: 'POI Diode ExtraLight', name: 'ExtraLight', weight: 200, style: 'normal' },
