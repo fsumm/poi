@@ -10,7 +10,6 @@ import Footer from './components/Footer.jsx'
 import Catalog from './pages/Catalog.jsx'
 import FontDetail from './pages/FontDetail.jsx'
 import About from './pages/About.jsx'
-import Contact from './pages/Contact.jsx'
 import Newsletter from './pages/Newsletter.jsx'
 import Trials from './pages/Trials.jsx'
 import License from './pages/License.jsx'
@@ -92,9 +91,11 @@ export default function App() {
           <AnimatedRoutes>
             <Route path="/" element={<Catalog />} />
             <Route path="/catalog" element={<Navigate to="/" replace />} />
+            {/* The Contact page is gone; its URL redirects rather than
+                rendering an empty shell, since there is no catch-all route. */}
+            <Route path="/contact" element={<Navigate to="/" replace />} />
             <Route path="/catalog/:fontId" element={<FontDetail />} />
             <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
             <Route path="/newsletter" element={<Newsletter />} />
             <Route path="/trials" element={<Trials />} />
             <Route path="/license" element={<License />} />

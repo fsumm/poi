@@ -37,9 +37,18 @@ const OUT_DIR = join(ROOT, 'public', 'responsive')
 const OUT_REL = 'responsive' // path under the served base, e.g. /poi/responsive/...
 const MANIFEST = join(ROOT, 'src', 'data', 'images.js')
 
-// Frames render at this height everywhere (see the *-img rules in index.css).
-// Variant heights are multiples of it so each maps to a clean density.
-const FRAME_HEIGHT = 360
+// Reference frame height that the density ladder is keyed to. Frames are no
+// longer the uniform 360px this pipeline was written for — they are
+// aspect-ratio boxes, and at a 1440px viewport the landing hero alone renders
+// 639px tall (455px for the catalog cards, 231px for the work grid). Keyed to
+// 360 the "2x" file was 720px tall against a hero needing 1279 device pixels,
+// which is what made the hero soft on a Retina display. 720 doubles every rung
+// (720 / 1080 / 1440 / 2160) so the 2x pick clears the tallest frame.
+//
+// Note this is one ladder for every frame, so the short work-grid thumbnails
+// now over-fetch. Sizing per frame class would need w-descriptors plus a real
+// `sizes` attribute — see the note in FrameImage.
+const FRAME_HEIGHT = 720
 const DENSITIES = [1, 1.5, 2, 3] // → heights 360 / 540 / 720 / 1080
 const JPEG_QUALITY = 72
 const PLACEHOLDER_EDGE = 24

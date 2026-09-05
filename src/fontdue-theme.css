@@ -1243,6 +1243,39 @@ input:checked + .checkbox__icon {
   background: var(--gray-5);
 }
 
+/* Disabled variable font: fontdue pairs data-clickable=false with
+   data-selected=false only while the tile can't be bought on its own — once
+   the full static set is selected the VF flips to selected and reads normally.
+   (The family headings carry data-clickable=false too, hence the tag scope.) */
+.store-modal__container__container
+  .store-modal__family__style-button[data-clickable=false][data-selected=false] {
+  opacity: 0.6;
+}
+
+/* Its hover label, mounted on the overlay by fontdueCart and tracking the
+   cursor. Same chip as the contact page's copy label: Gray 1 on Ink Black. */
+.poi-disabled-tip {
+  position: fixed;
+  z-index: 20;
+  transform: translate(-50%, -100%);
+  margin-top: -12px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--gray-1);
+  color: var(--ink-black);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.poi-disabled-tip[data-show] {
+  opacity: 1;
+}
+
 /* Hide the family button checked indicator */
 .store-modal__container__container .store-modal__family-button__checked {
   visibility: hidden;

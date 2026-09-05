@@ -112,6 +112,40 @@ export function setupCartOverlay(overlay) {
     return originalDispatch(action)
   }
 
+  // Cursor-following label for the disabled variable-font tile. fontdue marks
+  // it data-clickable=false, but so is the family heading above it, and the VF
+  // keeps that flag once it IS included — so the disabled state is the pair
+  // [data-clickable=false][data-selected=false]. Mounted on the overlay rather
+  // than inside the tile: the tile is overflow: hidden, and the panel carries a
+  // transform from its slide animation, which would capture a fixed child.
+  const DISABLED_VF =
+    '.store-modal__family__style-button[data-clickable=false][data-selected=false]'
+  const tip = document.createElement('div')
+  tip.className = 'poi-disabled-tip'
+  tip.textContent = 'Included in the full collection'
+  overlay.appendChild(tip)
+  let tipX = 0
+  let tipY = 0
+  const placeTip = () => {
+    // elementFromPoint (rather than the event target) so the label also settles
+    // correctly when the tile's state changes under a stationary cursor. The
+    // label is pointer-events: none, so it never hit-tests as itself.
+    const hit = document.elementFromPoint(tipX, tipY)
+    if (!hit?.closest?.(DISABLED_VF)) return tip.removeAttribute('data-show')
+    tip.style.left = `${tipX}px`
+    tip.style.top = `${tipY}px`
+    tip.dataset.show = ''
+  }
+  overlay.addEventListener('mousemove', e => {
+    tipX = e.clientX
+    tipY = e.clientY
+    placeTip()
+  })
+  overlay.addEventListener('mouseleave', () => tip.removeAttribute('data-show'))
+  // Selecting the last static style enables the VF under a still cursor; give
+  // React a commit before re-reading what sits under it.
+  overlay.addEventListener('click', () => setTimeout(placeTip, 250))
+
   // Fixed "Cart" toggle replacing the panel's close button (hidden in
   // fontdue-theme): mounted on the overlay — fixed and untransformed —
   // directly over the nav cart button, so the label holds still while the

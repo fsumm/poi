@@ -645,7 +645,11 @@ body[data-trial-modal='open'] .nav::after {
   object-fit: cover;
   object-position: center;
   display: block;
-  background: var(--gray-2);
+  /* The LQIP is set per-frame as a background-image by FrameImage; --gray-2
+     is the ground it (and frames with no asset yet) fall back to. */
+  background-color: var(--gray-2);
+  background-size: cover;
+  background-position: center;
 }
 
 /* ─── Editorial pages (landing / about / license) ─────────────────────────
@@ -2011,32 +2015,11 @@ body[data-trial-modal='open'] .nav::after {
   opacity: 0;
 }
 
-/* Frame images always carry the blur transition so switching phases
-   mid-animation doesn't snap. Idle overrides with transition:none so the initial
-   blur reset is instantaneous. */
-.page-anim .frame-img {
-  transition: filter 3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.page-anim--idle .frame-img {
-  filter: blur(8px);
-  transition: none;
-}
-
 /* ── Enter: transition 0 → 1, staggered per child ── */
 .page-anim--entering > * > * {
   opacity: 1;
   transition: opacity 0.4s linear;
 }
-
-.page-anim--entering .frame-img {
-  filter: blur(0px);
-}
-
-/* Catalog frames need explicit delays to match their parent card's stagger */
-.page-anim--entering .catalog-grid > *:nth-child(1) .frame-img { transition-delay: 0ms; }
-.page-anim--entering .catalog-grid > *:nth-child(2) .frame-img { transition-delay: 150ms; }
-.page-anim--entering .catalog-grid > *:nth-child(3) .frame-img { transition-delay: 300ms; }
 
 .page-anim--entering > * > *:nth-child(1)  { transition-delay: 0ms; }
 .page-anim--entering > * > *:nth-child(2)  { transition-delay: 150ms; }
@@ -2355,7 +2338,7 @@ body[data-page-phase=entering] .footer {
 
   .row { row-gap: 28px; }
 
-  .work-grid > *,
+  .work-grid > * { grid-column: span 2; }
   .faq { grid-column: 1 / -1; }
 
   .work-grid { row-gap: 40px; margin-top: 60px; }
@@ -2376,8 +2359,15 @@ body[data-page-phase=entering] .footer {
      and don't need the side-by-side shared height — which, measured against
      the now-narrow grid, would squash them to a third of their proportion.
      Hand them back a ratio, levelled at the wider crop so the tall frames
-     don't run off the bottom of the screen. */
-  .catalog-grid .media {
+     don't run off the bottom of the screen.
+
+     The landing hero and the About feature stack full width too, and their
+     desktop ratios (1660/758 and 1660/500) resolve to squat 160px and 105px
+     bands at this width. They take the same crop, so every full-width frame
+     on the site reads at one height. */
+  .catalog-grid .media,
+  .media--hero,
+  .media--wide {
     height: auto;
     aspect-ratio: 820 / 540;
   }

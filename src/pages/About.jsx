@@ -74,10 +74,7 @@ export default function About() {
         </div>
 
         <div className="about-feature">
-          <FrameImage className="media media--wide" />
-          <div className="caption">
-            Prattfolio <span className="caption-note">Fonts in Use</span>
-          </div>
+          <FrameImage file="about-1.jpg" className="media media--wide" />
         </div>
       </section>
 

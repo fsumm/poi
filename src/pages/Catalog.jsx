@@ -9,13 +9,31 @@ import Wordmark from '../components/Wordmark.jsx'
 const HERO_FONT = 'orbiter'
 const GRID_FONTS = ['aeronaut', 'carbonic', 'diode']
 
+// Frame art per family, keyed by the ids above.
+const FONT_IMG = {
+  orbiter: 'poi-orbiter-thumbnail.jpg',
+  aeronaut: 'poi-aeronaut-thumbnail.jpg',
+  carbonic: 'poi-carbonic-thumbnail.jpg',
+  diode: 'poi-diode-thumbnail.jpg',
+}
+
 // Selected work. Placeholder frames for now; each is an ink-black subject with
 // a gray descriptor after it.
 const WORK = [
-  { subject: 'Pratt Institute', note: 'Custom Font' },
-  { subject: 'Miniware', note: 'Custom Logomark' },
-  { subject: 'Siempre Agencia', note: 'Fonts in Use' },
-  { subject: 'OOO', note: 'Custom Motionmark' },
+  { subject: 'Pratt Institute', note: 'Custom Font', file: 'roh25-thumbnail.jpg' },
+  {
+    subject: 'Siempre Agencia',
+    note: 'Fonts in Use',
+    file: 'siempre-thumbnail.jpg',
+    video: 'video/siempre-thumbnail.mp4',
+  },
+  { subject: 'Miniware', note: 'Custom Logomark', file: 'miniware-thumbnail.jpg' },
+  {
+    subject: 'OOO',
+    note: 'Custom Motionmark',
+    file: 'ooo-thumbnail.jpg',
+    video: 'video/ooo-thumbnail.mp4',
+  },
 ]
 
 const CAPABILITIES = ['Logos', 'Wordmarks', 'Custom Fonts', 'Modifications']
@@ -35,7 +53,7 @@ export default function Catalog() {
       {/* ── Release ──────────────────────────────────────────────────── */}
       <section className="band">
         <Link to={`/catalog/${HERO_FONT}`}>
-          <FrameImage className="media media--hero" />
+          <FrameImage file={FONT_IMG[HERO_FONT]} className="media media--hero" eager />
           <div className="caption caption--split">
             <span>{hero.displayName}</span>
             <span>New Release</span>
@@ -61,13 +79,13 @@ export default function Catalog() {
 
         <div className="row catalog-grid">
           <Link to={`/catalog/${lead.id}`} className="catalog-card col-main">
-            <FrameImage className="media media--large" />
+            <FrameImage file={FONT_IMG[lead.id]} className="media media--large" />
             <div className="caption">{lead.displayName}</div>
           </Link>
 
           {rest.map((font, i) => (
             <Link key={font.id} to={`/catalog/${font.id}`} className={`catalog-card ${i === 0 ? 'col-a' : 'col-b'}`}>
-              <FrameImage className="media media--tall" />
+              <FrameImage file={FONT_IMG[font.id]} className="media media--tall" />
               <div className="caption">{font.displayName}</div>
             </Link>
           ))}
@@ -102,7 +120,7 @@ export default function Catalog() {
         <div className="work-grid">
           {WORK.map(item => (
             <div key={item.subject}>
-              <FrameImage className="media media--work" />
+              <FrameImage file={item.file} video={item.video} className="media media--work" />
               <div className="caption">
                 {item.subject} <span className="caption-note">{item.note}</span>
               </div>
