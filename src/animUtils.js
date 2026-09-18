@@ -9,11 +9,16 @@ const PENDING_MAX = 4000
 // [data-anim-pending] while loading.
 const hasAnimPending = el => el.querySelector('[data-anim-pending]') != null
 
-// fontdue's useFont renders font specimens with inline `font-family: Fallback`
-// while the real FontFace is still loading, then swaps to `"<Real>", Fallback`.
-// The bare `font-family: Fallback` substring therefore appears only while a
-// specimen is still unstyled — the cart-modal equivalent of [data-anim-pending].
-export const hasFontduePending = el => el.querySelector('[style*="font-family: Fallback"]') != null
+// fontdue renders font specimens with an inline fallback-only font-family while
+// the real FontFace is still loading, then swaps to `"<Real>", …fallbacks`.
+// fontdue-js 2 used a bare `Fallback`; fontdue-js 3 puts a metric-matched
+// `"<Real> fallback"` face in front of it. Either way the first family in the
+// list is a fallback only while a specimen is still unstyled — the cart-modal
+// equivalent of [data-anim-pending].
+const isFallbackFamily = family => family === 'Fallback' || family.endsWith(' fallback')
+export const hasFontduePending = el =>
+  [...el.querySelectorAll('[style*="Fallback"]')].some(node =>
+    isFallbackFamily(node.style.fontFamily.split(',')[0].trim().replace(/^["']|["']$/g, '')))
 
 // Resolves once nothing in the subtree is still rendering in, so the enter
 // animation doesn't start mid-load. `isPending` reports whether content is still

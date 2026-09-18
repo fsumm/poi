@@ -1196,6 +1196,15 @@ input:checked + .checkbox__icon {
   font-size: var(--h4-size);
   line-height: var(--h4-line);
 }
+/* fontdue-js 3 makes every span in here an inline-block (it spaces the "Aa"s
+   with a margin now instead of thin spaces). That includes the wrapper around
+   a variable font's instances, which then sets its own, tighter line boxes and
+   pulls the VF tile's two rows of "Aa"s closer together. Keep the direct child
+   inline, as it was in fontdue-js 2 — the instances inside stay inline-blocks,
+   so they still wrap. */
+.store-modal__container__container .store-modal__style-button__feature-glyphs > span {
+  display: inline;
+}
 
 /* Section spacing */
 .store-modal__container__container .store-modal__family__container:not(:last-child) {
